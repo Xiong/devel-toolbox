@@ -1,1 +1,81 @@
+Any technician has certain commonly used tools on the workbench and nobody else can say where they should go. A technician of any caliber has far more tools put away in one or more toolboxes; and if he is to work efficiently then these must be organized. While it is up to the individual to decide which tool should go where; tools often come in sets and the orderly technician generally stores them that way. 
+
+Perl developers are offered a range of machinery with which to carry out various tasks not strictly part of writing production code: starting a new project, starting new modules, testing (testing testing), building a CPAN distribution, uploading, and so forth. These machines range from simple and quaint to modern and enormous. 
+
+Devel::Toolbox steers a middle course; it attempts to offer more utility for less investment. We assume that you would rather figure out how to make your project work than learn how your toolbox works; and you may be willing to sacrifice fur-lined cupholders. 
+
+In D::T jargon, a 'tool' is an object-oriented method found in a 'toolset' or 'set', which is a Perl module written to certain standards. These standards help to ensure seamless inter-operation. All toolsets are subclasses of D::T::Base and all tools are methods on a single object representing your whole project. 
+
+There is an application core, consisting of: 
+    
+    dt:                 # command-line script
+    ::App               # command-line implementation
+    ::Set::Base         # base class of object representing your project
+    ...                 # 
+
+Some toolsets ship with the Devel-Toolbox dist: 
+    ::Set::List         # lists available toolsets and tools
+    ::Set::New          # create a new project, module, test, or toolset
+    ::Set::Test         # run some standard tests
+    ::Set::Build        # build a CPAN-ready distribution
+    ::Set::Clean        # remove cruft from working tree
+    
+You may find other toolsets on CPAN as well. 
+
+What about configuration? Well, Devel::Toolbox uses no special config file format. We think it's not worth the effort for you to switch gears. So there are *only* toolsets: Perl modules written in Perl. 
+
+Since most config files and some toolsets do essentially nothing but call lists of tools; we do provide a straightforward shortcut calling syntax that is automatically expanded for you when run. There are only a few rules, which only operate within designated blocks: 
+
+* A line that starts with the name of a module (found in @INC) requires it.
+* A line that begins with ::Foo is assumed to introduce a module named: 
+    Devel::Toolbox::Set::Foo
+* A lexical scope is created, which persists for all lines until the next one that loads a module. (This may be no lines, of course.) 
+* Within this scope, any method in the currently loaded module may be invoked using its name alone: 
+    ::Foo                               # defines bar(), baz() methods
+        bar;                            # calls $self->bar()
+        $rc = baz({ -answer => 42 });   # calls $self-baz({ -answer => 42 })
+* If no lines follow the require-line (until the next require-line) then the module's run() method will be run. Consider this the default tool in that set. 
+* $self is a pseudo-global football full of interesting stuff, 
+    blessed into Devel::Toolbox::Base. 
+
+Outside of special blocks, you can write ordinary Perl. Even within special blocks, Perl will still parse and execute as Perl. Your code only expands when you start a line with a bareword or you call a method without explicitly naming $self. 
+
+When you create a new toolset (or one is created for you), boilerplate is automatically created to help it conform to the simple requirements: 
+
+* You must comply with the usual requirements for a Perl module. 
+* You must inherit, directly or indirectly, from ::Base. 
+* Your public methods must expect $self as the first argument. 
+* Your toolset as a whole, and each tool, must supply an abstract. 
+* Each tool must supply a usage line. 
+* If your set contains only a single tool, call it run(). 
+
+You'll find all of this quite simple. Just type: 
+
+    $ dt new set MyToolset
+
+... and look over the boilerplate. 
+
+GETTING STARTED
+
+After installing the Devel-Toolbox dist, type: 
+
+    $ dt setup
+
+This only needs to be done once. 
+
+Here are some useful commands: 
+
+    $ dt help
+    $ dt list sets
+    $ dt list tools
+    $ dt new My::Dist
+    $ dt new test fubar
+    $ dt build
+    $ dt release
+    
+
+
+
+
+
 
