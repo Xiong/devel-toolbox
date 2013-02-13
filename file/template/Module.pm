@@ -6,7 +6,7 @@ package {{$module_name}};
 #~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
 #~ use 5.012003;   # 5.12.5    # 2011  # yada
 #~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
-#~ use 5.016002;   # 5.16.2    # 2012  # 
+#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 
