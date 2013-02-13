@@ -18,7 +18,9 @@ use warnings;
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-
+# This module exists mostly to provide the POD for the namespace. 
+# In any case, everything inherits from it. 
+# Might stick a few base methods in here. 
 
 ## END MODULE
 1;
