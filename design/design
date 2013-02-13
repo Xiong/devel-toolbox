@@ -22,7 +22,7 @@ Some toolsets ship with the Devel-Toolbox dist:
     
 You may find other toolsets on CPAN as well. 
 
-What about configuration? Well, Devel::Toolbox uses no special config file format. We think it's not worth the effort for you to switch gears. So there are *only* toolsets: Perl modules written in Perl. 
+What about configuration? Well, Devel::Toolbox uses no special config file format. We think it's not worth the effort for you to switch gears. So there are *only* toolsets: Perl modules written in Perl. Some toolsets do allow you to use a templating system. 
 
 Since most config files and some toolsets do essentially nothing but call lists of tools; we do provide a straightforward shortcut calling syntax that is automatically expanded for you when run. There are only a few rules, which only operate within designated blocks: 
 
@@ -44,7 +44,9 @@ When you create a new toolset (or one is created for you), boilerplate is automa
 
 * You must comply with the usual requirements for a Perl module. 
 * You must inherit, directly or indirectly, from ::Base. 
+* Since a toolset module is require()-ed, not use()-ed; no import() will be honored. 
 * Your public methods must expect $self as the first argument. 
+* Do not include a constructor. There is only one object. 
 * Your toolset as a whole, and each tool, must supply an abstract. 
 * Each tool must supply a usage line. 
 * If your set contains only a single tool, call it run(). 
