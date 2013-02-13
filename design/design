@@ -22,9 +22,11 @@ Some toolsets ship with the Devel-Toolbox dist:
     
 You may find other toolsets on CPAN as well. 
 
-What about configuration? Well, Devel::Toolbox uses no special config file format. We think it's not worth the effort for you to switch gears. So there are *only* toolsets: Perl modules written in Perl. Some toolsets do allow you to use a templating system. 
+On startup, dt unshifts "~/.config/devel-toolbox/lib/" (expanded) onto @INC, then "./blib" before that. So changing any built-in component (tool or otherwise) of D::T is just as simple as cloning it into one of those folders and editing to taste. 
 
-Since most config files and some toolsets do essentially nothing but call lists of tools; we do provide a straightforward shortcut calling syntax that is automatically expanded for you when run. There are only a few rules, which only operate within designated blocks: 
+What about config files? Well, Devel::Toolbox uses no special config file format. We think it's not worth the effort for you to switch gears. So there are *only* toolsets: Perl modules written in Perl. Some toolsets do allow you to use a templating system. 
+
+Since many tools do essentially nothing but call lists of tools; we do provide a straightforward shortcut calling syntax that is automatically expanded for you when run. There are only a few rules, which only operate within designated blocks: 
 
 * A line that starts with the name of a module (found in @INC) requires it.
 * A line that begins with ::Foo is assumed to introduce a module named: 
