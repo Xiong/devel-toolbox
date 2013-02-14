@@ -148,5 +148,7 @@ its very own section. Sorry if you disagree.
 
 =head2 get_attr
 
+=end   fool_pod_coverage
+
 =cut
 
