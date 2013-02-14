@@ -88,7 +88,7 @@ Some explanation.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Devel::Toolbox requires no configuration files or environment variables.
+None. 
 
 =head1 DEPENDENCIES
 

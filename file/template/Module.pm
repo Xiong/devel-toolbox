@@ -85,7 +85,7 @@ Some explanation.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-{{$module_name}} requires no configuration files or environment variables.
+None. 
 
 =head1 DEPENDENCIES
 
