@@ -1,5 +1,12 @@
-package Devel::Toolbox;
-use 5.016002;   # 5.16.2    # 2012  # __SUB__
+package {{$module_name}};
+# Choose minimum perl interpreter version; delete the rest.
+# Do you want to enforce the bugfix level?
+#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
+#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
+#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
+#~ use 5.012003;   # 5.12.5    # 2011  # yada
+#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
+#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 
@@ -18,9 +25,7 @@ use warnings;
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-# This module exists mostly to provide the POD for the namespace. 
-# In any case, everything inherits from it. 
-# Might stick a few base methods in here. 
+
 
 ## END MODULE
 1;
@@ -29,30 +34,22 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox - Simple custom project tool management
+{{$module_name}} - {{$module_abstract}}
 
 =head1 VERSION
 
-This document describes Devel::Toolbox version v0.0.0
+This document describes {{$module_name}} version {{$version}}
 
 =head1 SYNOPSIS
 
-    $ dt setup
-    $ dt help
-    $ dt list sets
-    $ dt list tools SomeSet
-    $ dt new My::Dist
-    $ dt new test fubar
-    $ dt build
-    $ dt release
+    use {{$module_name}};
 
 =head1 DESCRIPTION
 
 =over
 
-I<The computer should be doing the hard work. 
-That's what it's paid to do, after all.> 
--- Larry Wall
+I<{{$tagquote}}> 
+-- {{$tagquote_credit}}
 
 =back
 
@@ -88,7 +85,7 @@ Some explanation.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Devel::Toolbox requires no configuration files or environment variables.
+{{$module_name}} requires no configuration files or environment variables.
 
 =head1 DEPENDENCIES
 
@@ -98,8 +95,7 @@ There are no non-core dependencies.
 
 =item 
 
-L<version|version> 0.99    
-    E<nbsp>E<nbsp>E<nbsp>E<nbsp> # Perl extension for Version Objects
+L<version|version> 0.99    E<nbsp>E<nbsp>E<nbsp>E<nbsp> # Perl extension for Version Objects
 
 =back
 
@@ -116,12 +112,12 @@ This is an early release. Reports and suggestions will be warmly welcomed.
 
 Please report any bugs or feature requests, or other issues through 
 the web interface at
-L<https://github.com/xiong/devel-toolbox/issues>.
+L<https://github.com/{{$author_github}}/{{$dist_name}}/issues>.
 
 =head1 DEVELOPMENT
 
 This project is hosted on GitHub at: 
-L<https://github.com/xiong/devel-toolbox>. 
+L<https://github.com/{{$author_github}}/{{$dist_name}}>. 
 
 =head1 THANKS
 
@@ -129,11 +125,11 @@ Somebody helped!
 
 =head1 AUTHOR
 
-Xiong Changnian  C<< <xiong@cpan.org> >>
+{{$author_name}}  C<< <{{$author_email}}> >>
 
 =head1 LICENSE
 
-Copyright (C) 2013 Xiong Changnian C<< <xiong@cpan.org> >>
+Copyright (C) {{$copyright_years}} {{$author_name}} C<< <{{$author_email}}> >>
 
 This library and its contents are released under Artistic License 2.0:
 
@@ -149,4 +145,8 @@ its very own section. Sorry if you disagree.
 =head2 get_attr
 
 =cut
+
+
+
+
 
