@@ -48,7 +48,12 @@ This document describes Devel::Toolbox::Set::New version v0.0.0
 
 =head1 METHODS 
 
-=head2 new()
+=head2 module()
+
+    $self->module();
+    $self->module( $template );
+
+Create a new module from templates/Module.pm or from $template if given.
 
 =head1 ACCSESSORS
 
