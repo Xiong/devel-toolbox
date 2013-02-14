@@ -106,6 +106,7 @@ Here are some useful commands:
     $ dt help
     $ dt list sets
     $ dt list tools
+    $ dt list sometool
     $ dt new My::Dist
     $ dt new test fubar
     $ dt build

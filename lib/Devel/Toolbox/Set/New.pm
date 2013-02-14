@@ -29,7 +29,7 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Set::New - Simple custom project tool management
+Devel::Toolbox::Set::New - Create a project, module, test, or toolset
 
 =head1 VERSION
 
@@ -37,24 +37,14 @@ This document describes Devel::Toolbox::Set::New version v0.0.0
 
 =head1 SYNOPSIS
 
-    $ dt setup
-    $ dt help
-    $ dt list sets
-    $ dt list tools SomeSet
+    $ dt help new
+    $ dt list new
     $ dt new My::Dist
+    $ dt new module My::Module
     $ dt new test fubar
-    $ dt build
-    $ dt release
+    $ dt new tool foo
 
 =head1 DESCRIPTION
-
-=over
-
-I<The computer should be doing the hard work. 
-That's what it's paid to do, after all.> 
--- Larry Wall
-
-=back
 
 =head1 METHODS 
 

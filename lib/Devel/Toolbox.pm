@@ -40,7 +40,8 @@ This document describes Devel::Toolbox version v0.0.0
     $ dt setup
     $ dt help
     $ dt list sets
-    $ dt list tools SomeSet
+    $ dt list tools
+    $ dt list sometool
     $ dt new My::Dist
     $ dt new test fubar
     $ dt build
