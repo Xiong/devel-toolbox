@@ -85,7 +85,7 @@ Some explanation.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-{{$module_name}} requires no configuration files or environment variables.
+None. 
 
 =head1 DEPENDENCIES
 
@@ -143,6 +143,8 @@ its very own section. Sorry if you disagree.
 =head2 put_attr
 
 =head2 get_attr
+
+=end   fool_pod_coverage
 
 =cut
 

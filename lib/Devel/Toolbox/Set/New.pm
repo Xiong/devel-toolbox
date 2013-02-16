@@ -1,11 +1,16 @@
-package Devel::Toolbox;
+package Devel::Toolbox::Set::New;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
+use parent 'Devel::Toolbox';
 
 # Core modules
+use File::Spec;                 # Portably perform operations on file names
+use File::Copy;                 # Copy files or filehandles
 
 # CPAN modules
+use Error::Base;                # Simple structured errors with full backtrace
+
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -14,13 +19,45 @@ use warnings;
 #============================================================================#
 
 # Pseudo-globals
+my $err = Error::Base->new (
+    -base           => '[DT-New]',
+);
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# METHODS
 
-# This module exists mostly to provide the POD for the namespace. 
-# In any case, everything inherits from it. 
-# Might stick a few base methods in here. 
+#=========# OBJECT METHOD
+#
+#   Create a new module in an existing project.
+# ____
+#   
+sub module {
+    my $self        = shift;
+    my $args        = shift;
+    my $module      = $args{-module};       # name of new module
+    my $template    = $args{-template};     # path to template
+    my $abstract    = $args{-abstract};     # 44 character description
+    
+    # Set the template. 
+    if    ( not $template ) {
+        $template       = $self->{-default_module_template};
+    };
+    
+    # Find the template. Try these locations in order:
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+}; ## module
+
+
 
 ## END MODULE
 1;
@@ -29,37 +66,31 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox - Simple custom project tool management
+Devel::Toolbox::Set::New - Create a project, module, test, or toolset
 
 =head1 VERSION
 
-This document describes Devel::Toolbox version v0.0.0
+This document describes Devel::Toolbox::Set::New version v0.0.0
 
 =head1 SYNOPSIS
 
-    $ dt setup
-    $ dt help
-    $ dt list sets
-    $ dt list tools
-    $ dt list sometool
+    $ dt help new
+    $ dt list new
     $ dt new My::Dist
+    $ dt new module My::Module
     $ dt new test fubar
-    $ dt build
-    $ dt release
+    $ dt new tool foo
 
 =head1 DESCRIPTION
 
-=over
-
-I<The computer should be doing the hard work. 
-That's what it's paid to do, after all.> 
--- Larry Wall
-
-=back
-
 =head1 METHODS 
 
-=head2 new()
+=head2 module()
+
+    $self->module();
+    $self->module( $template );
+
+Create a new module from templates/Module.pm or from $template if given.
 
 =head1 ACCSESSORS
 
@@ -89,7 +120,7 @@ Some explanation.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-None. 
+None.
 
 =head1 DEPENDENCIES
 
