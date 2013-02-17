@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use parent 'Devel::Toolbox';
 
+use version; our $VERSION = qv('v0.0.0');
+
 # Core modules
 use File::Spec;                 # Portably perform operations on file names
 use File::Copy;                 # Copy files or filehandles
@@ -56,6 +58,15 @@ sub module {
     
     # Merge this method's arguments with football for template substitution
     %{$self}        = ( %{$self}, %{$args} );
+    
+    # Strip leading dash from hash keys; 
+    #   Text::Template will supply the correct sigil.
+    #   ( This actually duplicates keys so the originals remain. )
+    for ( keys $self ) {
+        my $v       = $self->{$_};
+        s/^-//;
+        $self->{$_} = $v;
+    };
     
     ### $self
     $out    = $tt->fill_in( HASH => $self );

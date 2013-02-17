@@ -49,7 +49,7 @@ This document describes [% $module_name %] version [% $version %]
 =over
 
 I<[% $tagquote %]> 
--- [% $tagquote_credit %]
+-- [% $tagquote_cite %]
 
 =back
 
@@ -111,8 +111,7 @@ None known.
 
 This is an early release. Reports and suggestions will be warmly welcomed. 
 
-Please report any bugs or feature requests, or other issues through 
-the web interface at
+Please report any issues to: 
 L<https://github.com/[% $author_github %]/[% $dist_name %]/issues>.
 
 =head1 DEVELOPMENT

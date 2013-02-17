@@ -35,12 +35,15 @@ my $template        = File::Spec->catfile( $install_path, 'Module.pm' );
 my $module          = File::Spec->catfile( $test_path,    'Example.pm' );
 
 my $self        = {
+    -dist_name              => 'example-dist',
     -module_template        => $template,
     -template_delimiters    => [ '[% ', ' %]' ],
     -module_name            => 'Example',
     -module_abstract        => '.................. 44 chars in PAUSE upload!',
+    -version                => 'v0.0.0',
     -author_name            => 'Alan Smithee',
     -author_email           => 'alan.smithee@example.org',
+    -author_github          => 'Smithee',
     -tagquote               => 'Anyone can tell the truth, ' . qq{\n} 
                             . 'but only very few of us can make epigrams.',
     -tagquote_cite          => 'W. Somerset Maugham',
@@ -80,7 +83,7 @@ ok( $got, $diag );
 # Get new module contents.
 $diag   = $base . 'open-module-in-test';
 $tc++;
-$got    = open my $tp_fh, '<', $module
+$got    = open my $m_fh, '<', $module
             or 0;
 ok( $got, $diag );
 
@@ -89,14 +92,14 @@ $tc++;
 my $module_contents   ;
 {
     local $/            = undef;            # slurp
-    $module_contents    = <$tp_fh>;
+    $module_contents    = <$m_fh>;
 };
 $got    = $module_contents;
 ok( $got, $diag );
 
 $diag   = $base . 'close-module-in-test';
 $tc++;
-$got    = close $tp_fh
+$got    = close $m_fh
             or 0;
 ok( $got, $diag );
 
