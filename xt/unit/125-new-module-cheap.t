@@ -3,7 +3,8 @@ use warnings;
 
 use Test::More;
 
-use Error::Base;
+use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Set::New;   # Create a project, module, test, or toolset
 my $QRTRUE       = $Error::Base::QRTRUE    ;
 my $QRFALSE      = $Error::Base::QRFALSE   ;
 
@@ -227,70 +228,4 @@ sub words {                         # sloppy match these strings
     
     return qr/$regex/is;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
