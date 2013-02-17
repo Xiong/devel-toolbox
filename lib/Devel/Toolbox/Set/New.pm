@@ -35,16 +35,9 @@ my $err = Error::Base->new (
 sub module {
     my $self        = shift;
     my $args        = shift;
-    my $module      = $args{-module};       # name of new module
-    my $template    = $args{-template};     # path to template
-    my $abstract    = $args{-abstract};     # 44 character description
+    my $module      = $args->{-module};     # name of new module
+    my $abstract    = $args->{-abstract};   # 44 character description
     
-    # Set the template. 
-    if    ( not $template ) {
-        $template       = $self->{-default_module_template};
-    };
-    
-    # Find the template. Try these locations in order:
     
     
     
