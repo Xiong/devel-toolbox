@@ -35,6 +35,8 @@ Devel::Toolbox - Simple custom project tool management
 
 This document describes Devel::Toolbox version v0.0.0
 
+*** NONFUNCTIONAL ***
+
 =head1 SYNOPSIS
 
     $ dt setup
@@ -56,6 +58,17 @@ That's what it's paid to do, after all.>
 -- Larry Wall
 
 =back
+
+Perl developers are offered a range of machinery with which to carry out 
+various tasks not strictly part of writing production code: starting a new 
+project, starting new modules, testing (testing testing), building a CPAN 
+distribution, uploading, and so forth. These machines range from simple 
+and quaint to modern and enormous. 
+
+Devel::Toolbox steers a middle course; it attempts to offer more utility 
+for less investment. We assume that you would rather make your project 
+work than learn how your toolbox works; and you may not need great power 
+to do that. 
 
 =head1 METHODS 
 
