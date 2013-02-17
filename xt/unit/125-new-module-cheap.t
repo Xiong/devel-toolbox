@@ -32,7 +32,7 @@ my $Verbose     = 0;
 my $install_path    = File::Spec->catdir (qw( file install ));
 my $test_path       = File::Spec->catdir ( 'test' );
 my $template        = File::Spec->catfile( $install_path, 'Module.pm' );
-my $new_module      = File::Spec->catfile( $test_path,    'Example.pm' );
+my $module          = File::Spec->catfile( $test_path,    'Example.pm' );
 
 my $self        = {
     -template       => $template,
@@ -42,13 +42,53 @@ my $self        = {
 $diag   = $base . 'execute';
 $tc++;
 Devel::Toolbox::Set::New::module( $self, {
-    -module         => $new_module,
+    -module         => $module,
 });
 pass($diag);
 
+# Get template contents
 $diag   = $base . 'open-template-in-test';
 $tc++;
 $got    = open my $tp_fh, '<', $template
+            or 0;
+ok( $got, $diag );
+
+$diag   = $base . 'slurp-template';
+$tc++;
+my $template_contents   ;
+{
+    local $/            = undef;            # slurp
+    $template_contents  = <$tp_fh>;
+};
+$got    = $template_contents;
+ok( $got, $diag );
+
+$diag   = $base . 'close-template-in-test';
+$tc++;
+$got    = close $tp_fh
+            or 0;
+ok( $got, $diag );
+
+# Get new module contents.
+$diag   = $base . 'open-module-in-test';
+$tc++;
+$got    = open my $tp_fh, '<', $module
+            or 0;
+ok( $got, $diag );
+
+$diag   = $base . 'slurp-module';
+$tc++;
+my $module_contents   ;
+{
+    local $/            = undef;            # slurp
+    $module_contents  = <$tp_fh>;
+};
+$got    = $module_contents;
+ok( $got, $diag );
+
+$diag   = $base . 'close-module-in-test';
+$tc++;
+$got    = close $tp_fh
             or 0;
 ok( $got, $diag );
 
