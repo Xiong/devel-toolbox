@@ -29,9 +29,10 @@ my $want        ;
 my $Verbose     = 0;
 #~    $Verbose++;
 
-my $test_path   = File::Spec->catdir ( 'file', 'test' );
-my $template    = File::Spec->catfile( $test_path, 'Module.pm' );
-my $new_module  = File::Spec->catfile( $test_path, 'Example.pm' );
+my $install_path    = File::Spec->catdir (qw( file install ));
+my $test_path       = File::Spec->catdir ( 'test' );
+my $template        = File::Spec->catfile( $install_path, 'Module.pm' );
+my $new_module      = File::Spec->catfile( $test_path,    'Example.pm' );
 
 my $self        = {
     -template       => $template,
