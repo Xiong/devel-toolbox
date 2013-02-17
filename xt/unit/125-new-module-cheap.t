@@ -33,12 +33,24 @@ my $test_path   = File::Spec->catdir ( 'file', 'test' );
 my $template    = File::Spec->catfile( $test_path, 'Module.pm' );
 my $new_module  = File::Spec->catfile( $test_path, 'Example.pm' );
 
+my $self        = {
+    -template       => $template,
+};
+
+
 $diag   = $base . 'execute';
 $tc++;
-Devel::Toolbox::Set::New::module(
-
-);
+Devel::Toolbox::Set::New::module( $self, {
+    -module         => $new_module,
+});
 pass($diag);
+
+$diag   = $base . 'open-template-in-test';
+$tc++;
+$got    = open my $tp_fh, '<', $template
+            or 0;
+ok( $got, $diag );
+
 
 
 #----------------------------------------------------------------------------#
