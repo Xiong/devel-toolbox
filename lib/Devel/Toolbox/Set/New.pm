@@ -10,10 +10,10 @@ use File::Copy;                 # Copy files or filehandles
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-
+use Text::Template;             # Expand template text with embedded Perl
 
 # Alternate uses
-#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
@@ -35,12 +35,38 @@ my $err = Error::Base->new (
 sub module {
     my $self        = shift;
     my $args        = shift;
-    my $module      = $args->{-module};     # name of new module
-    my $abstract    = $args->{-abstract};   # 44 character description
+    my $module      = $args->{-module};     # path of new module
+    
+    my $tt      = Text::Template->new(
+                    SOURCE      => $self->{-module_template},
+                    DELIMITERS  => $self->{-template_delimiters},
+                );
+    my $out     ;
+    
+#~     # Get template contents
+#~     open my $tp_fh, '<', $template
+#~                 or $err->crash("Failed to open $template for reading.");
+#~     {
+#~         local $/            = undef;            # slurp
+#~         $template_contents  = <$tp_fh>;
+#~     };
+#~     close $tp_fh
+#~                 or $err->crash("Failed to close $template after reading.");
     
     
+    # Merge this method's arguments with football for template substitution
+    %{$self}        = ( %{$self}, %{$args} );
     
+    ### $self
+    $out    = $tt->fill_in( HASH => $self );
     
+    # Put new module file
+    open my $m_fh, '>', $module
+                or $err->crash("Failed to open $module for writing.");
+    print {$m_fh} $out
+                or $err->crash("Failed while writing $module");
+    close $m_fh
+                or $err->crash("Failed to close $module after writing.");
     
     
     

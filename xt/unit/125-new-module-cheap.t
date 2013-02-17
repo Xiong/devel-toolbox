@@ -35,14 +35,22 @@ my $template        = File::Spec->catfile( $install_path, 'Module.pm' );
 my $module          = File::Spec->catfile( $test_path,    'Example.pm' );
 
 my $self        = {
-    -template       => $template,
+    -module_template        => $template,
+    -template_delimiters    => [ '[% ', ' %]' ],
+    -module_name            => 'Example',
+    -module_abstract        => '.................. 44 chars in PAUSE upload!',
+    -author_name            => 'Alan Smithee',
+    -author_email           => 'alan.smithee@example.org',
+    -tagquote               => 'Anyone can tell the truth, ' . qq{\n} 
+                            . 'but only very few of us can make epigrams.',
+    -tagquote_cite          => 'W. Somerset Maugham',
 };
 
 
 $diag   = $base . 'execute';
 $tc++;
 Devel::Toolbox::Set::New::module( $self, {
-    -module         => $module,
+    -module             => $module,
 });
 pass($diag);
 
@@ -81,7 +89,7 @@ $tc++;
 my $module_contents   ;
 {
     local $/            = undef;            # slurp
-    $module_contents  = <$tp_fh>;
+    $module_contents    = <$tp_fh>;
 };
 $got    = $module_contents;
 ok( $got, $diag );

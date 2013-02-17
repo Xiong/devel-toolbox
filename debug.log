@@ -1,0 +1,16 @@
+
+### $self: {
+###          '-author_email' => 'alan.smithee@example.org',
+###          '-author_name' => 'Alan Smithee',
+###          '-module' => 'test/Example.pm',
+###          '-module_abstract' => '.................. 44 chars in PAUSE upload!',
+###          '-module_name' => 'Example',
+###          '-module_template' => 'file/install/Module.pm',
+###          '-tagquote' => 'Anyone can tell the truth, 
+but only very few of us can make epigrams.',
+###          '-tagquote_cite' => 'W. Somerset Maugham',
+###          '-template_delimiters' => [
+###                                      '[% ',
+###                                      ' %]'
+###                                    ]
+###        }
