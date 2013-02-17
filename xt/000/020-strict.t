@@ -6,8 +6,6 @@
 use warnings;
 
 my @modules     = (
-    'Error::Base',                # Simple structured errors with full backtrace
-    'Error::Base::Cookbook',      # Examples of Error::Base usage
     'Devel::Toolbox',             # Simple custom project tool management
     'Devel::Toolbox::Set::New',   # Create a project, module, test, or toolset
 
