@@ -5,8 +5,10 @@ use Test::More;
 
 use Devel::Toolbox;             # Simple custom project tool management
 use Devel::Toolbox::Set::New;   # Create a project, module, test, or toolset
-my $QRTRUE       = $Error::Base::QRTRUE    ;
-my $QRFALSE      = $Error::Base::QRFALSE   ;
+
+# Compiled regexes
+our $QRFALSE            = qr/\A0?\z/            ;
+our $QRTRUE             = qr/\A(?!$QRFALSE)/    ;
 
 #----------------------------------------------------------------------------#
 
@@ -138,7 +140,7 @@ my @td  = (
 #----------------------------------------------------------------------------#
 
 my $tc          ;
-my $base        = 'Error-Base: new(): ';
+my $base        = 'Devel::Toolbox::Set::New::module(): ';
 my $diag        = $base;
 my @rv          ;
 my $got         ;
@@ -169,8 +171,7 @@ sub exck {
     
     $diag           = 'execute';
     @rv             = eval{ 
-        my $self        = Error::Base->new(@args);
-        $self->cuss;
+        my $self        = Devel::Toolbox::Set::New->new(@args);
     };
     pass( $diag );          # test didn't blow up
     note($@) if $@;         # did code under test blow up?
@@ -212,8 +213,10 @@ sub exck {
 
 #----------------------------------------------------------------------------#
 
-done_testing($tc);
-exit 0;
+END {
+    done_testing($tc);
+    exit 0;
+}
 
 #============================================================================#
 
