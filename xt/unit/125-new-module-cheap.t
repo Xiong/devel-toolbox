@@ -29,10 +29,12 @@ my $want        ;
 my $Verbose     = 0;
 #~    $Verbose++;
 
-my $install_path    = File::Spec->catdir (qw( file install ));
-my $test_path       = File::Spec->catdir ( 'test' );
-my $template        = File::Spec->catfile( $install_path, 'Module.pm' );
-my $module          = File::Spec->catfile( $test_path,    'Example.pm' );
+my $test_path       = File::Spec->catdir (qw( file test ));
+my $orig_path       = File::Spec->catdir ( $test_path, qw( orig ));
+my $dest_path       = File::Spec->catdir ( $test_path, qw( dest ));
+my $template        = File::Spec->catfile( $orig_path, 'TModule01.pm' );
+my $module          = File::Spec->catfile( $dest_path, 'Example01.pm' );
+my $compare         = File::Spec->catfile( $orig_path, 'Example01.pm' );
 
 my $self        = {
     -dist_name              => 'example-dist',

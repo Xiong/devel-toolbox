@@ -28,4 +28,4 @@ t/
 README~
 
 # Ignore testing output folder
-test/
+test/dest/

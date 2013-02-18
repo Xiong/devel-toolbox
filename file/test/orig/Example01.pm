@@ -1,4 +1,4 @@
-package [% $module_name %];
+package Example;
 # Choose minimum perl interpreter version; delete the rest.
 # Do you want to enforce the bugfix level?
 #~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
@@ -9,7 +9,6 @@ package [% $module_name %];
 #~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-use version; our $VERSION = qv('[% $version %]');
 
 # Core modules
 
@@ -35,22 +34,23 @@ __END__
 
 =head1 NAME
 
-[% $module_name %] - [% $module_abstract %]
+Example - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes [% $module_name %] version [% $version %]
+This document describes Example version v0.0.0
 
 =head1 SYNOPSIS
 
-    use [% $module_name %];
+    use Example;
 
 =head1 DESCRIPTION
 
 =over
 
-I<[% $tagquote %]> 
--- [% $tagquote_cite %]
+I<Anyone can tell the truth, 
+but only very few of us can make epigrams.> 
+-- W. Somerset Maugham
 
 =back
 
@@ -113,12 +113,12 @@ None known.
 This is an early release. Reports and suggestions will be warmly welcomed. 
 
 Please report any issues to: 
-L<https://github.com/[% $author_github %]/[% $dist_name %]/issues>.
+L<https://github.com/Smithee/example-dist/issues>.
 
 =head1 DEVELOPMENT
 
 This project is hosted on GitHub at: 
-L<https://github.com/[% $author_github %]/[% $dist_name %]>. 
+L<https://github.com/Smithee/example-dist>. 
 
 =head1 THANKS
 
@@ -126,12 +126,12 @@ Somebody helped!
 
 =head1 AUTHOR
 
-[% $author_name %]  C<< <[% $author_email %]> >>
+Alan Smithee  C<< <alan.smithee@example.org> >>
 
 =head1 LICENSE
 
-Copyright (C) [% $copyright_years %] 
-[% $author_name %] C<< <[% $author_email %]> >>
+Copyright (C)  
+Alan Smithee C<< <alan.smithee@example.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 
