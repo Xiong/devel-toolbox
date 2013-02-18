@@ -1,0 +1,1 @@
+/home/xiong/projects/devel-toolbox/xt/000/020-strict.t

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# The purpose is to sync up the "real" config folder to the "fake".
+# The purpose is to sync up the "real" config folder to the "fakes".
 
 
 cp -r ~/.config/devel-toolbox/ ./file

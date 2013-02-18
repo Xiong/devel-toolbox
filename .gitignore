@@ -26,3 +26,6 @@ t/
 
 # Ignore README~ (TODO: previous line doesn't work yet)
 README~
+
+# Ignore testing output folder
+test/dest/

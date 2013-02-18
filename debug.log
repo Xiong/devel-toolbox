@@ -1,0 +1,32 @@
+
+### $self: {
+###          '-author_email' => 'alan.smithee@example.org',
+###          '-author_github' => 'Smithee',
+###          '-author_name' => 'Alan Smithee',
+###          '-dist_name' => 'example-dist',
+###          '-module' => 'file/test/dest/Example01.pm',
+###          '-module_abstract' => '.................. 44 chars in PAUSE upload!',
+###          '-module_name' => 'Example',
+###          '-module_template' => 'file/test/orig/TModule01.pm',
+###          '-tagquote' => 'Anyone can tell the truth, 
+but only very few of us can make epigrams.',
+###          '-tagquote_cite' => 'W. Somerset Maugham',
+###          '-template_delimiters' => [
+###                                      '[% ',
+###                                      ' %]'
+###                                    ],
+###          '-version' => 'v0.0.0',
+###          author_email => 'alan.smithee@example.org',
+###          author_github => 'Smithee',
+###          author_name => 'Alan Smithee',
+###          dist_name => 'example-dist',
+###          module => 'file/test/dest/Example01.pm',
+###          module_abstract => '.................. 44 chars in PAUSE upload!',
+###          module_name => 'Example',
+###          module_template => 'file/test/orig/TModule01.pm',
+###          tagquote => 'Anyone can tell the truth, 
+but only very few of us can make epigrams.',
+###          tagquote_cite => 'W. Somerset Maugham',
+###          template_delimiters => $VAR1->[0]{'-template_delimiters'},
+###          version => 'v0.0.0'
+###        }

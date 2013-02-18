@@ -1,9 +1,14 @@
-package Devel::Toolbox;
-use 5.016002;   # 5.16.2    # 2012  # __SUB__
+package Example;
+# Choose minimum perl interpreter version; delete the rest.
+# Do you want to enforce the bugfix level?
+#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
+#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
+#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
+#~ use 5.012003;   # 5.12.5    # 2011  # yada
+#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
+#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-
-use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
 
@@ -20,9 +25,7 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-# This module exists mostly to provide the POD for the namespace. 
-# In any case, everything inherits from it. 
-# Might stick a few base methods in here. 
+
 
 ## END MODULE
 1;
@@ -31,46 +34,25 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox - Simple custom project tool management
+Example - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox version v0.0.0
-
-*** NONFUNCTIONAL ***
+This document describes Example version v0.0.0
 
 =head1 SYNOPSIS
 
-    $ dt setup
-    $ dt help
-    $ dt list sets
-    $ dt list tools
-    $ dt list sometool
-    $ dt new My::Dist
-    $ dt new test fubar
-    $ dt build
-    $ dt release
+    use Example;
 
 =head1 DESCRIPTION
 
 =over
 
-I<The computer should be doing the hard work. 
-That's what it's paid to do, after all.> 
--- Larry Wall
+I<Anyone can tell the truth, 
+but only very few of us can make epigrams.> 
+-- W. Somerset Maugham
 
 =back
-
-Perl developers are offered a range of machinery with which to carry out 
-various tasks not strictly part of writing production code: starting a new 
-project, starting new modules, testing (testing testing), building a CPAN 
-distribution, uploading, and so forth. These machines range from simple 
-and quaint to modern and enormous. 
-
-Devel::Toolbox steers a middle course; it attempts to offer more utility 
-for less investment. We assume that you would rather make your project 
-work than learn how your toolbox works; and you may not need great power 
-to do that. 
 
 =head1 METHODS 
 
@@ -114,8 +96,8 @@ There are no non-core dependencies.
 
 =item 
 
-L<version|version> 0.99    
-    E<nbsp>E<nbsp>E<nbsp>E<nbsp> # Perl extension for Version Objects
+L<version|version> 0.99    E<nbsp>E<nbsp>E<nbsp>E<nbsp> 
+# Perl extension for Version Objects
 
 =back
 
@@ -130,14 +112,13 @@ None known.
 
 This is an early release. Reports and suggestions will be warmly welcomed. 
 
-Please report any bugs or feature requests, or other issues through 
-the web interface at
-L<https://github.com/xiong/devel-toolbox/issues>.
+Please report any issues to: 
+L<https://github.com/Smithee/example-dist/issues>.
 
 =head1 DEVELOPMENT
 
 This project is hosted on GitHub at: 
-L<https://github.com/xiong/devel-toolbox>. 
+L<https://github.com/Smithee/example-dist>. 
 
 =head1 THANKS
 
@@ -145,11 +126,12 @@ Somebody helped!
 
 =head1 AUTHOR
 
-Xiong Changnian  C<< <xiong@cpan.org> >>
+Alan Smithee  C<< <alan.smithee@example.org> >>
 
 =head1 LICENSE
 
-Copyright (C) 2013 Xiong Changnian C<< <xiong@cpan.org> >>
+Copyright (C)  
+Alan Smithee C<< <alan.smithee@example.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 
@@ -167,4 +149,8 @@ its very own section. Sorry if you disagree.
 =end   fool_pod_coverage
 
 =cut
+
+
+
+
 
