@@ -29,3 +29,7 @@ README~
 
 # Ignore testing output folder
 test/dest/
+
+# Ignore Devel::Comments debugging log
+debug.log
+
