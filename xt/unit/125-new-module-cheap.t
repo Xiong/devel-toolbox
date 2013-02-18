@@ -62,7 +62,7 @@ pass($diag);
 # Get template contents
 $diag   = $base . 'open-template-in-test';
 $tc++;
-$got    = open my $tp_fh, '<', $template
+$got    = open my $t_fh, '<', $template
             or 0;
 ok( $got, $diag );
 
@@ -71,14 +71,14 @@ $tc++;
 my $template_contents   ;
 {
     local $/            = undef;            # slurp
-    $template_contents  = <$tp_fh>;
+    $template_contents  = <$t_fh>;
 };
 $got    = $template_contents;
 ok( $got, $diag );
 
 $diag   = $base . 'close-template-in-test';
 $tc++;
-$got    = close $tp_fh
+$got    = close $t_fh
             or 0;
 ok( $got, $diag );
 
@@ -105,7 +105,35 @@ $got    = close $m_fh
             or 0;
 ok( $got, $diag );
 
+# Get compare contents
+$diag   = $base . 'open-compare-in-test';
+$tc++;
+$got    = open my $c_fh, '<', $compare
+            or 0;
+ok( $got, $diag );
 
+$diag   = $base . 'slurp-compare';
+$tc++;
+my $compare_contents   ;
+{
+    local $/            = undef;            # slurp
+    $compare_contents   = <$c_fh>;
+};
+$got    = $compare_contents;
+ok( $got, $diag );
+
+$diag   = $base . 'close-compare-in-test';
+$tc++;
+$got    = close $c_fh
+            or 0;
+ok( $got, $diag );
+
+# For the big money -- exact match required
+$diag   = $base . 'is-module-eq-compare';
+$tc++;
+$got    = $module_contents;
+$want   = $compare_contents;
+is( $got, $want, $diag );
 
 #----------------------------------------------------------------------------#
 
