@@ -18,7 +18,7 @@ use Devel::Comments '###';
 
 say "$0 Running...";
 
-using Foo;
+#~ using Foo;
 
 my $self    = Foo->new({
                     -attr   => 'value',
