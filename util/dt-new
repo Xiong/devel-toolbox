@@ -21,6 +21,7 @@ use Devel::Toolbox::Set::New;   # Create a project, module, test, or toolset
 
 my $module_name     = $ARGV[0];
 my @module          = split ( '::', ( $module_name . q{.pm} ) );
+$module_name     = "Devel::Toolbox::$module_name";
 
 my $root_path       = File::Spec->rootdir ();
 my $orig_path       = File::Spec->catdir (

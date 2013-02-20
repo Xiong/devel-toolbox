@@ -1,12 +1,5 @@
-package Set::Dog;
-# Choose minimum perl interpreter version; delete the rest.
-# Do you want to enforce the bugfix level?
-#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
-#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
-#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
-#~ use 5.012003;   # 5.12.5    # 2011  # yada
-#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
-#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
+package Devel::Toolbox::Set::Dog;
+use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
@@ -26,7 +19,10 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-
+{
+    using ::Cat;
+    ::meow();
+}
 
 ## END MODULE
 1;
@@ -35,15 +31,15 @@ __END__
 
 =head1 NAME
 
-Set::Dog - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Set::Dog - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Set::Dog version v0.0.0
+This document describes Devel::Toolbox::Set::Dog version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Set::Dog;
+    use Devel::Toolbox::Set::Dog;
 
 =head1 DESCRIPTION
 
