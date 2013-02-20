@@ -19,10 +19,15 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-{
-    using ::Cat;
+use Devel::Toolbox;             # Simple custom project tool management
+#~ use parent 'Devel::Toolbox::App::Core';
+use Devel::Toolbox::App::Core;
+
+
+sub bark {
+    using '::Cat';
     ::meow();
-}
+};
 
 ## END MODULE
 1;

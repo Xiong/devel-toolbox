@@ -5,8 +5,12 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
+use lib 'lib';
 
 # CPAN modules
+use Exporter::Easy (        # Takes the drudgery out of Exporting symbols
+    EXPORT      => [qw( using Cat )],
+);
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -19,7 +23,44 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
+use Devel::Toolbox::Set::Cat;
 
+say 'Getting called:', caller[0];
+
+sub new {
+    my $class   = shift;
+    my $self    = {};                           # always hashref
+    bless ( $self => $class );
+    $self->init(@_);                            # init remaining args
+    return $self;
+}; ## new
+
+sub init {
+    my $self        = shift;
+    my $args        = shift or return $self;
+    %{$self}        = ( %{$self}, %{$args} );   # merge
+    return $self;
+}; ## init
+
+sub using {
+    say "Using...@_";
+    my $pkg         = shift;
+    $pkg            = 'Devel::Toolbox::Set' . $pkg;
+#~     require "$pkg";
+    my $callpkg     = caller(1);
+    my $sym         = 'meow';
+    {
+        no strict 'refs';
+        *{"${callpkg}::$sym"} = \&{"${pkg}::$sym"};
+    }
+};
+
+sub AUTOLOAD {
+    our $AUTOLOAD;
+    say "Autoloading...$AUTOLOAD";
+};
+
+sub Cat{'core-cat'};
 
 ## END MODULE
 1;
