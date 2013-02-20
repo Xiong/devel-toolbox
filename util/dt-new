@@ -1,0 +1,60 @@
+#!/usr/bin/env perl
+#       syntax.pl
+#       = Copyright 2013 Xiong Changnian <xiong@cpan.org> =
+#       = Free Software = Artistic License 2.0 = NO WARRANTY =
+
+use 5.016002;   # 5.16.2    # 2012  # __SUB__
+use strict;
+use warnings;
+use lib 'lib';
+
+use File::Spec;                 # Portably perform operations on file names
+
+use Error::Base;                # Simple structured errors with full backtrace
+use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Set::New;   # Create a project, module, test, or toolset
+
+#~ use Devel::Comments '###';
+#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+
+#----------------------------------------------------------------------------#
+
+my $module_name     = $ARGV[0];
+my @module          = split ( '::', ( $module_name . q{.pm} ) );
+
+my $root_path       = File::Spec->rootdir ();
+my $orig_path       = File::Spec->catdir (
+    $root_path,
+    qw( home xiong .config devel-toolbox templates ),
+);
+my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
+
+my $cwd_path        = File::Spec->curdir ();
+my $dest_path       = File::Spec->catdir (
+    $cwd_path, 
+    qw( lib Devel Toolbox ),
+);
+my $module          = File::Spec->catfile( $dest_path, @module );
+
+my $self        = {
+    -dist_name              => 'devel-toolbox',
+    -module_template        => $template,
+    -template_delimiters    => [ '[% ', ' %]' ],
+    -module_name            => $module_name,
+    -module_abstract        => '.................. 44 chars in PAUSE upload!',
+    -version                => 'v0.0.0',
+    -author_name            => 'Xiong Changnian',
+    -author_email           => 'xiong@cpan.org',
+    -author_github          => 'Xiong',
+    -tagquote               => 'Anyone can tell the truth, ' . qq{\n} 
+                            . 'but only very few of us can make epigrams.',
+    -tagquote_cite          => 'W. Somerset Maugham',
+    -copyright_years        => '2013',
+};
+
+Devel::Toolbox::Set::New::module( $self, {
+    -module             => $module,
+});
+
+say "Wrote $module";
+exit 0;
