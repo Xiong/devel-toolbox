@@ -19,7 +19,7 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-sub meow { say 'Meow!' };
+sub meow { say '[Cat] Meow!' };
 
 ## END MODULE
 1;

@@ -9,10 +9,12 @@ use lib 'lib';
 
 # CPAN modules
 use Exporter::Easy (        # Takes the drudgery out of Exporting symbols
-    EXPORT      => [qw( using Cat )],
+    EXPORT      => [qw( using )],
 );
+use Scope::Guard;           # Lexically-scoped resource management
 
 # Alternate uses
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -23,9 +25,7 @@ use Exporter::Easy (        # Takes the drudgery out of Exporting symbols
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-use Devel::Toolbox::Set::Cat;
-
-say 'Getting called:', caller[0];
+#~ say '[Core] callers:', caller[0], caller[1], '$';
 
 sub new {
     my $class   = shift;
@@ -42,25 +42,46 @@ sub init {
     return $self;
 }; ## init
 
+sub done_using {
+    say '[Core] done_using [', @_, ']';
+    
+};
+
 sub using {
-    say "Using...@_";
-    my $pkg         = shift;
-    $pkg            = 'Devel::Toolbox::Set' . $pkg;
-#~     require "$pkg";
-    my $callpkg     = caller(1);
+    say '[Core] using [', @_, ']';
+    
+    # Do the nasty export
+    my $expkg       = shift;
+    $expkg          = 'Devel::Toolbox::Set' . $expkg;
+    eval "require $expkg";
+#~     my $impkg       = caller(1);
+    my $impkg       = 'main';
     my $sym         = 'meow';
+    say "[Core] Exporting $sym from $expkg to $impkg";
     {
         no strict 'refs';
-        *{"${callpkg}::$sym"} = \&{"${pkg}::$sym"};
+        *{"${impkg}::$sym"} = \&{"${expkg}::$sym"};
     }
+    
+    # Create guard
+    my $caller      = caller(0);
+    my $guard_ref   = shift;
+    say "[Core] Creating guard $guard_ref in $caller (using scope)";
+    my $guard       = Scope::Guard->new(\&done_using);
+    $guard_ref      = \$guard;
+    
 };
 
 sub AUTOLOAD {
     our $AUTOLOAD;
-    say "Autoloading...$AUTOLOAD";
+    say "    Autoloading...$AUTOLOAD";
+    say "    @_";
+    ### @_
 };
 
-sub Cat{'core-cat'};
+#~ sub DESTROY {
+#~     say "[Core] Destroy @_";
+#~ };
 
 ## END MODULE
 1;

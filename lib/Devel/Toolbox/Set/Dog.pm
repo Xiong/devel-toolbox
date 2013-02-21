@@ -25,8 +25,13 @@ use Devel::Toolbox::App::Core;
 
 
 sub bark {
-    using '::Cat';
+    my $guard = {};
+    using '::Cat', $guard;      # must be quoted
+#~     using ::Cat;     # bareword fatals under strict 'subs'
+#~     using {::Cat};   # bareword
+    say '[Dog] bark';
     ::meow();
+#~     ::meow;          # bareword
 };
 
 ## END MODULE

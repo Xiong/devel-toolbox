@@ -16,16 +16,24 @@ use Devel::Comments '###';
 ## use
 #============================================================================#
 
-say "$0 Running...";
+say "[$0] Running...";
 use Devel::Toolbox;             # Simple custom project tool management
 use parent 'Devel::Toolbox::App::Core';
 use Devel::Toolbox::Set::Dog;
 
 my $self    = Devel::Toolbox::App::Core->new();
+#~ my $self    = main->new();
 
-$self->Devel::Toolbox::Set::Dog::bark();
+say "[$0] (dog bark) YES";
+$self->Devel::Toolbox::Set::Dog::bark();    # should work; Dog using Cat
 
-say "Done.";
+say "[$0] (self meow) NO";
+$self->meow();                              # should not work; autoloads
+
+say "[$0] (main meow) NO";
+meow();                                     # should not work; autoloads
+
+say "[$0] Done.";
 exit 0;
 
 #----------------------------------------------------------------------------#
