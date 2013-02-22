@@ -98,14 +98,13 @@ sub export_all {
     my @symbols     = @{ $args->{-symbols} };   # aryref of strings
                                                 #  include sigils $@%
     my $type        ;
-    my $sym         ;
     
     ### $impkg
     ### $expkg
     ### @symbols
     
     # Ripped from Exporter::Heavy::heavy_export()
-    foreach $sym (@symbols) {
+    foreach my $sym (@symbols) {
         # For we doeth darke magiks.
         no strict 'refs';
         # shortcut for the common case of no type character
