@@ -17,6 +17,7 @@ BEGIN {
 # CPAN modules
 
 # Project modules
+use Devel::Toolbox::Core::Base;     # Toolset base class
 use Devel::Toolbox::Core::Claim;    # Guts of 'claim' function
 
 # Alternate uses
@@ -33,12 +34,19 @@ use Devel::Toolbox::Core::Claim;    # Guts of 'claim' function
 #----------------------------------------------------------------------------#
 
 sub import {
+    # 'parent'
     my $caller      = caller;
     ### $caller
+    my $base_name   = 'Devel::Toolbox::Core::Base';
+    my $sym         = 'ISA';
+    {
+        no strict 'refs';
+        push @{"${caller}::$sym"}, $base_name;
+    }
     
+    # Export
     our @EXPORT     ;
     ### @EXPORT
-    
     Devel::Toolbox->export_to_level( 1, @EXPORT );
 };
 

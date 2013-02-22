@@ -20,7 +20,7 @@ use version; our $VERSION = qv('v0.0.0');
 #----------------------------------------------------------------------------#
 
 use Devel::Toolbox;             # Simple custom project tool management
-use parent 'Devel::Toolbox::Core::Base';
+#~ use parent 'Devel::Toolbox::Core::Base';
 
 sub meow { say '[Cat] Meow!' };
 
