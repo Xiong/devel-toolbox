@@ -1,30 +1,47 @@
 package Devel::Toolbox::Core::Base;
-# Choose minimum perl interpreter version; delete the rest.
-# Do you want to enforce the bugfix level?
-#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
-#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
-#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
-#~ use 5.012003;   # 5.12.5    # 2011  # yada
-#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
-#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
+use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
+use lib 'lib';
 
 # CPAN modules
+use Exporter::Easy (        # Takes the drudgery out of Exporting symbols
+    EXPORT      => [qw( using )],
+);
 
 # Alternate uses
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 
 # Pseudo-globals
+$singleton      = {};                           # the only object
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+
+sub new {
+#~     my $class   = shift;
+    my $class   = __PACKAGE__;                  # always in this package
+#~     my $self    = {};
+    my $self    = $singleton;                   # there can be only one
+    bless ( $self => $class );
+    $self->init(@_);                            # init remaining args
+    return $self;
+}; ## new
+
+sub init {
+    my $self        = shift;
+    my $args        = shift or return $self;
+    %{$self}        = ( %{$self}, %{$args} );   # merge
+    return $self;
+}; ## init
+
 
 
 
