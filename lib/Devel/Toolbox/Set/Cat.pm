@@ -19,6 +19,9 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
+use Devel::Toolbox;             # Simple custom project tool management
+#~ use parent 'Devel::Toolbox::Core::Base';
+
 sub meow { say '[Cat] Meow!' };
 
 ## END MODULE

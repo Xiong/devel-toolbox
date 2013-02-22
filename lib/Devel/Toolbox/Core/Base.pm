@@ -54,8 +54,9 @@ sub using {
     
     # Load the toolset requested.
     my $toolset     = shift;    # just what was given (in the request)
-    $toolset =~ s/^:://;
-    my $full_name   ;           # full Perlish module name
+    $toolset =~ s/^:://;        # since we suggest a leading double-colon
+    my $full_name   ;           # full path to module name
+    my $perl_name   ;           # Perlish module name
     my @path_parts  = (qw( Devel Toolbox Set ));
     while ( @path_parts ) {
         $full_name      = File::Spec->catfile( @path_parts, $toolset );
@@ -69,11 +70,22 @@ sub using {
     if ($@) {                   # we tried everything
         $err->crash("Can't find toolset $toolset");
     };
+    $perl_name      = join '::', @path_parts, $toolset;
     
     # Import all methods (= tools in set). 
     ### $full_name
-    my @tools       = Class::Inspector->functions( $full_name );
+    ### $perl_name
+#~ # Is a class installed and/or loaded
+#~ Class::Inspector->installed( 'Foo::Class' );
+#~ Class::Inspector->loaded( 'Foo::Class' );
+#~     my @tools       = Class::Inspector->functions( $perl_name );
+    my @tools       = Class::Inspector->methods( 
+                        $perl_name, 'full', 'public' 
+                    );
     ### @tools
+#~     @tools          = grep {/^qv$/} @tools; 
+    
+    
     
 }; ## using
 
