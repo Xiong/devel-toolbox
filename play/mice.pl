@@ -25,7 +25,7 @@ my $self    = Devel::Toolbox::Core::Base->new();
 #~ my $self    = main->new();
 
 say "[$0] (dog bark) YES";
-$self->Devel::Toolbox::Set::Dog::bark();    # should work; Dog using Cat
+$self->Devel::Toolbox::Set::Dog::bark();    # should work; Dog claims Cat
 
 say "[$0] (self meow) NO";
 $self->meow();                              # should not work; autoloads
@@ -72,10 +72,5 @@ sub init {
 }; ## init
 
 sub munge { ::munge(@_); };
-
-#~ sub using {
-#~     say 'Tricky stuff here.';
-#~     sub DT::munge { munge(@_) };
-#~ };
 
 __END__     

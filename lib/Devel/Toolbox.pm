@@ -9,7 +9,7 @@ use version; our $VERSION = qv('v0.0.0');
 BEGIN {
     require Exporter;               # Must use the old fellow here
     our @ISA    = 'Exporter';
-    our @EXPORT = 'using';          # That's right.
+    our @EXPORT = 'claim';          # That's right.
 }
 
 # Core modules
@@ -17,7 +17,7 @@ BEGIN {
 # CPAN modules
 
 # Project modules
-use Devel::Toolbox::Core::Using;    # Guts of 'using' function
+use Devel::Toolbox::Core::Claim;    # Guts of 'claim' function
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~

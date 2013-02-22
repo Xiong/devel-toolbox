@@ -25,9 +25,9 @@ use parent 'Devel::Toolbox::Core::Base';
 
 sub bark {
     my $self    = shift;
-    using '::Cat';      # must be quoted
-#~     using ::Cat;     # bareword fatals under strict 'subs'
-#~     using {::Cat};   # bareword
+    claim '::Cat';      # must be quoted
+#~     claim ::Cat;     # bareword fatals under strict 'subs'
+#~     claim {::Cat};   # bareword
     say '[Dog] bark';
     $self->meow();
 #~     ::meow;          # bareword

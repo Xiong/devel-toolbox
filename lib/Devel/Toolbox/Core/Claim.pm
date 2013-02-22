@@ -1,4 +1,4 @@
-package Devel::Toolbox::Core::Using;
+package Devel::Toolbox::Core::Claim;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT      => [qw( using )],
+    EXPORT      => [qw( claim )],
 );
 use Class::Inspector;           # Get info about a class and its structure
 
@@ -25,14 +25,14 @@ use Devel::Comments '###';                                               #~
 # Pseudo-globals
 
 my $err             = Error::Base->new(
-                        -base   => '! DT-Using:'
+                        -base   => '! DT-Claim:'
 );
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-sub using {
-#~     say '[Using] using [', @_, ']';                                       ~#
+sub claim {
+#~     say '[Claim] claiming [', @_, ']';                                   ~#
     
     # Load the toolset requested.
     my $toolset     = shift;    # just what was given (in the request)
@@ -69,7 +69,7 @@ sub using {
     
     
     
-}; ## using
+}; ## claim
 
 
 
@@ -80,15 +80,15 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::Using - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Claim - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::Using version v0.0.0
+This document describes Devel::Toolbox::Core::Claim version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::Using;
+    use Devel::Toolbox::Core::Claim;
 
 =head1 DESCRIPTION
 
