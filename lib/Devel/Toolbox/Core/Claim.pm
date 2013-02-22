@@ -16,7 +16,7 @@ use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
 use Class::Inspector;           # Get info about a class and its structure
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -35,7 +35,7 @@ sub claim {
     my $caller      = caller;
 #~     ### $caller
 
-    say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
+#~     say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
     
     # Load the toolset requested.
     my $toolset     = shift;    # just what was given (in the request)
@@ -76,38 +76,49 @@ sub claim {
     ### @tools
     
     my $base_name   = 'Devel::Toolbox::Core::Base';
-    my @base_tools  = @{ Class::Inspector->functions( $base_name ) };
+    my @base_tools  ;
+    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
     ### @base_tools
     
-    push @Devel::Toolbox::Core::Base::ISA, $perl_name;
+    export_all ({
+        -expkg      => $perl_name,
+        -impkg      => $base_name,
+        -symbols    => \@tools,
+    });
+    
+    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
     ### @base_tools
     
 }; ## claim
 
 sub export_all {
-    my $pkg         = shift;
-    my @imports     = @_;       # anything you like, baby
-    my $callpkg     = caller(1);
+    my $args        = shift;
+    my $expkg       = $args->{-expkg};          # package to export from
+    my $impkg       = $args->{-impkg};          # package to import into
+    my @symbols     = @{ $args->{-symbols} };   # aryref of strings
+                                                #  include sigils $@%
     my $type        ;
     my $sym         ;
     
-    ### $callpkg
-    ### $pkg
-    ### @imports
+    ### $impkg
+    ### $expkg
+    ### @symbols
     
     # Ripped from Exporter::Heavy::heavy_export()
-    foreach $sym (@imports) {
-    # shortcut for the common case of no type character
-    (*{"${callpkg}::$sym"} = \&{"${pkg}::$sym"}, next)
-        unless $sym =~ s/^(\W)//;
-    $type = $1;
-    *{"${callpkg}::$sym"} =
-        $type eq '&' ? \&{"${pkg}::$sym"} :
-        $type eq '$' ? \${"${pkg}::$sym"} :
-        $type eq '@' ? \@{"${pkg}::$sym"} :
-        $type eq '%' ? \%{"${pkg}::$sym"} :
-        $type eq '*' ?  *{"${pkg}::$sym"} :
-        die "$pkg: Can't export symbol: $type$sym\n", $!;
+    foreach $sym (@symbols) {
+        # For we doeth darke magiks.
+        no strict 'refs';
+        # shortcut for the common case of no type character
+        (*{"${impkg}::$sym"} = \&{"${expkg}::$sym"}, next)
+            unless $sym =~ s/^(\W)//;
+        $type = $1;
+        *{"${impkg}::$sym"} =
+            $type eq '&' ? \&{"${expkg}::$sym"} :
+            $type eq '$' ? \${"${expkg}::$sym"} :
+            $type eq '@' ? \@{"${expkg}::$sym"} :
+            $type eq '%' ? \%{"${expkg}::$sym"} :
+            $type eq '*' ?  *{"${expkg}::$sym"} :
+            die "Can't export symbol: $type$sym\n", $!;
     }
 }; ## export_all
 

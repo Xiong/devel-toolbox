@@ -28,8 +28,10 @@ sub bark {
     claim '::Cat';      # must be quoted
 #~     claim ::Cat;     # bareword fatals under strict 'subs'
 #~     claim {::Cat};   # bareword
-    say '[Dog] bark';
+    say '[Dog] bark objectively';
     $self->meow();
+#~     say '[Dog] bark procedurally';      # fails; namespace is clean
+#~     meow();
 #~     ::meow;          # bareword
 };
 

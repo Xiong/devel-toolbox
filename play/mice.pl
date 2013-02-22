@@ -18,7 +18,7 @@ use Error::Base;
 
 say "[$0] Running...";
 use Devel::Toolbox;             # Simple custom project tool management
-use parent 'Devel::Toolbox::Core::Base';
+#~ use parent 'Devel::Toolbox::Core::Base';
 use Devel::Toolbox::Set::Dog;
 
 my $self    = Devel::Toolbox::Core::Base->new();
@@ -27,11 +27,12 @@ my $self    = Devel::Toolbox::Core::Base->new();
 say "[$0] (dog bark) YES";
 $self->Devel::Toolbox::Set::Dog::bark();    # should work; Dog claims Cat
 
-say "[$0] (self meow) NO";
-$self->meow();                              # should not work; autoloads
+say "[$0] (self meow) YES";
+$self->meow();                              # should work; $self is blessed
 
-say "[$0] (main meow) NO";
-meow();                                     # should not work; autoloads
+#~ say "[$0] (main meow) NO";
+#~ meow();                                     # should not work
+#~                                             #  because clean main namespace
 
 say "[$0] Done.";
 exit 0;
