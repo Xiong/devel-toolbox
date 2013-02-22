@@ -32,7 +32,10 @@ my $err             = Error::Base->new(
 #----------------------------------------------------------------------------#
 
 sub claim {
-#~     say '[Claim] claiming [', @_, ']';                                   ~#
+    my $caller      = caller;
+#~     ### $caller
+
+    say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
     
     # Load the toolset requested.
     my $toolset     = shift;    # just what was given (in the request)
@@ -44,7 +47,7 @@ sub claim {
         $full_name      = File::Spec->catfile( @path_parts, $toolset );
         $full_name      .= q{.pm};
         my $caller = caller;
-#~  say q*DEBUG: $full_name: '*, $full_name, q*'*;                          ~#
+#~  say q*DEBUG: $full_name: '*, $full_name, q*'*;                         #~#
         eval { require $full_name };
         last if not $@;
         pop @path_parts;        # perhaps a longer name was given
@@ -55,19 +58,29 @@ sub claim {
     $perl_name      = join '::', @path_parts, $toolset;
     
     # Import all methods (= tools in set). 
-    ### $full_name
+#~     ### $full_name
     ### $perl_name
 #~ # Is a class installed and/or loaded
 #~ Class::Inspector->installed( 'Foo::Class' );
 #~ Class::Inspector->loaded( 'Foo::Class' );
-#~     my @tools       = Class::Inspector->functions( $perl_name );
-    my @tools       = Class::Inspector->methods( 
-                        $perl_name, 'full', 'public' 
-                    );
+
+#~     my @tools       = Class::Inspector->methods( 
+#~                         $perl_name, 'full', 'public' 
+#~                     );
+    
+    my @tools       = @{ Class::Inspector->functions( $perl_name ) };
+
+#~     ### @tools
+    my $filter      = qr/claim|qv/;
+    @tools          = grep { not /$filter/ } @tools; 
     ### @tools
-#~     @tools          = grep {/^qv$/} @tools; 
     
+    my $base_name   = 'Devel::Toolbox::Core::Base';
+    my @base_tools  = @{ Class::Inspector->functions( $base_name ) };
+    ### @base_tools
     
+    push @Devel::Toolbox::Core::Base::ISA, $perl_name;
+    ### @base_tools
     
 }; ## claim
 
