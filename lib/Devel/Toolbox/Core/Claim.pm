@@ -84,6 +84,33 @@ sub claim {
     
 }; ## claim
 
+sub export_all {
+    my $pkg         = shift;
+    my @imports     = @_;       # anything you like, baby
+    my $callpkg     = caller(1);
+    my $type        ;
+    my $sym         ;
+    
+    ### $callpkg
+    ### $pkg
+    ### @imports
+    
+    # Ripped from Exporter::Heavy::heavy_export()
+    foreach $sym (@imports) {
+    # shortcut for the common case of no type character
+    (*{"${callpkg}::$sym"} = \&{"${pkg}::$sym"}, next)
+        unless $sym =~ s/^(\W)//;
+    $type = $1;
+    *{"${callpkg}::$sym"} =
+        $type eq '&' ? \&{"${pkg}::$sym"} :
+        $type eq '$' ? \${"${pkg}::$sym"} :
+        $type eq '@' ? \@{"${pkg}::$sym"} :
+        $type eq '%' ? \%{"${pkg}::$sym"} :
+        $type eq '*' ?  *{"${pkg}::$sym"} :
+        die "$pkg: Can't export symbol: $type$sym\n", $!;
+    }
+}; ## export_all
+
 
 
 ## END MODULE
