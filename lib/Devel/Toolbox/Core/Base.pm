@@ -6,11 +6,14 @@ use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
 use lib 'lib';
+use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
-use Exporter::Easy (        # Takes the drudgery out of Exporting symbols
+use Error::Base;                # Simple structured errors with full backtrace
+use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
     EXPORT      => [qw( using )],
 );
+use Class::Inspector;           # Get info about a class and its structure
 
 # Alternate uses
 use Devel::Comments '###';                                               #~
@@ -20,13 +23,17 @@ use Devel::Comments '###';                                               #~
 #============================================================================#
 
 # Pseudo-globals
-$singleton      = {};                           # the only object
+my $singleton       = {};                       # the only object
+my $err             = Error::Base->new(
+                        -base   => '! DT-Base:'
+);
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
 sub new {
 #~     my $class   = shift;
+    shift;  # throw away
     my $class   = __PACKAGE__;                  # always in this package
 #~     my $self    = {};
     my $self    = $singleton;                   # there can be only one
@@ -42,6 +49,33 @@ sub init {
     return $self;
 }; ## init
 
+sub using {
+#~     say '[Base] using [', @_, ']';                                       ~#
+    
+    # Load the toolset requested.
+    my $toolset     = shift;    # just what was given (in the request)
+    $toolset =~ s/^:://;
+    my $full_name   ;           # full Perlish module name
+    my @path_parts  = (qw( Devel Toolbox Set ));
+    while ( @path_parts ) {
+        $full_name      = File::Spec->catfile( @path_parts, $toolset );
+        $full_name      .= q{.pm};
+        my $caller = caller;
+#~  say q*DEBUG: $full_name: '*, $full_name, q*'*;                          ~#
+        eval { require $full_name };
+        last if not $@;
+        pop @path_parts;        # perhaps a longer name was given
+    };
+    if ($@) {                   # we tried everything
+        $err->crash("Can't find toolset $toolset");
+    };
+    
+    # Import all methods (= tools in set). 
+    ### $full_name
+    my @tools       = Class::Inspector->functions( $full_name );
+    ### @tools
+    
+}; ## using
 
 
 

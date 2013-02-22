@@ -20,17 +20,16 @@ use version; our $VERSION = qv('v0.0.0');
 #----------------------------------------------------------------------------#
 
 use Devel::Toolbox;             # Simple custom project tool management
-#~ use parent 'Devel::Toolbox::App::Core';
-use Devel::Toolbox::App::Core;
+#~ use parent 'Devel::Toolbox::Core::Base';
 
 
 sub bark {
-    my $guard = {};
-    using '::Cat', $guard;      # must be quoted
+    my $self    = shift;
+    using '::Cat';      # must be quoted
 #~     using ::Cat;     # bareword fatals under strict 'subs'
 #~     using {::Cat};   # bareword
     say '[Dog] bark';
-    ::meow();
+    $self->meow();
 #~     ::meow;          # bareword
 };
 

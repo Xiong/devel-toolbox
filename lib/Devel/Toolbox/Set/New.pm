@@ -22,7 +22,7 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 # Pseudo-globals
 my $err = Error::Base->new (
-    -base           => '[DT-New]',
+    -base           => '! DT-New:',
 );
 
 ## pseudo-globals

@@ -10,7 +10,7 @@ use warnings;
 use lib 'lib';
 use Error::Base;
 
-use Devel::Comments '###';
+#~ use Devel::Comments '###';
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -18,10 +18,9 @@ use Devel::Comments '###';
 
 say "[$0] Running...";
 use Devel::Toolbox;             # Simple custom project tool management
-use parent 'Devel::Toolbox::App::Core';
 use Devel::Toolbox::Set::Dog;
 
-my $self    = Devel::Toolbox::App::Core->new();
+my $self    = Devel::Toolbox::Core::Base->new();
 #~ my $self    = main->new();
 
 say "[$0] (dog bark) YES";

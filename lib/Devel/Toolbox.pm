@@ -5,11 +5,22 @@ use warnings;
 
 use version; our $VERSION = qv('v0.0.0');
 
+# Exporter first.
+BEGIN {
+    require Exporter;               # Must use the old fellow here
+    our @ISA    = 'Exporter';
+    our @EXPORT = 'using';          # That's right.
+}
+
 # Core modules
 
 # CPAN modules
 
+# Project modules
+use Devel::Toolbox::Core::Base;     # Base class and guts
+
 # Alternate uses
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -20,9 +31,15 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-# This module exists mostly to provide the POD for the namespace. 
-# In any case, everything inherits from it. 
-# Might stick a few base methods in here. 
+sub import {
+    my $caller      = caller;
+    ### $caller
+    
+    our @EXPORT     ;
+    Devel::Toolbox->export_to_level( 1, @_ );
+};
+
+
 
 ## END MODULE
 1;
