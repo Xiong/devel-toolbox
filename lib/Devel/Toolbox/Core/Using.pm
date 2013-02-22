@@ -1,21 +1,22 @@
 package Devel::Toolbox::Core::Using;
-# Choose minimum perl interpreter version; delete the rest.
-# Do you want to enforce the bugfix level?
-#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
-#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
-#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
-#~ use 5.012003;   # 5.12.5    # 2011  # yada
-#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
-#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
+use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
+use lib 'lib';
+use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
+use Error::Base;                # Simple structured errors with full backtrace
+use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
+    EXPORT      => [qw( using )],
+);
+use Class::Inspector;           # Get info about a class and its structure
 
 # Alternate uses
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -23,8 +24,52 @@ use version; our $VERSION = qv('v0.0.0');
 
 # Pseudo-globals
 
+my $err             = Error::Base->new(
+                        -base   => '! DT-Using:'
+);
+
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+
+sub using {
+#~     say '[Using] using [', @_, ']';                                       ~#
+    
+    # Load the toolset requested.
+    my $toolset     = shift;    # just what was given (in the request)
+    $toolset =~ s/^:://;        # since we suggest a leading double-colon
+    my $full_name   ;           # full path to module name
+    my $perl_name   ;           # Perlish module name
+    my @path_parts  = (qw( Devel Toolbox Set ));
+    while ( @path_parts ) {
+        $full_name      = File::Spec->catfile( @path_parts, $toolset );
+        $full_name      .= q{.pm};
+        my $caller = caller;
+#~  say q*DEBUG: $full_name: '*, $full_name, q*'*;                          ~#
+        eval { require $full_name };
+        last if not $@;
+        pop @path_parts;        # perhaps a longer name was given
+    };
+    if ($@) {                   # we tried everything
+        $err->crash("Can't find toolset $toolset");
+    };
+    $perl_name      = join '::', @path_parts, $toolset;
+    
+    # Import all methods (= tools in set). 
+    ### $full_name
+    ### $perl_name
+#~ # Is a class installed and/or loaded
+#~ Class::Inspector->installed( 'Foo::Class' );
+#~ Class::Inspector->loaded( 'Foo::Class' );
+#~     my @tools       = Class::Inspector->functions( $perl_name );
+    my @tools       = Class::Inspector->methods( 
+                        $perl_name, 'full', 'public' 
+                    );
+    ### @tools
+#~     @tools          = grep {/^qv$/} @tools; 
+    
+    
+    
+}; ## using
 
 
 

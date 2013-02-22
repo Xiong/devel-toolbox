@@ -18,6 +18,7 @@ use Error::Base;
 
 say "[$0] Running...";
 use Devel::Toolbox;             # Simple custom project tool management
+use parent 'Devel::Toolbox::Core::Base';
 use Devel::Toolbox::Set::Dog;
 
 my $self    = Devel::Toolbox::Core::Base->new();

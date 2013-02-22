@@ -21,7 +21,7 @@ use namespace::clean ();            # no cleanup, just load
 # CPAN modules
 
 # Project modules
-use Devel::Toolbox::Core::Base;     # Base class and guts
+use Devel::Toolbox::Core::Using;    # Guts of 'using' function
 
 # Alternate uses
 use Devel::Comments '###';                                               #~
