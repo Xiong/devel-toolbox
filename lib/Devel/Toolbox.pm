@@ -5,16 +5,12 @@ use warnings;
 
 use version; our $VERSION = qv('v0.0.0');
 
-#~ use namespace::clean -except => [qw( using )];
 # Exporter first.
 BEGIN {
     require Exporter;               # Must use the old fellow here
     our @ISA    = 'Exporter';
     our @EXPORT = 'using';          # That's right.
 }
-use namespace::clean ();            # no cleanup, just load
-#~ use namespace::autoclean;
-#~ use namespace::clean -except => [qw( using )];
 
 # Core modules
 
@@ -24,7 +20,7 @@ use namespace::clean ();            # no cleanup, just load
 use Devel::Toolbox::Core::Using;    # Guts of 'using' function
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 # Clean after all use
@@ -43,12 +39,6 @@ sub import {
     our @EXPORT     ;
     ### @EXPORT
     
-#~ use namespace::clean -except => [qw( using )];
-    namespace::clean->import(
-        -cleanee    => 'Devel::Toolbox',
-#~         -cleanee    => $caller,
-        -except     => 'using',
-    );
     Devel::Toolbox->export_to_level( 1, @EXPORT );
 };
 
