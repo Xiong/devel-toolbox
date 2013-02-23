@@ -33,8 +33,6 @@ my $err             = Error::Base->new(
 
 sub claim {
     my $caller      = caller;
-#~     ### $caller
-
 #~     say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
     
     # Load the toolset requested.
@@ -47,7 +45,7 @@ sub claim {
         $full_name      = File::Spec->catfile( @path_parts, $toolset );
         $full_name      .= q{.pm};
         my $caller = caller;
-#~  say q*DEBUG: $full_name: '*, $full_name, q*'*;                         #~#
+        ### $full_name
         eval { require $full_name };
         last if not $@;
         pop @path_parts;        # perhaps a longer name was given
@@ -58,27 +56,20 @@ sub claim {
     $perl_name      = join '::', @path_parts, $toolset;
     
     # Import all methods (= tools in set). 
-#~     ### $full_name
     ### $perl_name
 #~ # Is a class installed and/or loaded
 #~ Class::Inspector->installed( 'Foo::Class' );
 #~ Class::Inspector->loaded( 'Foo::Class' );
-
-#~     my @tools       = Class::Inspector->methods( 
-#~                         $perl_name, 'full', 'public' 
-#~                     );
     
     my @tools       = @{ Class::Inspector->functions( $perl_name ) };
-
-#~     ### @tools
     my $filter      = qr/claim|qv/;
     @tools          = grep { not /$filter/ } @tools; 
     ### @tools
     
     my $base_name   = 'Devel::Toolbox::Core::Base';
-    my @base_tools  ;
-    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
-    ### @base_tools
+#~     my @base_tools  ;
+#~     @base_tools     = @{ Class::Inspector->functions( $base_name ) };
+#~     ### @base_tools
     
     export_all ({
         -expkg      => $perl_name,
@@ -86,8 +77,8 @@ sub claim {
         -symbols    => \@tools,
     });
     
-    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
-    ### @base_tools
+#~     @base_tools     = @{ Class::Inspector->functions( $base_name ) };
+#~     ### @base_tools
     
 }; ## claim
 
@@ -96,28 +87,26 @@ sub export_all {
     my $expkg       = $args->{-expkg};          # package to export from
     my $impkg       = $args->{-impkg};          # package to import into
     my @symbols     = @{ $args->{-symbols} };   # aryref of strings
-                                                #  include sigils $@%
-    my $type        ;
-    
-    ### $impkg
+                                                #  include sigils $@%    
     ### $expkg
+    ### $impkg
     ### @symbols
     
     # Ripped from Exporter::Heavy::heavy_export()
-    foreach my $sym (@symbols) {
+    for my $sym (@symbols) {
         # For we doeth darke magiks.
         no strict 'refs';
         # shortcut for the common case of no type character
         (*{"${impkg}::$sym"} = \&{"${expkg}::$sym"}, next)
             unless $sym =~ s/^(\W)//;
-        $type = $1;
+        my $type = $1;
         *{"${impkg}::$sym"} =
             $type eq '&' ? \&{"${expkg}::$sym"} :
             $type eq '$' ? \${"${expkg}::$sym"} :
             $type eq '@' ? \@{"${expkg}::$sym"} :
             $type eq '%' ? \%{"${expkg}::$sym"} :
             $type eq '*' ?  *{"${expkg}::$sym"} :
-            die "Can't export symbol: $type$sym\n", $!;
+            $err->crash("Can't export symbol: $type$sym");
     }
 }; ## export_all
 
