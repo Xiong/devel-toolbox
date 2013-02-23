@@ -1,0 +1,38 @@
+#!/home/sfidcom/opt/bin/perl -T
+#  dt
+#  =  Copyright 2013 Xiong Changnian <xiong@cpan.org>   =
+#  = Free Software = Artistic License 2.0 = NO WARRANTY =
+
+use strict;
+use warnings;
+use lib qw{ /home/sfidcom/opt/lib/ };
+use Local::Userlibs;                                # find CPAN modules
+use lib qw{ /home/sfidcom/projects/PROJECT/lib };   # find project modules
+
+#use Readonly;
+#use Perl6::Junction qw( all any none one );
+#use List::Util qw(first max maxstr min minstr reduce shuffle sum);
+#use File::Spec;
+#use File::Spec::Functions qw(
+#   catdir
+#   catfile
+#   catpath
+#   splitpath
+#   curdir
+#   rootdir
+#   updir
+#   canonpath
+#);
+#use Cwd;
+use Smart::Comments '###', '####';
+
+#
+
+
+__DATA__
+
+Output: 
+
+
+__END__
+
