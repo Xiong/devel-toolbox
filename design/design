@@ -24,7 +24,7 @@ representing your whole project.
 
 There is an application core, consisting of: 
     
-    dt:                 # command-line script
+    dt                  # command-line script
     ::App               # command-line implementation
     ::Set::Base         # base class of object representing your project
     ...                 # 

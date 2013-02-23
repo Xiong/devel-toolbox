@@ -5,13 +5,26 @@ use warnings;
 
 use version; our $VERSION = qv('v0.0.0');
 
+# Exporter first.
+BEGIN {
+    require Exporter;               # Must use the old fellow here
+    our @ISA    = 'Exporter';
+    our @EXPORT = 'claim';          # That's right.
+}
+
 # Core modules
 
 # CPAN modules
 
+# Project modules
+use Devel::Toolbox::Core::Base;     # Toolset base class
+use Devel::Toolbox::Core::Claim;    # Guts of 'claim' function
+
 # Alternate uses
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
+# Clean after all use
 ## use
 #============================================================================#
 
@@ -20,9 +33,32 @@ use version; our $VERSION = qv('v0.0.0');
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-# This module exists mostly to provide the POD for the namespace. 
-# In any case, everything inherits from it. 
-# Might stick a few base methods in here. 
+#=========# EXTERNAL FUNCTION
+#~ use Devel::Toolbox;             # Simple custom project tool management
+#
+#   Ignores any arguments (import list);  
+#   forcibly exports the 'claim' function (keyword);
+#   and makes 'Devel::Toolbox::Core::Base' a parent of caller (toolset).
+#   
+sub import {
+    # 'parent'
+    my $caller      = caller;
+    ### $caller
+    my $base_name   = 'Devel::Toolbox::Core::Base';
+    my $sym         = 'ISA';
+    {
+        no strict 'refs';
+        push @{"${caller}::$sym"}, $base_name;
+    }
+    
+    # Export
+    our @EXPORT     ;
+    ### @EXPORT
+    Devel::Toolbox->export_to_level( 1, @EXPORT );
+};
+
+#   This module exists to accept a simple use line from callers
+#   and be a starting point for POD documentation. 
 
 ## END MODULE
 1;
