@@ -33,6 +33,13 @@ use Devel::Toolbox::Core::Claim;    # Guts of 'claim' function
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
+#=========# EXTERNAL FUNCTION
+#~ use Devel::Toolbox;             # Simple custom project tool management
+#
+#   Ignores any arguments (import list);  
+#   forcibly exports the 'claim' function (keyword);
+#   and makes 'Devel::Toolbox::Core::Base' a parent of caller (toolset).
+#   
 sub import {
     # 'parent'
     my $caller      = caller;
@@ -50,7 +57,8 @@ sub import {
     Devel::Toolbox->export_to_level( 1, @EXPORT );
 };
 
-
+#   This module exists to accept a simple use line from callers
+#   and be a starting point for POD documentation. 
 
 ## END MODULE
 1;

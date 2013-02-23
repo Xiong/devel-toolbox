@@ -14,8 +14,12 @@ use File::Copy;                 # Copy files or filehandles
 use Error::Base;                # Simple structured errors with full backtrace
 use Text::Template;             # Expand template text with embedded Perl
 
+# Project module
+use Devel::Toolbox;             # Simple custom project tool management
+
 # Alternate uses
-use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
@@ -30,9 +34,15 @@ my $err = Error::Base->new (
 # METHODS
 
 #=========# OBJECT METHOD
+#~ $self->module({ -module => $path });
 #
 #   Create a new module in an existing project.
-# ____
+#   $path and -module_template must both be platform-expanded; e.g.: 
+#       $path               = /home/foo/projects/bar/lib/
+#       -module_template    = /home/foo/.config/templates/Module.pm
+#   
+#   -template_delimiters can be any pair of strings; watch for conflicts!
+#   All other arguments and all existing keys are available to templates!
 #   
 sub module {
     my $self        = shift;
@@ -44,17 +54,6 @@ sub module {
                     DELIMITERS  => $self->{-template_delimiters},
                 );
     my $out     ;
-    
-#~     # Get template contents
-#~     open my $tp_fh, '<', $template
-#~                 or $err->crash("Failed to open $template for reading.");
-#~     {
-#~         local $/            = undef;            # slurp
-#~         $template_contents  = <$tp_fh>;
-#~     };
-#~     close $tp_fh
-#~                 or $err->crash("Failed to close $template after reading.");
-    
     
     # Merge this method's arguments with football for template substitution
     %{$self}        = ( %{$self}, %{$args} );
@@ -79,12 +78,7 @@ sub module {
     close $m_fh
                 or $err->crash("Failed to close $module after writing.");
     
-    
-    
-    
-    
-    
-    
+    return $self;
 }; ## module
 
 

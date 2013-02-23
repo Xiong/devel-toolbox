@@ -13,7 +13,7 @@ use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -28,17 +28,36 @@ my $err             = Error::Base->new(
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
+#=========# CLASS METHOD
+#~ my $self    = Devel::Toolbox::Core::Base->new({
+#~                 -param      => 'value',
+#~             });
+#
+#   Classic hashref-based-object constructor.
+#   This has been modified into a singleton constructor 
+#     which must be declared outside the sub. 
+#   Also this has been modified to bless into only this package
+#     regardless of who calls it. 
+#   
 sub new {
-#~     my $class   = shift;
-    shift;  # throw away
+#   my $class   = shift;
+    shift;                                      # throw away
     my $class   = __PACKAGE__;                  # always in this package
-#~     my $self    = {};
+#   my $self    = {};
     my $self    = $singleton;                   # there can be only one
     bless ( $self => $class );
     $self->init(@_);                            # init remaining args
     return $self;
 }; ## new
 
+#=========# OBJECT METHOD
+#~ $self->init({
+#~     -param      => 'value',
+#~ });
+#
+#   Standard hashref-merge initializer. 
+#   New values overwrite old values without touching other attributes.
+#   
 sub init {
     my $self        = shift;
     my $args        = shift or return $self;

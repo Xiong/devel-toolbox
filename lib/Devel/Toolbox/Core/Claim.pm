@@ -31,16 +31,29 @@ my $err             = Error::Base->new(
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
+#=========# EXTERNAL FUNCTION
+#~ claim '::Mytoolset';
+#
+#   This functions as a keyword or pseudo-pragma and does multiple things: 
+#     * Expands a shortcut toolset (module) name; eg:
+#       ::Mytoolset     => Devel::Toolbox::Set::Mytoolset
+#     * require's the toolset
+#     * exports all subroutines (tools) found in the toolset
+#         into Devel::Toolbox::Core::Base.
+#   
+#   
+#   
 sub claim {
     my $caller      = caller;
 #~     say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
-    
-    # Load the toolset requested.
     my $toolset     = shift;    # just what was given (in the request)
     $toolset =~ s/^:://;        # since we suggest a leading double-colon
     my $full_name   ;           # full path to module name
     my $perl_name   ;           # Perlish module name
-    my @path_parts  = (qw( Devel Toolbox Set ));
+    my @path_parts  = (qw( Devel Toolbox Set ));    # search up from here
+    my $base_name   = 'Devel::Toolbox::Core::Base'; # export methods here
+    
+    # Expand module name and load the toolset requested.
     while ( @path_parts ) {
         $full_name      = File::Spec->catfile( @path_parts, $toolset );
         $full_name      .= q{.pm};
@@ -54,24 +67,24 @@ sub claim {
         $err->crash("Can't find toolset $toolset");
     };
     $perl_name      = join '::', @path_parts, $toolset;
-    
-    # Import all methods (= tools in set). 
     ### $perl_name
-#~ # Is a class installed and/or loaded
-#~ Class::Inspector->installed( 'Foo::Class' );
-#~ Class::Inspector->loaded( 'Foo::Class' );
+    
+    # Import all methods (= tools in set).
+    # Class::Inspector->methods() returns inherited methods, too. 
+    # Is a class installed and/or loaded?
+    # Class::Inspector->installed( $perl_name );
+    # Class::Inspector->loaded( $perl_name );
     
     my @tools       = @{ Class::Inspector->functions( $perl_name ) };
     my $filter      = qr/claim|qv/;
     @tools          = grep { not /$filter/ } @tools; 
     ### @tools
     
-    my $base_name   = 'Devel::Toolbox::Core::Base';
 #~     my @base_tools  ;
 #~     @base_tools     = @{ Class::Inspector->functions( $base_name ) };
 #~     ### @base_tools
     
-    export_all ({
+    _export_all ({
         -expkg      => $perl_name,
         -impkg      => $base_name,
         -symbols    => \@tools,
@@ -82,7 +95,17 @@ sub claim {
     
 }; ## claim
 
-sub export_all {
+#=========# INTERNAL ROUTINE
+#~     _export_all ({
+#~         -expkg      => $exporting_package,   # 'Foo::Bar'
+#~         -impkg      => $importing_package,   # 'Hoge::Piyo'
+#~         -symbols    => \@symbol_list,        # [ sub, $scalar, %hash ]
+#~     });
+#
+#   This came from Exporter via Acme::Teddy. 
+#   It exports, quite indiscriminately, everything in -symbols. 
+#   
+sub _export_all {
     my $args        = shift;
     my $expkg       = $args->{-expkg};          # package to export from
     my $impkg       = $args->{-impkg};          # package to import into
@@ -94,8 +117,7 @@ sub export_all {
     
     # Ripped from Exporter::Heavy::heavy_export()
     for my $sym (@symbols) {
-        # For we doeth darke magiks.
-        no strict 'refs';
+        no strict 'refs';                       # For we doeth darke magiks.
         # shortcut for the common case of no type character
         (*{"${impkg}::$sym"} = \&{"${expkg}::$sym"}, next)
             unless $sym =~ s/^(\W)//;
@@ -108,9 +130,7 @@ sub export_all {
             $type eq '*' ?  *{"${expkg}::$sym"} :
             $err->crash("Can't export symbol: $type$sym");
     }
-}; ## export_all
-
-
+}; ## _export_all
 
 ## END MODULE
 1;
