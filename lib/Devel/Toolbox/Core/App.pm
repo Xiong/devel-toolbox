@@ -1,30 +1,64 @@
 package Devel::Toolbox::Core::App;
-# Choose minimum perl interpreter version; delete the rest.
-# Do you want to enforce the bugfix level?
-#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
-#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
-#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
-#~ use 5.012003;   # 5.12.5    # 2011  # yada
-#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
-#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
+use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
+use File::Spec;                 # Portably perform operations on file names
+use File::Copy;                 # Copy files or filehandles
 
 # CPAN modules
+use Error::Base;                # Simple structured errors with full backtrace
+
+# Project module
+use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 
 # Pseudo-globals
+my $err = Error::Base->new (
+    -base           => '! DTC-App:',
+);
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# METHODS
+
+#=========# OBJECT METHOD
+#~ my $exit_code   = $self->app_execute() or 0;
+#
+#   Runs the dt application. Normally invoked only by $ dt script.
+#   Requires $self to be blessed, of course; 
+#    and init() should be called; both can be done with: 
+#   
+#~         my $self    = Devel::Toolbox::Core::Base->new({
+#~             -script     => {
+#~                 -cmdline_opts   => $opts,   # hashref
+#~                 -cmdline_args   => $args,   # aryref
+#~             },
+#~         });
+#   
+#   $opts       hashref containing all command line options 
+#                (such as -n, -v, --help) as output by Getoptions::*
+#   
+#   $args       arrayref containing all the barewords on command line
+#   
+#   ---
+#   
+sub app_execute {
+    
+    
+    
+}; ## app_execute
+
+
+
 
 
 

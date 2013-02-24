@@ -38,5 +38,8 @@ $self->init({
     });
 ### $self
 
+my $exit_code   = $self->app_execute() or 0;
+exit $exit_code;
+
 __END__
 
