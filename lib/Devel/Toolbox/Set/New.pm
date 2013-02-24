@@ -8,7 +8,7 @@ use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
 use File::Spec;                 # Portably perform operations on file names
-use File::Copy;                 # Copy files or filehandles
+use File::Copy();               # Copy files or filehandles
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace

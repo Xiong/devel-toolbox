@@ -5,8 +5,8 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use File::Spec;                 # Portably perform operations on file names
-use File::Copy;                 # Copy files or filehandles
+#~ use File::Spec;                 # Portably perform operations on file names
+#~ use File::Copy;                 # Copy files or filehandles
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
@@ -15,7 +15,7 @@ use Error::Base;                # Simple structured errors with full backtrace
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -29,6 +29,7 @@ my $err = Error::Base->new (
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # METHODS
+#~ return 0;   # DEBUG ONLY -- FAIL IN COMPILATION
 
 #=========# OBJECT METHOD
 #~ my $exit_code   = $self->app_execute() or 0;
@@ -62,10 +63,17 @@ sub app_execute {
     # Get config.
     
     # Dispatch
-    my $set         = shift $words;
+    my $set         = ucfirst shift $words;
     my $tool        = shift $words;
-    $self->{$set}{$tool}($words);
-    
+    my $method      = join q{::}, $set, $tool;
+    ### $method
+    ### $words
+    claim "::$set";
+    {
+        no strict 'refs';
+#~         &{"$tool"}($self, $words);
+        $self->{"$tool"}($words);
+    }
     
 }; ## app_execute
 

@@ -28,6 +28,8 @@ my $err             = Error::Base->new(
                         -base   => '! DTC-Claim:'
 );
 
+my $qr_errinc       = qr/locate.*?INC/;  # Can't locate Foo.pm in @INC...
+
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
@@ -51,21 +53,33 @@ sub claim {
     my $perl_name   ;           # full Perlish module name
     my @path_parts  = (qw( Devel ::Toolbox ::Set ));    # search up from here
     my $base_name   = 'Devel::Toolbox::Core::Base';     # export methods here
+    my $eval_err    ;
     
     # Expand module name and load the toolset requested.
+    unshift @path_parts, q{};       # try it naked, too
     while ( @path_parts ) {
         $perl_name      = join q{}, @path_parts, $toolset;
         ### $perl_name
         eval " require $perl_name ";    # must string eval!
-        last if not $@;
+        $eval_err       = $@;
+        last if not $eval_err;
+        ### $eval_err
+        if ( not $eval_err =~ /$qr_errinc/ ){
+            $err->crash([
+                "$perl_name failed in require\n",
+                $eval_err,
+            ]);
+        };
         pop @path_parts;            # perhaps a longer name was given
     };
-    ### $perl_name
-    if ($@) {                       # no expansion successful
+    if ($eval_err) {                # no expansion successful
+        ### $toolset
         eval " require $toolset ";  # try one last time, naked
+        $eval_err       = $@;
     };
-    if ($@) {                       # we tried everything
-        $err->crash("Can't find toolset $toolset");
+    if ($eval_err) {                # we tried everything
+        ### $eval_err
+        $err->crash("Can't require toolset $toolset");
     };
     
     # Import all methods (= tools in set).
