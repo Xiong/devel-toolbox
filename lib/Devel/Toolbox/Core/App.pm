@@ -39,20 +39,32 @@ my $err = Error::Base->new (
 #   
 #~         my $self    = Devel::Toolbox::Core::Base->new({
 #~             -script     => {
-#~                 -cmdline_opts   => $opts,   # hashref
-#~                 -cmdline_args   => $args,   # aryref
+#~                 -cmdline_opt    => $option,   # hashref
+#~                 -cmdline_words  => $words,    # aryref
 #~             },
 #~         });
 #   
-#   $opts       hashref containing all command line options 
-#                (such as -n, -v, --help) as output by Getoptions::*
+#   $option     hashref containing all command line options 
+#                (such as -n, -v, --help) as output by Getopt::*
 #   
-#   $args       arrayref containing all the barewords on command line
+#   $words      arrayref containing all the barewords on command line
 #   
 #   ---
 #   
 sub app_execute {
+    my $self        = shift;
+    my $args        = shift;
+    my $option      = $self->{-script}{-cmdline_opt};
+    my $words       = $self->{-script}{-cmdline_words};
     
+    # Option handling here. (not yet)
+    
+    # Get config.
+    
+    # Dispatch
+    my $set         = shift $words;
+    my $tool        = shift $words;
+    $self->{$set}{$tool}($words);
     
     
 }; ## app_execute

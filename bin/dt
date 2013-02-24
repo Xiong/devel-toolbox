@@ -23,22 +23,24 @@ use Devel::Comments '###';                                               #~
 
 ### @ARGV
 
+# Construct first if we need the object to set up Getopt::*. 
 my $self    = Devel::Toolbox::Core::Base->new();
 
 # get options
-my $opts    = {};           # none for now; no need for Getopt::*
-my @args    = @ARGV;        # copy
-my $args    = \@args;       # not ref to special global
+my $option  = {};           # none for now; no need for Getopt::*
+my @words   = @ARGV;        # copy
+my $words   = \@words;      # not ref to special global
 
 $self->init({
         -script     => {
-            -cmdline_opts   => $opts,   # hashref
-            -cmdline_args   => $args,   # aryref
+            -cmdline_opt    => $option,  # hashref
+            -cmdline_words  => $words,   # aryref
         },
     });
 ### $self
 
-my $exit_code   = $self->app_execute() or 0;
+claim '::Core::App';
+my $exit_code   = $self->app_execute({}) or 0;
 exit $exit_code;
 
 __END__
