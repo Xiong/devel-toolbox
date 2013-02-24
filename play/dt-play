@@ -10,6 +10,23 @@ use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
 use lib 'lib';
+
+# CPAN modules
+use Getopt::Complete(           # Shell completion and options parsing
+
+    '>new'      => [                # set
+        '>module'   => [                # tool
+            '<>'        => undef,           # bare argument
+        ],
+    ],
+    '>list'     => [
+        '>modules'  => [
+            '<>'        => undef,           # bare argument
+        ],
+    ],
+    
+); ## getopt
+
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
 
@@ -21,6 +38,7 @@ use Devel::Comments '###';                                               #~
 #============================================================================#
 
 ### @ARGV
+### %ARGS
 
 __END__
 

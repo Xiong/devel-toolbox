@@ -10,6 +10,7 @@ use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
 use lib 'lib';
+
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
 
@@ -21,6 +22,17 @@ use Devel::Comments '###';                                               #~
 #============================================================================#
 
 ### @ARGV
+
+my $self    = Devel::Toolbox::Core::Base->new();
+
+
+$self->init(
+    -script             => {
+        -cmd_line_options   => ,
+        -cmd_line_bareargs  => ,
+    },
+            );
+### $self
 
 __END__
 
