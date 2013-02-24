@@ -25,13 +25,17 @@ use Devel::Comments '###';                                               #~
 
 my $self    = Devel::Toolbox::Core::Base->new();
 
+# get options
+my $opts    = {};           # none for now; no need for Getopt::*
+my @args    = @ARGV;        # copy
+my $args    = \@args;       # not ref to special global
 
-$self->init(
-    -script             => {
-        -cmd_line_options   => ,
-        -cmd_line_bareargs  => ,
-    },
-            );
+$self->init({
+        -script     => {
+            -cmdline_opts   => $opts,   # hashref
+            -cmdline_args   => $args,   # aryref
+        },
+    });
 ### $self
 
 __END__
