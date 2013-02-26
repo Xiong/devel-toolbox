@@ -69,11 +69,16 @@ sub app_execute {
     ### $method
     ### $words
     claim "::$set";
-    {
-        no strict 'refs';
+#~     $self->module($words);
+    
+    my $do  = \&Devel::Toolbox::Core::Base::module;
+    $self->$do($words);
+    
+#~     {
+#~         no strict 'refs';
 #~         &{"$tool"}($self, $words);
-        $self->{"$tool"}($words);
-    }
+#~         $self->{"$tool"}($words);
+#~     }
     
 }; ## app_execute
 
