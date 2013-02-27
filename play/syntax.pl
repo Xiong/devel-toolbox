@@ -7,38 +7,32 @@ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 
-use lib 'lib';
+use lib 'play', 'lib';
 use Error::Base;
 
-use Devel::Comments '###';
+#~ use Devel::Comments '###';
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
-
 say "$0 Running...";
 
-#~ using Foo;
+use Declare;
 
-my $self    = Foo->new({
-                    -attr   => 'value',
-                });
-### $self
+sub fiddle;                 # forward
+declare {
+        -foo    => 'bar',
+        -hoge   => 'piyo',
+        -name   => 'fiddle',
+        -coderef    => 
+sub{
+    say '----Hey!';
+}}; ## fiddle
 
-#~ $self->munge();
-#~ $self->::munge();
-#~ $self->Foo::munge();
-#~ $self->Screw::you();
-#~ $self-> ::munge();
-$self-> DT::munge();
+sub wonk {
+    &$fiddle;
+};
 
-### $self;
-
-
-#~ ::munge($self);
-::Foo::munge($self);
-
-### $self;
 
 say "Done.";
 exit 0;
@@ -56,9 +50,9 @@ sub Screw::you {
     $self->{-attr}  = 'flipt';
     return $self;
 };
-
 #----------------------------------------------------------------------------#
 package Foo;
+
 
 
 sub new {
@@ -85,4 +79,9 @@ sub using {
     sub DT::munge { munge(@_) };
 };
 
+#----------------------------------------------------------------------------#
+
+
+
+#============================================================================#
 __END__     
