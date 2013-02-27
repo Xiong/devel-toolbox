@@ -7,10 +7,10 @@ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 
-use lib 'lib';
+use lib 'play', 'lib';
 use Error::Base;
 
-use Devel::Comments '###';
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -18,27 +18,53 @@ use Devel::Comments '###';
 
 say "$0 Running...";
 
-#~ using Foo;
+use Declare;
+use Foo;
 
-my $self    = Foo->new({
-                    -attr   => 'value',
-                });
-### $self
+#~ use Bar;
+#~ exit;
 
-#~ $self->munge();
-#~ $self->::munge();
-#~ $self->Foo::munge();
-#~ $self->Screw::you();
-#~ $self-> ::munge();
-$self-> DT::munge();
+my $dead        = '42';
+my $live        = \$dead;
 
-### $self;
+# Declare sub and its code in one shot.
+declare {
+        -foo    => 'bar',
+        -hoge   => 'piyo',
+        -name   => 'fiddle',
+        -sub    => 
+sub{
+    say '----[fiddle] Hey!';
+}}; ## fiddle
+# Close with two braces if you want to indent this way;
+#  the entire thing is the argument to declare(). 
 
+# Forward declaration, then 'declare', then define the sub's code. 
+# This gives you a named sub inside your own package. 
+sub plurky;                 # forward
+declare {
+        -foo    => 'baz',
+        -hoge   => 'carmichael',
+        -name   => 'plurky',
+        -sub    => \&plurky,
+};
+sub plurky {
+    say '----[plurky] zeep';
+    say '$$live: ', $$live;     # both...
+    say '$dead: ',   $dead;     #   ... work (not dead)
+}; ## plurky
 
-#~ ::munge($self);
-::Foo::munge($self);
+sub wonk {
+    Foo::peepee();
+};
 
-### $self;
+# Execute. 
+say 'main...';
+plurky();
+$dead++;
+
+say 'wonking...';
+wonk();
 
 say "Done.";
 exit 0;
@@ -58,7 +84,7 @@ sub Screw::you {
 };
 
 #----------------------------------------------------------------------------#
-package Foo;
+
 
 
 sub new {
@@ -73,16 +99,16 @@ sub new {
 
 sub init {
     my $self        = shift;
-    my $args        = shift;
-    %{$self}        = ( %{$self}, %{$args} );
+    my $args        = shift or return $self;
+    %{$self}        = ( %{$self}, %{$args} );   # merge
     return $self;
 }; ## init
 
-sub munge { ::munge(@_); };
 
-sub using {
-    say 'Tricky stuff here.';
-    sub DT::munge { munge(@_) };
-};
 
+#----------------------------------------------------------------------------#
+
+
+
+#============================================================================#
 __END__     

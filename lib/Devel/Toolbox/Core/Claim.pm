@@ -25,8 +25,10 @@ use Class::Inspector;           # Get info about a class and its structure
 # Pseudo-globals
 
 my $err             = Error::Base->new(
-                        -base   => '! DT-Claim:'
+                        -base   => '! DTC-Claim:'
 );
+
+my $qr_errinc       = qr/locate.*?INC/;  # Can't locate Foo.pm in @INC...
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
@@ -41,33 +43,44 @@ my $err             = Error::Base->new(
 #     * exports all subroutines (tools) found in the toolset
 #         into Devel::Toolbox::Core::Base.
 #   
-#   
+#   The toolset name must be quoted; 
+#    if you want the expansion then you must lead with '::' (aristdottle).
 #   
 sub claim {
     my $caller      = caller;
-#~     say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
+    say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
     my $toolset     = shift;    # just what was given (in the request)
-    $toolset =~ s/^:://;        # since we suggest a leading double-colon
-    my $full_name   ;           # full path to module name
-    my $perl_name   ;           # Perlish module name
-    my @path_parts  = (qw( Devel Toolbox Set ));    # search up from here
-    my $base_name   = 'Devel::Toolbox::Core::Base'; # export methods here
+    my $perl_name   ;           # full Perlish module name
+    my @path_parts  = (qw( Devel ::Toolbox ::Set ));    # search up from here
+    my $base_name   = 'Devel::Toolbox::Core::Base';     # export methods here
+    my $eval_err    ;
     
     # Expand module name and load the toolset requested.
+    unshift @path_parts, q{};       # try it naked, too
     while ( @path_parts ) {
-        $full_name      = File::Spec->catfile( @path_parts, $toolset );
-        $full_name      .= q{.pm};
-        my $caller = caller;
-        ### $full_name
-        eval { require $full_name };
-        last if not $@;
-        pop @path_parts;        # perhaps a longer name was given
+        $perl_name      = join q{}, @path_parts, $toolset;
+        ### $perl_name
+        eval " require $perl_name ";    # must string eval!
+        $eval_err       = $@;
+        last if not $eval_err;
+        ### $eval_err
+        if ( not $eval_err =~ /$qr_errinc/ ){
+            $err->crash([
+                "$perl_name failed in require\n",
+                $eval_err,
+            ]);
+        };
+        pop @path_parts;            # perhaps a longer name was given
     };
-    if ($@) {                   # we tried everything
-        $err->crash("Can't find toolset $toolset");
+    if ($eval_err) {                # no expansion successful
+        ### $toolset
+        eval " require $toolset ";  # try one last time, naked
+        $eval_err       = $@;
     };
-    $perl_name      = join '::', @path_parts, $toolset;
-    ### $perl_name
+    if ($eval_err) {                # we tried everything
+        ### $eval_err
+        $err->crash("Can't require toolset $toolset");
+    };
     
     # Import all methods (= tools in set).
     # Class::Inspector->methods() returns inherited methods, too. 
@@ -114,6 +127,8 @@ sub _export_all {
     ### $expkg
     ### $impkg
     ### @symbols
+    
+    return if $expkg eq $impkg;                 # why bother?
     
     # Ripped from Exporter::Heavy::heavy_export()
     for my $sym (@symbols) {
