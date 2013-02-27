@@ -10,29 +10,61 @@ use warnings;
 use lib 'play', 'lib';
 use Error::Base;
 
-#~ use Devel::Comments '###';
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
+
 say "$0 Running...";
 
 use Declare;
+use Foo;
 
-sub fiddle;                 # forward
+#~ use Bar;
+#~ exit;
+
+my $dead        = '42';
+my $live        = \$dead;
+
+# Declare sub and its code in one shot.
 declare {
         -foo    => 'bar',
         -hoge   => 'piyo',
         -name   => 'fiddle',
-        -coderef    => 
+        -sub    => 
 sub{
-    say '----Hey!';
+    say '----[fiddle] Hey!';
 }}; ## fiddle
+# Close with two braces if you want to indent this way;
+#  the entire thing is the argument to declare(). 
+
+# Forward declaration, then 'declare', then define the sub's code. 
+# This gives you a named sub inside your own package. 
+sub plurky;                 # forward
+declare {
+        -foo    => 'baz',
+        -hoge   => 'carmichael',
+        -name   => 'plurky',
+        -sub    => \&plurky,
+};
+sub plurky {
+    say '----[plurky] zeep';
+    say '$$live: ', $$live;     # both...
+    say '$dead: ',   $dead;     #   ... work (not dead)
+}; ## plurky
 
 sub wonk {
-    &$fiddle;
+    Foo::peepee();
 };
 
+# Execute. 
+say 'main...';
+plurky();
+$dead++;
+
+say 'wonking...';
+wonk();
 
 say "Done.";
 exit 0;
@@ -50,8 +82,8 @@ sub Screw::you {
     $self->{-attr}  = 'flipt';
     return $self;
 };
+
 #----------------------------------------------------------------------------#
-package Foo;
 
 
 
@@ -67,17 +99,12 @@ sub new {
 
 sub init {
     my $self        = shift;
-    my $args        = shift;
-    %{$self}        = ( %{$self}, %{$args} );
+    my $args        = shift or return $self;
+    %{$self}        = ( %{$self}, %{$args} );   # merge
     return $self;
 }; ## init
 
-sub munge { ::munge(@_); };
 
-sub using {
-    say 'Tricky stuff here.';
-    sub DT::munge { munge(@_) };
-};
 
 #----------------------------------------------------------------------------#
 

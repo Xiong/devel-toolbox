@@ -1,33 +1,22 @@
 package Declare;
 use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT      => [qw( declare as fiddle )],
+    EXPORT      => [qw( declare $U )],
 );
 use Devel::Comments '###';
 
-#~ sub declare ($@) {
-#~     my $decref      = shift;
-#~     ### $decref
-#~     my $as          = shift;
-#~     if ($@) {
-#~         local $_ = $@;
-#~         &$as;
-#~     }
-#~ }
-#~ 
-#~ sub as (&) {
-#~     my $coderef     = shift;
-#~     &$coderef;
-#~     
-#~ }
+our $U  = {};     # pseudo-global store
 
 sub declare {
-    my $args        = shift;
+    my $args                = shift;
     ### $args
-    my $sub         = $args->{-coderef};
+    $U->{ $args->{-name} }  = $args->{-sub};
+    ### $U
 #~         &$sub;
 }
-sub as (&) { $_[0] }
+#~ sub as (&) { $_[0] }
 
-
+sub get_global_store {
+    return $U;
+};
 
 1;
