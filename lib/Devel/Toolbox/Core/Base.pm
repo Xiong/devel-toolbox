@@ -20,7 +20,6 @@ use Class::Inspector;           # Get info about a class and its structure
 #============================================================================#
 
 # Pseudo-globals
-my $singleton       = {};                       # the only object
 my $err             = Error::Base->new(
                         -base   => '! DT-Base:'
 );
@@ -34,17 +33,10 @@ my $err             = Error::Base->new(
 #~             });
 #
 #   Classic hashref-based-object constructor.
-#   This has been modified into a singleton constructor 
-#     which must be declared outside the sub. 
-#   Also this has been modified to bless into only this package
-#     regardless of who calls it. 
 #   
 sub new {
-#   my $class   = shift;
-    shift;                                      # throw away
-    my $class   = __PACKAGE__;                  # always in this package
-#   my $self    = {};
-    my $self    = $singleton;                   # there can be only one
+    my $class   = shift;
+    my $self    = {};
     bless ( $self => $class );
     $self->init(@_);                            # init remaining args
     return $self;
