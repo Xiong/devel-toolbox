@@ -42,11 +42,23 @@ my $words   = \@words;          # not ref to special global
 ### @words
 ### $words
 
+# This should be done in ::App calling ::Config.            TODO
+use File::Spec;                 # Portably perform operations on file names
+my $root_path       = File::Spec->rootdir ();
+my $orig_path       = File::Spec->catdir (
+    $root_path,
+    qw( home xiong .config devel-toolbox templates ),
+);
+my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
+## TODO
+
 Devel::Toolbox::Core::Pool::merge_global_pool({
         -script     => {
             -cmdline_opt    => $option,  # hashref
             -cmdline_words  => $words,   # aryref
         },
+        -module_template        => $template,           # TODO: config
+        -template_delimiters    => [ '[% ', ' %]' ],    # TODO: config
     });
 ### $::U
 

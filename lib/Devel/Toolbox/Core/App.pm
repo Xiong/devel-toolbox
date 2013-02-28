@@ -15,7 +15,7 @@ use Error::Base;                # Simple structured errors with full backtrace
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -60,14 +60,26 @@ sub app_execute {
     # Dispatch
     
     my $set_name    = ucfirst shift $words;
-#~     my $tool_name   = shift $words;
+    my $tool_name   = shift $words;
     ### $set_name
-#~     ### $tool_name
+    ### $tool_name
     ### $words
     
 #~     claim '::$set_name', $set ;
-    eval "require Devel::Toolbox::Set::$set_name";
-    &{ $U->{-sub}{$set_name}{-app} }($words);
+    my $set = "Devel::Toolbox::Set::$set_name";
+    eval "require $set";
+    my $eval_err    = $@;
+    ### App (evaled)
+    ### $eval_err
+    ### $U
+    
+#~     my $subu    = $U->{-sub}{$set}{$tool_name};
+#~     ### $subu
+    
+    &{ $U->{-sub}{$set}{$tool_name} }($words);
+#~     no strict 'refs';
+#~     &{ "$U->{-sub}{$set_name}{$tool_name}" }($words);
+#~     &{ $U->{-meta}{$set_name}{-app} }($words);
     
 }; ## app_execute
 

@@ -16,7 +16,7 @@ use Text::Template;             # Expand template text with embedded Perl
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -27,12 +27,14 @@ my $err     = Error::Base->new(
     -base           => '! DTC-New:',
 );
 
+our $U      = get_global_pool();            # common to all toolsets
+
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # METHODS
 
-#=========# OBJECT METHOD
-#~ $self->module({ -module => $path });
+#=========# EXTERNAL FUNCTION
+#~ module({ -module => $path });
 #
 #   Create a new module in an existing project.
 #   $path and -module_template must both be platform-expanded; e.g.: 
@@ -42,31 +44,57 @@ my $err     = Error::Base->new(
 #   -template_delimiters can be any pair of strings; watch for conflicts!
 #   All other arguments and all existing keys are available to templates!
 #   
+sub module;     # forward
+declare {
+    -name       => 'module',
+    -sub        => \&module,
+};
 sub module {
-    my $self        = shift;
     my $args        = shift;
-    my $module      = $args->{-module};     # path of new module
+    my $module      ;
+    my $u           ;                       # local this sub only
+    %{$u}           = ( %{$U} );
+    
+    
+    # Polymorphic API.
+    if    ( ref $args eq 'HASH' ) {
+        $module     = $args->{-module};     # path of new module
+    }
+    elsif ( ref $args eq 'SCALAR' ) {
+        $module     = $$args;
+        $args       = {};                   # dummy
+    }
+    elsif ( ref $args eq 'ARRAY' ) {
+        $module     = shift @$args;
+        $args       = {};                   # dummy
+    }
+    else {
+        $module     = $args;
+        $args       = {};                   # dummy
+    };
+    
+    # Merge this functions's arguments with pool for template substitution
+    %{$u}        = ( %{$u}, %{$args} );
     
     my $tt      = Text::Template->new(
-                    SOURCE      => $self->{-module_template},
-                    DELIMITERS  => $self->{-template_delimiters},
+                    SOURCE      => $u->{-module_template},
+                    DELIMITERS  => $u->{-template_delimiters},
                 );
     my $out     ;
     
-    # Merge this method's arguments with football for template substitution
-    %{$self}        = ( %{$self}, %{$args} );
     
     # Strip leading dash from hash keys; 
     #   Text::Template will supply the correct sigil.
     #   ( This actually duplicates keys so the originals remain. )
-    for ( keys $self ) {
-        my $v       = $self->{$_};
+    for ( keys $u ) {
+        my $val     = $u->{$_};
         s/^-//;
-        $self->{$_} = $v;
+        $u->{$_}    = $val;
     };
     
-    ### $self
-    $out    = $tt->fill_in( HASH => $self );
+    ### New-template-ready
+    ### $u
+    $out    = $tt->fill_in( HASH => $u );
     
     # Put new module file
     open my $m_fh, '>', $module
@@ -76,7 +104,7 @@ sub module {
     close $m_fh
                 or $err->crash("Failed to close $module after writing.");
     
-    return $self;
+    return 1;
 }; ## module
 
 
