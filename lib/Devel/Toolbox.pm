@@ -17,48 +17,28 @@ BEGIN {
 # CPAN modules
 
 # Project modules
-use Devel::Toolbox::Core::Base;     # Toolset base class
-use Devel::Toolbox::Core::Claim;    # Guts of 'claim' function
+#   use's all Core modules
+use Devel::Toolbox::Core::App;          # Command-line interpreter
+use Devel::Toolbox::Core::Base;         # Optional base class
+use Devel::Toolbox::Core::Claim;        # Import stuff
+use Devel::Toolbox::Core::Declare;      # Export stuff
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
-# Clean after all use
 ## use
 #============================================================================#
 
 # Pseudo-globals
 
+our $U      = {};       # application-wide store
+
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 
-#=========# EXTERNAL FUNCTION
-#~ use Devel::Toolbox;             # Simple custom project tool management
-#
-#   Ignores any arguments (import list);  
-#   forcibly exports the 'claim' function (keyword);
-#   and makes 'Devel::Toolbox::Core::Base' a parent of caller (toolset).
-#   
-sub import {
-    # 'parent'
-    my $caller      = caller;
-    ### $caller
-    my $base_name   = 'Devel::Toolbox::Core::Base';
-    my $sym         = 'ISA';
-    {
-        no strict 'refs';
-        push @{"${caller}::$sym"}, $base_name;
-    }
-    
-    # Export
-    our @EXPORT     ;
-    ### @EXPORT
-    Devel::Toolbox->export_to_level( 1, @EXPORT );
-};
-
-#   This module exists to accept a simple use line from callers
-#   and be a starting point for POD documentation. 
+#   * Accepts a bare use line from callers.
+#   * Starting point for POD documentation. 
 
 ## END MODULE
 1;

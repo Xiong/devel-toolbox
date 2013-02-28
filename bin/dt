@@ -23,25 +23,26 @@ use Devel::Toolbox;             # Simple custom project tool management
 
 ### @ARGV
 
-# Construct first if we need the object to set up Getopt::*. 
-my $self    = Devel::Toolbox::Core::Base->new();
+# Define pool first; we may need it to set up Getopt::*. 
+our $U      = {};                                   #    $::U or $main::U
+Devel::Toolbox::Core::Pool::init_global_pool($U);   # minimum initialization
 
 # get options
-my $option  = {};           # none for now; no need for Getopt::*
-my @words   = @ARGV;        # copy
-my $words   = \@words;      # not ref to special global
+my $option  = {};               # none for now; no need for Getopt::*
+my @words   = @ARGV;            # copy
+my $words   = \@words;          # not ref to special global
 
-$self->init({
+merge_global_pool({
         -script     => {
             -cmdline_opt    => $option,  # hashref
             -cmdline_words  => $words,   # aryref
         },
     });
-### $self
+### $U
 
-claim '::Core::App';
-my $exit_code   = $self->app_execute({}) or 0;
-exit $exit_code;
+my $perl_exit   = Devel::Toolbox::Core::App::app_execute({});   # 1 for okay
+my $shell_exit  = not $perl_exit;
+exit $shell_exit;                                               # 0 for okay
 
 __END__
 

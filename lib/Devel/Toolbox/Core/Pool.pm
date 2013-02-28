@@ -1,79 +1,78 @@
-package Devel::Toolbox::Core::App;
+package Devel::Toolbox::Core::Pool;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-#~ use File::Spec;                 # Portably perform operations on file names
-#~ use File::Copy;                 # Copy files or filehandles
+use lib 'lib';
+use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-
-# Project module
-use Devel::Toolbox;             # Simple custom project tool management
+use Class::Inspector;           # Get info about a class and its structure
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
-
 # Pseudo-globals
-my $err = Error::Base->new (
-    -base           => '! DTC-App:',
+my $err             = Error::Base->new(
+                        -base   => '! DT-Pool:'
 );
+
+# $U is a hashref, the big global pool per each script invocation of D::T. 
+# The pool contains stuff common to all D::T modules. Look here first.
+# $U is an implicit argument to all tools. 
+our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
-# METHODS
-#~ return 0;   # DEBUG ONLY -- FAIL IN COMPILATION
+# FUNCTIONS
 
-#=========# OBJECT METHOD
-#~ my $exit_code   = $self->app_execute() or 0;
+#=========# EXTERNAL FUNCTION
+#~ our $U      = get_global_pool();            # common to all toolsets
 #
-#   Runs the dt application. Normally invoked only by $ dt script.
-#   Requires $self to be blessed, of course; 
-#    and init() should be called; both can be done with: 
+#   Get an alias to the global pool. You should do this in your toolset FIRST.  
+#   If you accept the default import when use'ing Devel::Comments,
+#    then $Your::Toolset::U will already be defined. 
 #   
-#~         my $self    = Devel::Toolbox::Core::Base->new({
-#~             -script     => {
-#~                 -cmdline_opt    => $option,   # hashref
-#~                 -cmdline_words  => $words,    # aryref
-#~             },
-#~         });
-#   
-#   $option     hashref containing all command line options 
-#                (such as -n, -v, --help) as output by Getopt::*
-#   
-#   $words      arrayref containing all the barewords on command line
-#   
-#   ---
-#   
-sub app_execute {
-    my $self        = shift;
-    my $args        = shift;
-    my $option      = $self->{-script}{-cmdline_opt};
-    my $words       = $self->{-script}{-cmdline_words};
-    
-    # Option handling here.                                 TODO
-    
-    # Get config.                                           TODO
-    
-    # Dispatch
-    my $set         = ucfirst shift $words;
-    my $tool        = shift $words;
-    ### $set
-    ### $tool
-    ### $words
-    claim "::$set";
-    
-    
-}; ## app_execute
+sub get_global_pool {
+    return $::U;
+}; ## get_global_pool
 
+#=========# EXTERNAL FUNCTION
+#~ Devel::Toolbox::Core::Pool::init_global_pool($U);  # minimum initialization
+#
+#   init($U) sets some minimal keys; this should be done only once. 
+#   As a safeguard, this fatals if called from any other than package main. 
+#   
+sub init_global_pool {
+    my $U       = shift;
+    scalar caller eq 'main'
+        or $err->crash( 'Attempt to re-initialize $U in package ', caller );
+    
+    # Initial values.                                   TODO
+#~     $U->{-somekey}      = 42;
+    
+    return $U;
+}; ## init_global_pool
 
+#=========# EXTERNAL FUNCTION
+#~ merge_global_pool({
+#~     -key        => 'value',
+#~ });
+#
+#   Merge arguments into pool. You probably don't want this outside of ::Core.  
+#   New values overwrite old values without touching other keys.
+#   
+sub merge_global_pool {
+    my $args        = shift or return $U;
+    %{$U}           = ( %{$U}, %{$args} );   # merge
+    return $U;
+}; ## merge_global_pool
 
 
 
@@ -85,15 +84,15 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::App - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Pool - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::App version v0.0.0
+This document describes Devel::Toolbox::Core::Pool version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::App;
+    use Devel::Toolbox::Core::Pool;
 
 =head1 DESCRIPTION
 
