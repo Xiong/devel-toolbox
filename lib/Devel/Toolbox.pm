@@ -17,9 +17,9 @@ use Devel::Toolbox::Core::Claim;        # Import stuff          FIRST
 use Devel::Toolbox::Core::Base;         # Optional base class
 use Devel::Toolbox::Core::App;          # Command-line interpreter
 #~ claim 'Baz';     # fatals because Claim exports claim() to our caller
-#~ # Exporter after importing.
+#~ # Exporter after importing.      # Nah, doesn't work to export twice.
 #~ use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-#~     EXPORT      => [qw( claim declare )],
+#~     EXPORT      => [qw( claim declare get_global_pool )],
 #~ );  # Basic to import/export mechanism; not optional for toolsets!
 
 # Alternate uses

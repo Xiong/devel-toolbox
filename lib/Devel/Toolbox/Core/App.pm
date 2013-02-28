@@ -26,6 +26,9 @@ my $err = Error::Base->new (
     -base           => '! DTC-App:',
 );
 
+#~ our $U      = get_global_pool();            # common to all toolsets
+our $U      = $::U;                         # common to all toolsets
+
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # METHODS
@@ -53,11 +56,9 @@ my $err = Error::Base->new (
 #   ---
 #   
 sub app_execute {
-return;
-    my $self        = shift;
     my $args        = shift;
-    my $option      = $self->{-script}{-cmdline_opt};
-    my $words       = $self->{-script}{-cmdline_words};
+    my $option      = $U->{-script}{-cmdline_opt};
+    my $words       = $U->{-script}{-cmdline_words};
     
     # Option handling here.                                 TODO
     
@@ -70,7 +71,8 @@ return;
     ### $tool
     ### $words
     
-    claim( "::$set");
+    declare();
+#~     claim("::$set");
     
     
 }; ## app_execute

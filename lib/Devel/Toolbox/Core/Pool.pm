@@ -12,7 +12,7 @@ use File::Spec;                 # Portably perform operations on file names
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT       => [qw( $U get_global_pool merge_global_pool )],
+    EXPORT       => [qw( get_global_pool merge_global_pool )],
 );
 
 # Alternate uses
