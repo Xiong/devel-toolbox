@@ -26,24 +26,39 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
                               merge_global_pool
         )],
     },
-};
+};  ## use sub exporter
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 # Pseudo-globals
-my $err             = Error::Base->new(
-                        -base   => '! DT-Pool:'
+my $err     = Error::Base->new(
+    -base   => '! DTC-Pool:'
 );
 
 # $U is a hashref, the big global pool per each script invocation of D::T. 
 # The pool contains stuff common to all D::T modules. Look here first.
-# $U is an implicit argument to all tools. 
+# $U is an implicit argument to all tools.
+#   Next line is for toolset modules: 
 #~ our $U      = get_global_pool();            # common to all toolsets
-our $U      ;                               # not ready to get yet
+
+# Since this module defines that function, get_global_pool();
+#  $U is instead set directly during init_global_pool().
+our $U      ;                               # common to all toolsets
+
+#   Only calling *scripts* should incorporate this block: 
+#~ # Define pool first! 
+#~ BEGIN {                         #    $::U or $main::U
+#~     $::U      = {}; 
+#~     say 'dt-BEGIN: ', $::U;
+#~     # Make get_global_pool work now.
+#~     use Devel::Toolbox::Core::Pool qw( -main );
+#~     init_global_pool($::U);
+#~ }
+#~ use Devel::Toolbox;             # Simple custom project tool management
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#

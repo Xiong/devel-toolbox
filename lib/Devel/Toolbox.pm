@@ -2,7 +2,6 @@ package Devel::Toolbox;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
@@ -10,45 +9,30 @@ use version; our $VERSION = qv('v0.0.0');
 # CPAN modules
 
 # Project modules
-#   use's only some Core modules
+#   use only mandatory Core modules
 use Devel::Toolbox::Core::Pool;         # Global data pool      FIRST
 use Devel::Toolbox::Core::Declare;      # Export stuff          FIRST
 use Devel::Toolbox::Core::Claim;        # Import stuff          FIRST
 
-# Alternate uses
-#~ use Devel::Comments '###';                                               #~
-#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
-
-## use
-#============================================================================#
-
-# Pseudo-globals
-
-#~ our $U      = {};       # application-wide store
-
-## pseudo-globals
-#----------------------------------------------------------------------------#
-# FUNCTIONS
-
 # use Devel::Toolbox;
-#  won't work for these three modules; they must import directly.
+#  ... won't work for these three modules; they must import directly.
 # They define the mandatory functions: 
 #       get_global_pool(), declare(), claim()
+# See: Sub::Exporter, RT#83682
 sub import {
     my $package = shift;
-    Devel::Toolbox::Core::Pool->import( { into_level => 1 }, @_ );
-    Devel::Toolbox::Core::Declare->import( { into_level => 1 }, @_ );
-    Devel::Toolbox::Core::Claim->import( { into_level => 1 }, @_ );
+    Devel::Toolbox::Core::Pool->import(     { into_level => 1 }, @_ );
+    Devel::Toolbox::Core::Declare->import(  { into_level => 1 }, @_ );
+    Devel::Toolbox::Core::Claim->import(    { into_level => 1 }, @_ );
 };
 
 # Now ready to use modules that (may) use the previous modules.
 use Devel::Toolbox::Core::App;          # Command-line interpreter
 use Devel::Toolbox::Core::Base;         # Optional base class
 
-
-
 #   * Accepts a bare use line from callers.
-#   * Starting point for POD documentation. 
+#   * Starting point for POD documentation.
+#   * No other runtime function. 
 
 ## END MODULE
 1;

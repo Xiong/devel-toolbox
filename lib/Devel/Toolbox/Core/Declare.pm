@@ -18,18 +18,18 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 
 # Project modules
 use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool;         # Global data pool
+use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 # Pseudo-globals
 my $err     = Error::Base->new(
-                -base   => '! DT-Declare:'
-            );
+    -base   => '! DTC-Declare:'
+);
 our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals

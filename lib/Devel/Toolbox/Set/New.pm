@@ -2,8 +2,6 @@ package Devel::Toolbox::Set::New;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-use parent 'Devel::Toolbox';    # TODO: DO WE NEED THIS? TEST!
-
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
@@ -25,8 +23,8 @@ use Devel::Toolbox;             # Simple custom project tool management
 #============================================================================#
 
 # Pseudo-globals
-my $err = Error::Base->new (
-    -base           => '! DT-New:',
+my $err     = Error::Base->new(
+    -base           => '! DTC-New:',
 );
 
 ## pseudo-globals

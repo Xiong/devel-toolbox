@@ -15,7 +15,7 @@ use Error::Base;                # Simple structured errors with full backtrace
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -27,35 +27,24 @@ my $err = Error::Base->new (
 );
 
 our $U      = get_global_pool();            # common to all toolsets
-#~ our $U      = $::U;                         # common to all toolsets
 ### App-package
 ### $U
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # METHODS
-#~ return 0;   # DEBUG ONLY -- FAIL IN COMPILATION
 
-#=========# OBJECT METHOD
-#~ my $exit_code   = $self->app_execute() or 0;
+#=========# EXTERNAL FUNCTION
+#~ my $perl_exit   = Devel::Toolbox::Core::App::app_execute({});  # 1 for okay
 #
-#   Runs the dt application. Normally invoked only by $ dt script.
-#   Requires $self to be blessed, of course; 
-#    and init() should be called; both can be done with: 
-#   
-#~         my $self    = Devel::Toolbox::Core::Base->new({
-#~             -script     => {
-#~                 -cmdline_opt    => $option,   # hashref
-#~                 -cmdline_words  => $words,    # aryref
-#~             },
-#~         });
+#   Runs the dt application. Normally invoked only by script, $ dt <usage>
 #   
 #   $option     hashref containing all command line options 
 #                (such as -n, -v, --help) as output by Getopt::*
 #   
 #   $words      arrayref containing all the barewords on command line
 #   
-#   ---
+#   See: dt, DTC::Pool
 #   
 sub app_execute {
     my $args        = shift;

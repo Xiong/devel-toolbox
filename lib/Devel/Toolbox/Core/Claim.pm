@@ -18,23 +18,23 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool;         # Global data pool
+use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 
 # Pseudo-globals
-
-my $err             = Error::Base->new(
-                        -base   => '! DTC-Claim:'
+my $err     = Error::Base->new(
+    -base   => '! DTC-Claim:'
 );
+
 our $U      = get_global_pool();            # common to all toolsets
 
-my $qr_errinc       = qr/locate.*?INC/;  # Can't locate Foo.pm in @INC...
+my $qr_errinc       = qr/locate.*?INC/;     # Can't locate Foo.pm in @INC...
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#

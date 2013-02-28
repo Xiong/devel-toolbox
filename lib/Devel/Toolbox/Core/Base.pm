@@ -17,9 +17,8 @@ use Error::Base;                # Simple structured errors with full backtrace
 ## use
 #============================================================================#
 # Pseudo-globals
-
-my $err             = Error::Base->new(
-                        -base   => '! DT-Base:'
+my $err     = Error::Base->new(
+    -base   => '! DTC-Base:'
 );
 
 ## pseudo-globals
@@ -28,7 +27,7 @@ my $err             = Error::Base->new(
 
 #=========# CLASS METHOD
 #~ my $self    = Devel::Toolbox::Core::Base->new({
-#~                 -param      => 'value',
+#~                 -key        => 'value',
 #~             });
 #
 #   Classic hashref-based-object constructor.
@@ -43,7 +42,7 @@ sub new {
 
 #=========# OBJECT METHOD
 #~ $self->init({
-#~     -param      => 'value',
+#~     -key        => 'value',
 #~ });
 #
 #   Standard hashref-merge initializer. 
