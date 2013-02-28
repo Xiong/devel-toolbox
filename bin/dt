@@ -13,14 +13,13 @@ use lib 'lib';
 
 # Project module
 # Define pool first! 
-#~ BEGIN { $::U      = {}; }                           #    $::U or $main::U
-BEGIN { 
+BEGIN {                         #    $::U or $main::U
     $::U      = {}; 
     say 'dt-BEGIN: ', $::U;
     # Make get_global_pool work now.
     use Devel::Toolbox::Core::Pool qw( -main );
     init_global_pool($::U);
-}                           #    $::U or $main::U
+}
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses

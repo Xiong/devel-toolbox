@@ -70,15 +70,15 @@ sub app_execute {
     
     # Dispatch
     
-    my $set         = ucfirst shift $words;
-    my $tool        = shift $words;
-    ### $set
-    ### $tool
+    my $set_name    = ucfirst shift $words;
+#~     my $tool_name   = shift $words;
+    ### $set_name
+#~     ### $tool_name
     ### $words
     
-    declare();
-    claim("::$set");
-    
+#~     claim '::$set_name', $set ;
+    eval "require Devel::Toolbox::Set::$set_name";
+    &{ $U->{-sub}{$set_name}{-app} }($words);
     
 }; ## app_execute
 

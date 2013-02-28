@@ -8,15 +8,14 @@ use Error::Base;
 
 #~ use Devel::Comments '###';                                               #~
 
-use Declare;
+use Devel::Toolbox;             # Simple custom project tool management
 
-my $U   = Declare::get_global_store();
+my $U   = get_global_pool();
 say '[Foo] $U: ', $U;
 
 sub peepee {
-#~     &{ $U->{plurky} }();
-    my $fake    = $U->{plurky};
-    my $fart    = $U->{fiddle};
+    my $fake    = $U->{-sub}{plurky};
+    my $fart    = $U->{-sub}{fiddle};
 say '[Foo::peepee] $U: ', $U;
     &$fake();
     &$fart();

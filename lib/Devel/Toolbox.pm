@@ -30,7 +30,10 @@ use Devel::Toolbox::Core::Claim;        # Import stuff          FIRST
 #----------------------------------------------------------------------------#
 # FUNCTIONS
 
-# This won't work for these three modules; they must import directly.
+# use Devel::Toolbox;
+#  won't work for these three modules; they must import directly.
+# They define the mandatory functions: 
+#       get_global_pool(), declare(), claim()
 sub import {
     my $package = shift;
     Devel::Toolbox::Core::Pool->import( { into_level => 1 }, @_ );
@@ -38,15 +41,9 @@ sub import {
     Devel::Toolbox::Core::Claim->import( { into_level => 1 }, @_ );
 };
 
-
-INIT {
-    require Devel::Toolbox::Core::App;          # Command-line interpreter
-    require Devel::Toolbox::Core::Base;         # Optional base class
-
-}
-#~ 
-#~ use Devel::Toolbox::Core::App;          # Command-line interpreter
-#~ use Devel::Toolbox::Core::Base;         # Optional base class
+# Now ready to use modules that (may) use the previous modules.
+use Devel::Toolbox::Core::App;          # Command-line interpreter
+use Devel::Toolbox::Core::Base;         # Optional base class
 
 
 

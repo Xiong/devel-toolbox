@@ -37,24 +37,23 @@ our $U      = get_global_pool();            # common to all toolsets
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
+#~     declare();     # short
 #
-#   declare();     # short
-#       
-# Purpose   : ____
-# Parms     : ____
-# Reads     : ____
-# Returns   : ____
-# Writes    : ____
-# Throws    : ____
-# See also  : ____
-# 
-# ____
+#   
 #   
 sub declare {
-    my $arg      = $_[0];
-    say 'Declaring!';
+    my $caller              = caller;
+    my $args                = shift;
+    my $topkey              = $args->{-name};
+    ### declaring...
+    ### $caller
+    ### $args
     
+    $U->{$topkey}{-meta}    = $args;
+    $U->{-sub}{$topkey}     = $args->{-sub};
+    ### $U
     
+    return 1;
 }; ## declare
 
 

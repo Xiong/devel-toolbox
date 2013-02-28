@@ -10,6 +10,17 @@ use warnings;
 use lib 'play', 'lib';
 use Error::Base;
 
+# Define pool first! 
+BEGIN {                         #    $::U or $main::U
+    $::U      = {}; 
+    say 'dt-BEGIN: ', $::U;
+    # Make get_global_pool work now.
+    use Devel::Toolbox::Core::Pool qw( -main );
+    init_global_pool($::U);
+}
+use Devel::Toolbox;             # Simple custom project tool management
+use Foo;
+
 #~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
@@ -18,11 +29,9 @@ use Error::Base;
 
 say "$0 Running...";
 
-use Declare;
-use Foo;
 
-#~ use Bar;
-#~ exit;
+
+
 
 my $dead        = '42';
 my $live        = \$dead;
