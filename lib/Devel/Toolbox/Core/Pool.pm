@@ -12,11 +12,11 @@ use File::Spec;                 # Portably perform operations on file names
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT       => [qw( get_global_pool merge_global_pool )],
+    EXPORT       => [qw( $U get_global_pool merge_global_pool )],
 );
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -29,7 +29,8 @@ my $err             = Error::Base->new(
 # $U is a hashref, the big global pool per each script invocation of D::T. 
 # The pool contains stuff common to all D::T modules. Look here first.
 # $U is an implicit argument to all tools. 
-our $U      = get_global_pool();            # common to all toolsets
+#~ our $U      = get_global_pool();            # common to all toolsets
+our $U      ;                               # not ready to get yet
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
@@ -43,7 +44,11 @@ our $U      = get_global_pool();            # common to all toolsets
 #    then $Your::Toolset::U will already be defined. 
 #   
 sub get_global_pool {
-    return $::U;
+    my $caller = caller;
+    ### Pool-ggp
+    ### $caller
+    ### $main::U
+    return $U;
 }; ## get_global_pool
 
 #=========# EXTERNAL FUNCTION
@@ -53,14 +58,15 @@ sub get_global_pool {
 #   As a safeguard, this fatals if called from any other than package main. 
 #   
 sub init_global_pool {
-    my $U       = shift;
+    my $mainU   = shift;
     scalar caller eq 'main'
         or $err->crash( 'Attempt to re-initialize $U in package ', caller );
+    our $U      = $mainU;
     
     # Initial values.                                   TODO
 #~     $U->{-somekey}      = 42;
     
-    return $U;
+    return $mainU;
 }; ## init_global_pool
 
 #=========# EXTERNAL FUNCTION
@@ -72,6 +78,10 @@ sub init_global_pool {
 #   New values overwrite old values without touching other keys.
 #   
 sub merge_global_pool {
+    my $caller = caller;
+    ### Pool-mgp
+    ### $caller
+    ### $U
     my $args        = shift or return $U;
     %{$U}           = ( %{$U}, %{$args} );   # merge
     return $U;

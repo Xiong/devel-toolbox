@@ -53,6 +53,7 @@ my $err = Error::Base->new (
 #   ---
 #   
 sub app_execute {
+return;
     my $self        = shift;
     my $args        = shift;
     my $option      = $self->{-script}{-cmdline_opt};
@@ -69,7 +70,7 @@ sub app_execute {
     ### $tool
     ### $words
     
-    claim "::$set";
+    claim( "::$set");
     
     
 }; ## app_execute

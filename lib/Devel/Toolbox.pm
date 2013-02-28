@@ -16,11 +16,11 @@ use Devel::Toolbox::Core::Declare;      # Export stuff          FIRST
 use Devel::Toolbox::Core::Claim;        # Import stuff          FIRST
 use Devel::Toolbox::Core::Base;         # Optional base class
 use Devel::Toolbox::Core::App;          # Command-line interpreter
-claim 'Baz';
-# Exporter after importing.
-use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT      => [qw( claim declare )],
-);  # Basic to import/export mechanism; not optional for toolsets!
+#~ claim 'Baz';     # fatals because Claim exports claim() to our caller
+#~ # Exporter after importing.
+#~ use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
+#~     EXPORT      => [qw( claim declare )],
+#~ );  # Basic to import/export mechanism; not optional for toolsets!
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~

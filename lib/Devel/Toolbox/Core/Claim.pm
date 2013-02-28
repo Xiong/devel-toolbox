@@ -11,9 +11,10 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
-use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT      => [qw( claim )],
-);
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+        exports     => [ qw( claim ) ],
+        into_level  => 1,
+};
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
