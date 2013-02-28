@@ -32,7 +32,7 @@ my $option  = {};               # none for now; no need for Getopt::*
 my @words   = @ARGV;            # copy
 my $words   = \@words;          # not ref to special global
 
-merge_global_pool({
+Devel::Toolbox::Core::Pool::merge_global_pool({
         -script     => {
             -cmdline_opt    => $option,  # hashref
             -cmdline_words  => $words,   # aryref

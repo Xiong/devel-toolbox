@@ -6,11 +6,9 @@ use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
 use lib 'lib';
-use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-use Class::Inspector;           # Get info about a class and its structure
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -18,14 +16,15 @@ use Class::Inspector;           # Get info about a class and its structure
 
 ## use
 #============================================================================#
-
 # Pseudo-globals
+
 my $err             = Error::Base->new(
                         -base   => '! DT-Base:'
 );
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# METHODS
 
 #=========# CLASS METHOD
 #~ my $self    = Devel::Toolbox::Core::Base->new({

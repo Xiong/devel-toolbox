@@ -5,23 +5,22 @@ use warnings;
 
 use version; our $VERSION = qv('v0.0.0');
 
-# Exporter first.
-BEGIN {
-    require Exporter;               # Must use the old fellow here
-    our @ISA    = 'Exporter';
-    our @EXPORT = 'claim';          # That's right.
-}
-
 # Core modules
 
 # CPAN modules
 
 # Project modules
 #   use's all Core modules
-use Devel::Toolbox::Core::App;          # Command-line interpreter
+use Devel::Toolbox::Core::Pool;         # Global data pool      FIRST
+use Devel::Toolbox::Core::Declare;      # Export stuff          FIRST
+use Devel::Toolbox::Core::Claim;        # Import stuff          FIRST
 use Devel::Toolbox::Core::Base;         # Optional base class
-use Devel::Toolbox::Core::Claim;        # Import stuff
-use Devel::Toolbox::Core::Declare;      # Export stuff
+use Devel::Toolbox::Core::App;          # Command-line interpreter
+claim 'Baz';
+# Exporter after importing.
+use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
+    EXPORT      => [qw( claim declare )],
+);  # Basic to import/export mechanism; not optional for toolsets!
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~

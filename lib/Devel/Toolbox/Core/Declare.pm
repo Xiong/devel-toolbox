@@ -1,4 +1,4 @@
-package Devel::Toolbox::Core::Pool;
+package Devel::Toolbox::Core::Declare;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
@@ -12,8 +12,12 @@ use File::Spec;                 # Portably perform operations on file names
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT       => [qw( get_global_pool merge_global_pool )],
+    EXPORT      => [qw( declare )],
 );
+
+# Project modules
+use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Core::Pool;         # Global data pool
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -22,13 +26,9 @@ use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
 ## use
 #============================================================================#
 # Pseudo-globals
-my $err             = Error::Base->new(
-                        -base   => '! DT-Pool:'
-);
-
-# $U is a hashref, the big global pool per each script invocation of D::T. 
-# The pool contains stuff common to all D::T modules. Look here first.
-# $U is an implicit argument to all tools. 
+my $err     = Error::Base->new(
+                -base   => '! DT-Declare:'
+            );
 our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals
@@ -36,47 +36,25 @@ our $U      = get_global_pool();            # common to all toolsets
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~ our $U      = get_global_pool();            # common to all toolsets
 #
-#   Get an alias to the global pool. You should do this in your toolset FIRST.  
-#   If you accept the default import when use'ing Devel::Comments,
-#    then $Your::Toolset::U will already be defined. 
+#   declare();     # short
+#       
+# Purpose   : ____
+# Parms     : ____
+# Reads     : ____
+# Returns   : ____
+# Writes    : ____
+# Throws    : ____
+# See also  : ____
+# 
+# ____
 #   
-sub get_global_pool {
-    return $::U;
-}; ## get_global_pool
-
-#=========# EXTERNAL FUNCTION
-#~ Devel::Toolbox::Core::Pool::init_global_pool($U);  # minimum initialization
-#
-#   init($U) sets some minimal keys; this should be done only once. 
-#   As a safeguard, this fatals if called from any other than package main. 
-#   
-sub init_global_pool {
-    my $U       = shift;
-    scalar caller eq 'main'
-        or $err->crash( 'Attempt to re-initialize $U in package ', caller );
+sub declare {
+    my $arg      = $_[0];
     
-    # Initial values.                                   TODO
-#~     $U->{-somekey}      = 42;
     
-    return $U;
-}; ## init_global_pool
-
-#=========# EXTERNAL FUNCTION
-#~ merge_global_pool({
-#~     -key        => 'value',
-#~ });
-#
-#   Merge arguments into pool. You probably don't want this outside of ::Core.  
-#   New values overwrite old values without touching other keys.
-#   
-sub merge_global_pool {
-    my $args        = shift or return $U;
-    %{$U}           = ( %{$U}, %{$args} );   # merge
-    return $U;
-}; ## merge_global_pool
-
+    
+}; ## declare
 
 
 
@@ -87,15 +65,15 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::Pool - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Declare - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::Pool version v0.0.0
+This document describes Devel::Toolbox::Core::Declare version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::Pool;
+    use Devel::Toolbox::Core::Declare;
 
 =head1 DESCRIPTION
 
