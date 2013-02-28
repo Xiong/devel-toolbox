@@ -11,9 +11,22 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
-use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT       => [qw( get_global_pool merge_global_pool )],
-);
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports                 => [qw( 
+                                get_global_pool
+                               init_global_pool
+                              merge_global_pool
+        )],
+    groups  => { default    => [qw( 
+                                get_global_pool 
+        ) ],
+                 main       => [qw(
+                                get_global_pool
+                               init_global_pool
+                              merge_global_pool
+        )],
+    },
+};
 
 # Alternate uses
 use Devel::Comments '###';                                               #~

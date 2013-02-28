@@ -26,8 +26,10 @@ my $err = Error::Base->new (
     -base           => '! DTC-App:',
 );
 
-#~ our $U      = get_global_pool();            # common to all toolsets
-our $U      = $::U;                         # common to all toolsets
+our $U      = get_global_pool();            # common to all toolsets
+#~ our $U      = $::U;                         # common to all toolsets
+### App-package
+### $U
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
@@ -57,6 +59,8 @@ our $U      = $::U;                         # common to all toolsets
 #   
 sub app_execute {
     my $args        = shift;
+    ### App-execute
+    ### $U
     my $option      = $U->{-script}{-cmdline_opt};
     my $words       = $U->{-script}{-cmdline_words};
     
@@ -65,6 +69,7 @@ sub app_execute {
     # Get config.                                           TODO
     
     # Dispatch
+    
     my $set         = ucfirst shift $words;
     my $tool        = shift $words;
     ### $set
@@ -72,7 +77,7 @@ sub app_execute {
     ### $words
     
     declare();
-#~     claim("::$set");
+    claim("::$set");
     
     
 }; ## app_execute

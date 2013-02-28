@@ -11,16 +11,17 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
-use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT      => [qw( declare )],
-);
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports     => [ qw( declare ) ],
+    groups      => { default => [ qw( declare ) ] },
+};
 
 # Project modules
 use Devel::Toolbox;             # Simple custom project tool management
 use Devel::Toolbox::Core::Pool;         # Global data pool
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use

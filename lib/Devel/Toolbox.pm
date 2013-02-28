@@ -10,17 +10,10 @@ use version; our $VERSION = qv('v0.0.0');
 # CPAN modules
 
 # Project modules
-#   use's all Core modules
+#   use's only some Core modules
 use Devel::Toolbox::Core::Pool;         # Global data pool      FIRST
 use Devel::Toolbox::Core::Declare;      # Export stuff          FIRST
 use Devel::Toolbox::Core::Claim;        # Import stuff          FIRST
-use Devel::Toolbox::Core::Base;         # Optional base class
-use Devel::Toolbox::Core::App;          # Command-line interpreter
-#~ claim 'Baz';     # fatals because Claim exports claim() to our caller
-#~ # Exporter after importing.      # Nah, doesn't work to export twice.
-#~ use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-#~     EXPORT      => [qw( claim declare get_global_pool )],
-#~ );  # Basic to import/export mechanism; not optional for toolsets!
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -31,10 +24,31 @@ use Devel::Toolbox::Core::App;          # Command-line interpreter
 
 # Pseudo-globals
 
-our $U      = {};       # application-wide store
+#~ our $U      = {};       # application-wide store
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# FUNCTIONS
+
+# This won't work for these three modules; they must import directly.
+sub import {
+    my $package = shift;
+    Devel::Toolbox::Core::Pool->import( { into_level => 1 }, @_ );
+    Devel::Toolbox::Core::Declare->import( { into_level => 1 }, @_ );
+    Devel::Toolbox::Core::Claim->import( { into_level => 1 }, @_ );
+};
+
+
+INIT {
+    require Devel::Toolbox::Core::App;          # Command-line interpreter
+    require Devel::Toolbox::Core::Base;         # Optional base class
+
+}
+#~ 
+#~ use Devel::Toolbox::Core::App;          # Command-line interpreter
+#~ use Devel::Toolbox::Core::Base;         # Optional base class
+
+
 
 #   * Accepts a bare use line from callers.
 #   * Starting point for POD documentation. 

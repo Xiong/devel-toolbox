@@ -12,12 +12,13 @@ use File::Spec;                 # Portably perform operations on file names
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-        exports     => [ qw( claim ) ],
-        into_level  => 1,
+    exports     => [ qw( claim ) ],
+    groups      => { default => [ qw( claim ) ] },
 };
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Core::Pool;         # Global data pool
 
 # Alternate uses
 use Devel::Comments '###';                                               #~
@@ -31,6 +32,7 @@ use Devel::Comments '###';                                               #~
 my $err             = Error::Base->new(
                         -base   => '! DTC-Claim:'
 );
+our $U      = get_global_pool();            # common to all toolsets
 
 my $qr_errinc       = qr/locate.*?INC/;  # Can't locate Foo.pm in @INC...
 

@@ -13,9 +13,15 @@ use lib 'lib';
 
 # Project module
 # Define pool first! 
-BEGIN { $::U      = {}; }                           #    $::U or $main::U
+#~ BEGIN { $::U      = {}; }                           #    $::U or $main::U
+BEGIN { 
+    $::U      = {}; 
+    say 'dt-BEGIN: ', $::U;
+    # Make get_global_pool work now.
+    use Devel::Toolbox::Core::Pool qw( -main );
+    init_global_pool($::U);
+}                           #    $::U or $main::U
 use Devel::Toolbox;             # Simple custom project tool management
-claim();
 
 # Alternate uses
 use Devel::Comments '###';                                               #~
@@ -28,7 +34,6 @@ use Devel::Comments '###';                                               #~
 
 ### dt
 ### $::U
-Devel::Toolbox::Core::Pool::init_global_pool($::U);   # minimum initialization
 
 # get options
 my $option  = {};               # none for now; no need for Getopt::*
