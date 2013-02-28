@@ -61,6 +61,7 @@ sub plurky {
     say '----[plurky] zeep';
     say '$$live: ', $$live;     # both...
     say '$dead: ',   $dead;     #   ... work (not dead)
+    $dead++;
 }; ## plurky
 
 sub wonk {
@@ -70,7 +71,6 @@ sub wonk {
 # Execute. 
 say 'main...';
 plurky();
-$dead++;
 
 say 'wonking...';
 wonk();

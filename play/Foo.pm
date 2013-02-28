@@ -14,8 +14,8 @@ my $U   = get_global_pool();
 say '[Foo] $U: ', $U;
 
 sub peepee {
-    my $fake    = $U->{-sub}{plurky};
-    my $fart    = $U->{-sub}{fiddle};
+    my $fake    = $U->{-sub}{main}{plurky};
+    my $fart    = $U->{-sub}{main}{fiddle};
 say '[Foo::peepee] $U: ', $U;
     &$fake();
     &$fart();

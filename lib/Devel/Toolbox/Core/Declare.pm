@@ -42,15 +42,15 @@ our $U      = get_global_pool();            # common to all toolsets
 #   
 #   
 sub declare {
-    my $caller              = caller;
-    my $args                = shift;
-    my $topkey              = $args->{-name};
+    my $caller                      = caller;
+    my $args                        = shift;
+    my $tool                        = $args->{-name};
     ### declaring...
     ### $caller
     ### $args
     
-    $U->{$topkey}{-meta}    = $args;
-    $U->{-sub}{$topkey}     = $args->{-sub};
+    $U->{-meta}{$caller}{$tool}     = $args;
+    $U->{-sub}{$caller}{$tool}      = $args->{-sub};
     ### $U
     
     return 1;
