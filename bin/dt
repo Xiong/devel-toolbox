@@ -12,6 +12,14 @@ use version; our $VERSION = qv('v0.0.0');
 use lib 'lib';
 
 # Project module
+# Define pool first! 
+BEGIN {                         #    $::U or $main::U
+    $::U      = {}; 
+    say 'dt-BEGIN: ', $::U;
+    # Make get_global_pool work now.
+    use Devel::Toolbox::Core::Pool qw( -main );
+    init_global_pool($::U);
+}
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
@@ -21,27 +29,42 @@ use Devel::Toolbox;             # Simple custom project tool management
 ## use
 #============================================================================#
 
-### @ARGV
+#~ ### @ARGV
 
-# Construct first if we need the object to set up Getopt::*. 
-my $self    = Devel::Toolbox::Core::Base->new();
+### dt
+### $::U
 
 # get options
-my $option  = {};           # none for now; no need for Getopt::*
-my @words   = @ARGV;        # copy
-my $words   = \@words;      # not ref to special global
+my $option  = {};               # none for now; no need for Getopt::*
+my @words   = @ARGV;            # copy
+my $words   = \@words;          # not ref to special global
+### @ARGV
+### @words
+### $words
 
-$self->init({
+# This should be done in ::App calling ::Config.            TODO
+use File::Spec;                 # Portably perform operations on file names
+my $root_path       = File::Spec->rootdir ();
+my $orig_path       = File::Spec->catdir (
+    $root_path,
+    qw( home xiong .config devel-toolbox templates ),
+);
+my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
+## TODO
+
+Devel::Toolbox::Core::Pool::merge_global_pool({
         -script     => {
             -cmdline_opt    => $option,  # hashref
             -cmdline_words  => $words,   # aryref
         },
+        -module_template        => $template,           # TODO: config
+        -template_delimiters    => [ '[% ', ' %]' ],    # TODO: config
     });
-### $self
+### $::U
 
-claim '::Core::App';
-my $exit_code   = $self->app_execute({}) or 0;
-exit $exit_code;
+my $perl_exit   = Devel::Toolbox::Core::App::app_execute({});   # 1 for okay
+my $shell_exit  = not $perl_exit;
+exit $shell_exit;                                               # 0 for okay
 
 __END__
 

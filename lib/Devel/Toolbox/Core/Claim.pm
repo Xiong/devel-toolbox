@@ -10,10 +10,15 @@ use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-use Exporter::Easy (            # Takes the drudgery out of Exporting symbols
-    EXPORT      => [qw( claim )],
-);
 use Class::Inspector;           # Get info about a class and its structure
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports     => [ qw( claim ) ],
+    groups      => { default => [ qw( claim ) ] },
+};
+
+# Project module
+use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -23,12 +28,13 @@ use Class::Inspector;           # Get info about a class and its structure
 #============================================================================#
 
 # Pseudo-globals
-
-my $err             = Error::Base->new(
-                        -base   => '! DTC-Claim:'
+my $err     = Error::Base->new(
+    -base   => '! DTC-Claim:'
 );
 
-my $qr_errinc       = qr/locate.*?INC/;  # Can't locate Foo.pm in @INC...
+our $U      = get_global_pool();            # common to all toolsets
+
+my $qr_errinc       = qr/locate.*?INC/;     # Can't locate Foo.pm in @INC...
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
@@ -41,10 +47,10 @@ my $qr_errinc       = qr/locate.*?INC/;  # Can't locate Foo.pm in @INC...
 #       ::Mytoolset     => Devel::Toolbox::Set::Mytoolset
 #     * require's the toolset
 #     * exports all subroutines (tools) found in the toolset
-#         into Devel::Toolbox::Core::Base.
+#         into caller's namespace.
 #   
-#   The toolset name must be quoted; 
-#    if you want the expansion then you must lead with '::' (aristdottle).
+#   The toolset name must be quoted. 
+#   If you want the expansion then you must lead with '::' (aristdottle).
 #   
 sub claim {
     my $caller      = caller;

@@ -6,11 +6,9 @@ use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
 use lib 'lib';
-use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-use Class::Inspector;           # Get info about a class and its structure
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -18,33 +16,25 @@ use Class::Inspector;           # Get info about a class and its structure
 
 ## use
 #============================================================================#
-
 # Pseudo-globals
-my $singleton       = {};                       # the only object
-my $err             = Error::Base->new(
-                        -base   => '! DT-Base:'
+my $err     = Error::Base->new(
+    -base   => '! DTC-Base:'
 );
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# METHODS
 
 #=========# CLASS METHOD
 #~ my $self    = Devel::Toolbox::Core::Base->new({
-#~                 -param      => 'value',
+#~                 -key        => 'value',
 #~             });
 #
 #   Classic hashref-based-object constructor.
-#   This has been modified into a singleton constructor 
-#     which must be declared outside the sub. 
-#   Also this has been modified to bless into only this package
-#     regardless of who calls it. 
 #   
 sub new {
-#   my $class   = shift;
-    shift;                                      # throw away
-    my $class   = __PACKAGE__;                  # always in this package
-#   my $self    = {};
-    my $self    = $singleton;                   # there can be only one
+    my $class   = shift;
+    my $self    = {};
     bless ( $self => $class );
     $self->init(@_);                            # init remaining args
     return $self;
@@ -52,7 +42,7 @@ sub new {
 
 #=========# OBJECT METHOD
 #~ $self->init({
-#~     -param      => 'value',
+#~     -key        => 'value',
 #~ });
 #
 #   Standard hashref-merge initializer. 

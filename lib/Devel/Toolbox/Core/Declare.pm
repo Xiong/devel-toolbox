@@ -1,90 +1,60 @@
-package Devel::Toolbox::Core::App;
+package Devel::Toolbox::Core::Declare;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-#~ use File::Spec;                 # Portably perform operations on file names
-#~ use File::Copy;                 # Copy files or filehandles
+use lib 'lib';
+use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
+use Class::Inspector;           # Get info about a class and its structure
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports     => [ qw( declare ) ],
+    groups      => { default => [ qw( declare ) ] },
+};
 
-# Project module
+# Project modules
 use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
-
 # Pseudo-globals
-my $err = Error::Base->new (
-    -base           => '! DTC-App:',
+my $err     = Error::Base->new(
+    -base   => '! DTC-Declare:'
 );
-
 our $U      = get_global_pool();            # common to all toolsets
-### App-package
-### $U
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
-# METHODS
+# FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~ my $perl_exit   = Devel::Toolbox::Core::App::app_execute({});  # 1 for okay
+#~     declare();     # short
 #
-#   Runs the dt application. Normally invoked only by script, $ dt <usage>
 #   
-#   $option     hashref containing all command line options 
-#                (such as -n, -v, --help) as output by Getopt::*
 #   
-#   $words      arrayref containing all the barewords on command line
-#   
-#   See: dt, DTC::Pool
-#   
-sub app_execute {
-    my $args        = shift;
-    ### App-execute
-    ### $U
-    my $option      = $U->{-script}{-cmdline_opt};
-    my $words       = $U->{-script}{-cmdline_words};
+sub declare {
+    my $caller                      = caller;
+    my $args                        = shift;
+    my $tool                        = $args->{-name};
+    ### declaring...
+    ### $caller
+    ### $args
     
-    # Option handling here.                                 TODO
-    
-    # Get config.                                           TODO
-    
-    # Dispatch
-    
-    my $set_name    = ucfirst shift $words;
-    my $tool_name   = shift $words;
-    ### $set_name
-    ### $tool_name
-    ### $words
-    
-#~     claim '::$set_name', $set ;
-    my $set = "Devel::Toolbox::Set::$set_name";
-    eval "require $set";
-    my $eval_err    = $@;
-    ### App (evaled)
-    ### $eval_err
+    $U->{-meta}{$caller}{$tool}     = $args;
+    $U->{-sub}{$caller}{$tool}      = $args->{-sub};
     ### $U
     
-#~     my $subu    = $U->{-sub}{$set}{$tool_name};
-#~     ### $subu
-    
-    &{ $U->{-sub}{$set}{$tool_name} }($words);
-#~     no strict 'refs';
-#~     &{ "$U->{-sub}{$set_name}{$tool_name}" }($words);
-#~     &{ $U->{-meta}{$set_name}{-app} }($words);
-    
-}; ## app_execute
-
-
-
+    return 1;
+}; ## declare
 
 
 
@@ -95,15 +65,15 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::App - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Declare - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::App version v0.0.0
+This document describes Devel::Toolbox::Core::Declare version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::App;
+    use Devel::Toolbox::Core::Declare;
 
 =head1 DESCRIPTION
 

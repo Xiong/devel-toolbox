@@ -11,9 +11,7 @@ sub declare {
     ### $args
     $U->{ $args->{-name} }  = $args->{-sub};
     ### $U
-#~         &$sub;
 }
-#~ sub as (&) { $_[0] }
 
 sub get_global_store {
     return $U;

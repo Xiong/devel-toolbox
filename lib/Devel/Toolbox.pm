@@ -2,63 +2,37 @@ package Devel::Toolbox;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-
 use version; our $VERSION = qv('v0.0.0');
-
-# Exporter first.
-BEGIN {
-    require Exporter;               # Must use the old fellow here
-    our @ISA    = 'Exporter';
-    our @EXPORT = 'claim';          # That's right.
-}
 
 # Core modules
 
 # CPAN modules
 
 # Project modules
-use Devel::Toolbox::Core::Base;     # Toolset base class
-use Devel::Toolbox::Core::Claim;    # Guts of 'claim' function
+#   use only mandatory Core modules
+use Devel::Toolbox::Core::Pool;         # Global data pool      FIRST
+use Devel::Toolbox::Core::Declare;      # Export stuff          FIRST
+use Devel::Toolbox::Core::Claim;        # Import stuff          FIRST
 
-# Alternate uses
-#~ use Devel::Comments '###';                                               #~
-#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
-
-# Clean after all use
-## use
-#============================================================================#
-
-# Pseudo-globals
-
-## pseudo-globals
-#----------------------------------------------------------------------------#
-
-#=========# EXTERNAL FUNCTION
-#~ use Devel::Toolbox;             # Simple custom project tool management
-#
-#   Ignores any arguments (import list);  
-#   forcibly exports the 'claim' function (keyword);
-#   and makes 'Devel::Toolbox::Core::Base' a parent of caller (toolset).
-#   
+# use Devel::Toolbox;
+#  ... won't work for these three modules; they must import directly.
+# They define the mandatory functions: 
+#       get_global_pool(), declare(), claim()
+# See: Sub::Exporter, RT#83682
 sub import {
-    # 'parent'
-    my $caller      = caller;
-    ### $caller
-    my $base_name   = 'Devel::Toolbox::Core::Base';
-    my $sym         = 'ISA';
-    {
-        no strict 'refs';
-        push @{"${caller}::$sym"}, $base_name;
-    }
-    
-    # Export
-    our @EXPORT     ;
-    ### @EXPORT
-    Devel::Toolbox->export_to_level( 1, @EXPORT );
+    my $package = shift;
+    Devel::Toolbox::Core::Pool->import(     { into_level => 1 }, @_ );
+    Devel::Toolbox::Core::Declare->import(  { into_level => 1 }, @_ );
+    Devel::Toolbox::Core::Claim->import(    { into_level => 1 }, @_ );
 };
 
-#   This module exists to accept a simple use line from callers
-#   and be a starting point for POD documentation. 
+# Now ready to use modules that (may) use the previous modules.
+use Devel::Toolbox::Core::App;          # Command-line interpreter
+use Devel::Toolbox::Core::Base;         # Optional base class
+
+#   * Accepts a bare use line from callers.
+#   * Starting point for POD documentation.
+#   * No other runtime function. 
 
 ## END MODULE
 1;
