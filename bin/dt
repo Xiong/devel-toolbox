@@ -50,7 +50,7 @@ my $orig_path       = File::Spec->catdir (
     qw( home xiong .config devel-toolbox templates ),
 );
 my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
-## TODO
+## TODO: config
 
 Devel::Toolbox::Core::Pool::merge_global_pool({
         -script     => {

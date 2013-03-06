@@ -100,9 +100,9 @@ sub claim {
 #~ @tools = map { '&' . $_ } @tools;   #DEBUG
     ### @tools
     
-    my @base_tools  ;
-    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
-    ### @base_tools
+#~ my @base_tools  ;
+#~ @base_tools     = @{ Class::Inspector->functions( $base_name ) };
+#~ ### @base_tools
     
     my $prepend     = lc $toolset;
     $prepend =~ s/:://g;
@@ -114,8 +114,8 @@ sub claim {
         -prepend    => $prepend,
     });
     
-    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
-    ### @base_tools
+#~ @base_tools     = @{ Class::Inspector->functions( $base_name ) };
+#~ ### @base_tools
     
 }; ## claim
 
@@ -155,15 +155,15 @@ sub _export_all {
         ### $type
         if ( not $type ) {                      # the common case: 'quux'
             my $imsym   = join q{_}, $prepend, $exsym;      # e.g. set_tool()
-            ### WHAT
-            ### $expkg
-            ### $exsym
-            ### $impkg
-            ### $imsym
+#~             ### WHAT
+#~             ### $expkg
+#~             ### $exsym
+#~             ### $impkg
+#~             ### $imsym
             
             no strict 'refs';                   # For we doeth darke magiks.
             *{"${impkg}::$imsym"} = \&{"${expkg}::$exsym"};
-            ### HERE 
+#~             ### HERE 
         }
         else {
             my $imsym   = $exsym;                           # don't prepend
@@ -177,7 +177,7 @@ sub _export_all {
                 $type eq '%' ? \%{"${expkg}::$exsym"} :
                 $type eq '*' ?  *{"${expkg}::$exsym"} :
                 $err->crash("Can't export symbol: $type$exsym");
-            ### THERE
+#~             ### THERE
         };
     }; ## for exsym
 }; ## _export_all

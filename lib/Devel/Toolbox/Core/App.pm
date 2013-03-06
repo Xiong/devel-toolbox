@@ -69,24 +69,16 @@ sub app_execute {
     ### $words
     
     claim "::$set_name";        # expands and imports mashed-up: set_tool()
-#~     my $set = "Devel::Toolbox::Set::$set_name";
-#~     eval "require $set";
-#~     my $eval_err    = $@;
     ### App (claimed)
-#~     ### $eval_err
 #~     ### $U
-    
-#~     my $subu    = $U->{-sub}{$set}{$tool_name};
-#~     ### $subu
     
     my @tools       = @{ Class::Inspector->functions( __PACKAGE__ ) };
     ### @tools
     
     no strict 'refs';
     &$import_name($words);
-#~     &{ "$U->{-sub}{$set_name}{$tool_name}" }($words);
-#~     &{ $U->{-meta}{$set_name}{-app} }($words);
     
+    return 1;
 }; ## app_execute
 
 
