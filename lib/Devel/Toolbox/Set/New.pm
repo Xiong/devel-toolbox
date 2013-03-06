@@ -77,8 +77,8 @@ sub module {
     %{$u}        = ( %{$u}, %{$args} );
     
     my $tt      = Text::Template->new(
-                    SOURCE      => $u->{-module_template},
-                    DELIMITERS  => $u->{-template_delimiters},
+                    SOURCE      => $u->{-template}{-module},
+                    DELIMITERS  => $u->{-template}{-delimiters},
                 );
     my $out     ;
     
