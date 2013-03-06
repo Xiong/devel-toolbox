@@ -50,16 +50,18 @@ my $orig_path       = File::Spec->catdir (
     qw( home xiong .config devel-toolbox templates ),
 );
 my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
-## TODO
+## TODO: config
 
 Devel::Toolbox::Core::Pool::merge_global_pool({
-        -script     => {
-            -cmdline_opt    => $option,  # hashref
-            -cmdline_words  => $words,   # aryref
-        },
-        -module_template        => $template,           # TODO: config
-        -template_delimiters    => [ '[% ', ' %]' ],    # TODO: config
-    });
+    -script     => {
+        -cmdline_opt    => $option,  # hashref
+        -cmdline_words  => $words,   # aryref
+    },
+    -template   => {
+        -module        => $template,           # TODO: config
+        -delimiters    => [ '[% ', ' %]' ],    # TODO: config
+    },
+});
 ### $::U
 
 my $perl_exit   = Devel::Toolbox::Core::App::app_execute({});   # 1 for okay
