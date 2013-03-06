@@ -59,25 +59,31 @@ sub app_execute {
     
     # Dispatch
     
-    my $set_name    = ucfirst shift $words;
-    my $tool_name   = shift $words;
+    my $set_name            = ucfirst shift $words;
+    my $tool_name           = shift $words;
+    my $import_name         = join q{_}, lc $set_name, $tool_name;
     ### $set_name
     ### $tool_name
+    ### $import_name
+    
     ### $words
     
-#~     claim '::$set_name', $set ;
-    my $set = "Devel::Toolbox::Set::$set_name";
-    eval "require $set";
-    my $eval_err    = $@;
-    ### App (evaled)
-    ### $eval_err
-    ### $U
+    claim "::$set_name";        # expands and imports mashed-up: set_tool()
+#~     my $set = "Devel::Toolbox::Set::$set_name";
+#~     eval "require $set";
+#~     my $eval_err    = $@;
+    ### App (claimed)
+#~     ### $eval_err
+#~     ### $U
     
 #~     my $subu    = $U->{-sub}{$set}{$tool_name};
 #~     ### $subu
     
-    &{ $U->{-sub}{$set}{$tool_name} }($words);
-#~     no strict 'refs';
+    my @tools       = @{ Class::Inspector->functions( __PACKAGE__ ) };
+    ### @tools
+    
+    no strict 'refs';
+    &$import_name($words);
 #~     &{ "$U->{-sub}{$set_name}{$tool_name}" }($words);
 #~     &{ $U->{-meta}{$set_name}{-app} }($words);
     

@@ -21,7 +21,7 @@ use Devel::Toolbox;             # Simple custom project tool management
 use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -58,7 +58,7 @@ sub claim {
     my $toolset     = shift;    # just what was given (in the request)
     my $perl_name   ;           # full Perlish module name
     my @path_parts  = (qw( Devel ::Toolbox ::Set ));    # search up from here
-    my $base_name   = 'Devel::Toolbox::Core::Base';     # export methods here
+    my $base_name   = $caller;                          # export methods here
     my $eval_err    ;
     
     # Expand module name and load the toolset requested.
@@ -95,22 +95,27 @@ sub claim {
     # Class::Inspector->loaded( $perl_name );
     
     my @tools       = @{ Class::Inspector->functions( $perl_name ) };
-    my $filter      = qr/claim|qv/;
-    @tools          = grep { not /$filter/ } @tools; 
+    my $filter      = qr/get_global_pool|claim|declare|qv/;
+    @tools          = grep { not /$filter/ } @tools;
+#~ @tools = map { '&' . $_ } @tools;   #DEBUG
     ### @tools
     
-#~     my @base_tools  ;
-#~     @base_tools     = @{ Class::Inspector->functions( $base_name ) };
-#~     ### @base_tools
+    my @base_tools  ;
+    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
+    ### @base_tools
+    
+    my $prepend     = lc $toolset;
+    $prepend =~ s/:://g;
     
     _export_all ({
         -expkg      => $perl_name,
         -impkg      => $base_name,
         -symbols    => \@tools,
+        -prepend    => $prepend,
     });
     
-#~     @base_tools     = @{ Class::Inspector->functions( $base_name ) };
-#~     ### @base_tools
+    @base_tools     = @{ Class::Inspector->functions( $base_name ) };
+    ### @base_tools
     
 }; ## claim
 
@@ -119,38 +124,62 @@ sub claim {
 #~         -expkg      => $exporting_package,   # 'Foo::Bar'
 #~         -impkg      => $importing_package,   # 'Hoge::Piyo'
 #~         -symbols    => \@symbol_list,        # [ sub, $scalar, %hash ]
+#~         -prepend    => $string,              # 'foo_bar'
 #~     });
 #
 #   This came from Exporter via Acme::Teddy. 
-#   It exports, quite indiscriminately, everything in -symbols. 
+#   It exports, quite indiscriminately, everything in -symbols.
+#   This version prepends a string to barewords; 
+#    so Foo::quux() exports foo_quux() to Bar.
+#   There is NO PREPENDING if a sigil is found; &quux exports quux(). 
+#   A quietable warning is issued if a non-bareword is exported.
 #   
 sub _export_all {
     my $args        = shift;
     my $expkg       = $args->{-expkg};          # package to export from
     my $impkg       = $args->{-impkg};          # package to import into
-    my @symbols     = @{ $args->{-symbols} };   # aryref of strings
+    my @exsyms      = @{ $args->{-symbols} };   # aryref of strings
                                                 #  include sigils $@%    
+    my $prepend      = $args->{-prepend};       # prepended to exports
     ### $expkg
     ### $impkg
-    ### @symbols
+    ### @exsyms
+    ### $prepend
     
     return if $expkg eq $impkg;                 # why bother?
     
     # Ripped from Exporter::Heavy::heavy_export()
-    for my $sym (@symbols) {
-        no strict 'refs';                       # For we doeth darke magiks.
-        # shortcut for the common case of no type character
-        (*{"${impkg}::$sym"} = \&{"${expkg}::$sym"}, next)
-            unless $sym =~ s/^(\W)//;
+    for my $exsym (@exsyms) {
+        $exsym =~ s/^(\W)//;                    # strip off sigil and capture
         my $type = $1;
-        *{"${impkg}::$sym"} =
-            $type eq '&' ? \&{"${expkg}::$sym"} :
-            $type eq '$' ? \${"${expkg}::$sym"} :
-            $type eq '@' ? \@{"${expkg}::$sym"} :
-            $type eq '%' ? \%{"${expkg}::$sym"} :
-            $type eq '*' ?  *{"${expkg}::$sym"} :
-            $err->crash("Can't export symbol: $type$sym");
-    }
+        ### $type
+        if ( not $type ) {                      # the common case: 'quux'
+            my $imsym   = join q{_}, $prepend, $exsym;      # e.g. set_tool()
+            ### WHAT
+            ### $expkg
+            ### $exsym
+            ### $impkg
+            ### $imsym
+            
+            no strict 'refs';                   # For we doeth darke magiks.
+            *{"${impkg}::$imsym"} = \&{"${expkg}::$exsym"};
+            ### HERE 
+        }
+        else {
+            my $imsym   = $exsym;                           # don't prepend
+            warn "Exporting symbol: $type$exsym to $impkg"
+                unless $U->{-core}{-flags}{-quiet};
+            no strict 'refs';                   # For we doeth darke magiks.
+            *{"${impkg}::$imsym"} =
+                $type eq '&' ? \&{"${expkg}::$exsym"} :
+                $type eq '$' ? \${"${expkg}::$exsym"} :
+                $type eq '@' ? \@{"${expkg}::$exsym"} :
+                $type eq '%' ? \%{"${expkg}::$exsym"} :
+                $type eq '*' ?  *{"${expkg}::$exsym"} :
+                $err->crash("Can't export symbol: $type$exsym");
+            ### THERE
+        };
+    }; ## for exsym
 }; ## _export_all
 
 ## END MODULE
