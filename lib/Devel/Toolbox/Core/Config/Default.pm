@@ -177,5 +177,21 @@ its very own section. Sorry if you disagree.
 =cut
 
 __DATA__
+# Location of the primary config path file, paths.* 
+#   You may edit *here* and move that file. 
+# This is not the place to list all the config files you have; 
+#   ideally there is only one path *here*. 
+# If multiple paths are given here, 
+#   they will be searched until a 'paths' file is found. 
+#
+# paths.* may be any file accepted by Config::Any. 
+# The 'paths' file contains paths to all config files; see which. 
+# This information may be modified when this module is installed. 
 
-foo
+/usr/share/devel-toolbox/core
+/usr/local/share/devel-toolbox/core
+/etc/devel-toolbox/core
+/home/$user/.config/devel-toolbox/core
+.config/devel-toolbox/core
+file/dot-config-dt/core
+file/test/orig/dot-config-dt/core
