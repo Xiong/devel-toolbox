@@ -54,21 +54,21 @@ sub load_files {
     # Search for a good paths.* file.
     for my $path (@$paths) {
         my $try         = File::Spec->catfile( $path, 'paths' );    # stem
-        ### $try
+#~         ### $try
 #~         stat $try;                          # file system status
 #~         next if not -e _;                   # exists (not zero size)?
 #~         next if not -f _;                   # file (not dir)?
 #~         next if not -T _;                   # text file (not binary)?
         
-        # Read the paths.* file, if possible.
+        # Read the paths.* file (with any extension), if possible.
         eval { 
             $p  = Config::Any->load_stems({ 
-                stems       => [$try],
-                use_ext     => 1, 
+                stems       => [$try],      # ... with any extension
+                use_ext     => 1,           # format must match extension
             }) 
         };
         $eval_err   = $@;
-        ### $eval_err
+#~         ### $eval_err
         next if $eval_err;
         
         # Store the location of the paths.* file.
