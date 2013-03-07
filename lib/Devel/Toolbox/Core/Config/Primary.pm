@@ -38,7 +38,7 @@ my $err     = Error::Base->new(
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~     get_paths();     # short
+#~     $paths  = get_paths();     # get primary config paths
 #
 #   
 #   

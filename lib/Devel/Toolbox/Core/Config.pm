@@ -10,31 +10,85 @@ use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
+use Config::Any;                # Load configs from any file format
 #~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 #~     exports     => [ qw( declare ) ],
 #~     groups      => { default => [ qw( declare ) ] },
 #~ };
 
 # Project modules
-use Devel::Toolbox;             # Simple custom project tool management
+#~ use Devel::Toolbox;             # Simple custom project tool management
 #~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 use Devel::Toolbox::Core::Config::Primary;  # get config paths IMPORTANT HERE!
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 # Pseudo-globals
 my $err     = Error::Base->new(
-    -base   => '! DTC-Config:'
+    -base   => '! DTC-Config:',
 );
-our $U      = get_global_pool();            # common to all toolsets
+#~ our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # FUNCTIONS
+
+#=========# EXTERNAL FUNCTION
+#~     load_files();     # short
+#
+#   
+#   
+sub load_files {
+    my $u           ;                       # config hashref
+    my $p           ;                       # 
+    my $paths       ;                       # search for paths.*
+    my $eval_err    ;                       # don't let $@ get stale
+    
+    # Get primary config path(s).
+    $paths      = Devel::Toolbox::Core::Config::Primary::get_paths();
+    
+    # Search for a good paths.* file.
+    for my $path (@$paths) {
+        my $try         = File::Spec->catfile( $path, 'paths' );    # stem
+        ### $try
+#~         stat $try;                          # file system status
+#~         next if not -e _;                   # exists (not zero size)?
+#~         next if not -f _;                   # file (not dir)?
+#~         next if not -T _;                   # text file (not binary)?
+        
+        # Read the paths.* file, if possible.
+        eval { 
+            $p  = Config::Any->load_stems({ 
+                stems       => [$try],
+                use_ext     => 1, 
+            }) 
+        };
+        $eval_err   = $@;
+        ### $eval_err
+        next if $eval_err;
+        
+        # Store the location of the paths.* file.
+        $u->{-core}{-path}{-paths_file}     = $try;
+    };
+    if ( not defined $u->{-core}{-path}{-paths_file} ) {
+        @$paths     = map { qq{\n} . $_ } @$paths;
+        $err->crash([ 
+            "Can't find any primary config path file, 'paths.*'" , qq{\n},
+            " Searched:", @$paths,
+        ])
+    };
+    
+    ### $p
+    ### $u
+    
+    
+    
+    
+}; ## load_files
 
 #=========# EXTERNAL FUNCTION
 #~     function();     # short
@@ -42,6 +96,8 @@ our $U      = get_global_pool();            # common to all toolsets
 #   
 #   
 sub function {
+    
+    
     
 }; ## function
 

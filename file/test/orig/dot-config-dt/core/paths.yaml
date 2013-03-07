@@ -1,0 +1,6 @@
+Projects:
+  C/C++ Libraries:
+  - libyaml       # "C" Fast YAML 1.1
+  - Syck          # (dated) "C" YAML 1.0
+  - yaml-cpp      # C++ YAML 1.1 implementation
+  
