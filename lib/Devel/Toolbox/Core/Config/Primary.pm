@@ -1,4 +1,4 @@
-package Devel::Toolbox::Core::Config::Default;
+package Devel::Toolbox::Core::Config::Primary;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
@@ -28,8 +28,7 @@ use Error::Base;                # Simple structured errors with full backtrace
 #============================================================================#
 # Pseudo-globals
 my $err     = Error::Base->new(
-    -base   => '! DTC-Config-Default:',
-    _open   => 'Failed to open DATA for reading.',
+    -base   => '! DTC-Config-Primary:',
     _close  => 'Failed to close DATA after reading.',
 );
 #~ our $U      = get_global_pool();            # common to all toolsets
@@ -39,18 +38,24 @@ my $err     = Error::Base->new(
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~     get();     # short
+#~     get_paths();     # short
 #
 #   
 #   
-sub get {
-    my $data    ;
-    local $/        = undef;            # slurp
-    $data           = <DATA>;
+sub get_paths {
+    my $paths       ;
+    @$paths         = <DATA>;
     close DATA 
         or $err->crash ( $err->{ _close } );
-    return $data;
-}; ## get
+    
+    # Filter out comments and similar rubbish.
+    chomp @$paths;
+    my $qr_comment  = qr/^\s*#/;
+    my $qr_empty    = qr/^\s*$/;
+    @$paths         = grep { not /$qr_comment|$qr_empty/ } @$paths;
+    
+    return $paths;
+}; ## get_paths
 
 
 
@@ -60,15 +65,15 @@ sub get {
 
 =head1 NAME
 
-Devel::Toolbox::Core::Config::Default - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Config::Primary - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::Config::Default version v0.0.0
+This document describes Devel::Toolbox::Core::Config::Primary version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::Config::Default;
+    use Devel::Toolbox::Core::Config::Primary;
 
 =head1 DESCRIPTION
 

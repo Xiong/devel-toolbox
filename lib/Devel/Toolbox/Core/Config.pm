@@ -17,7 +17,8 @@ use Error::Base;                # Simple structured errors with full backtrace
 
 # Project modules
 use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
+#~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
+use Devel::Toolbox::Core::Config::Primary;  # get config paths IMPORTANT HERE!
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
