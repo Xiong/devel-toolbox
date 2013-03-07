@@ -5,20 +5,20 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
-use File::Spec;                 # Portably perform operations on file names
+#~ use lib 'lib';
+#~ use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-use Class::Inspector;           # Get info about a class and its structure
-use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports     => [ qw( declare ) ],
-    groups      => { default => [ qw( declare ) ] },
-};
+#~ use Class::Inspector;           # Get info about a class and its structure
+#~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
+#~     exports     => [ qw( declare ) ],
+#~     groups      => { default => [ qw( declare ) ] },
+#~ };
 
 # Project modules
-use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
+#~ use Devel::Toolbox;             # Simple custom project tool management
+#~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -28,40 +28,35 @@ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 #============================================================================#
 # Pseudo-globals
 my $err     = Error::Base->new(
-    -base   => '! DTC-Declare:'
+    -base   => '! DTC-Config-Default:',
+    _open   => 'Failed to open DATA for reading.',
+    _close  => 'Failed to close DATA after reading.',
 );
-our $U      = get_global_pool();            # common to all toolsets
+#~ our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~     declare();     # short
+#~     get();     # short
 #
 #   
 #   
-sub declare {
-    my $caller                      = caller;
-    my $args                        = shift;
-    my $tool                        = $args->{-name};
-    ### declaring...
-    ### $caller
-    ### $args
-    
-    $U->{-meta}{$caller}{$tool}     = $args;
-    $U->{-sub}{$caller}{$tool}      = $args->{-sub};
-    ### $U
-    
-    return 1;
-}; ## declare
+sub get {
+    my $data    ;
+    local $/        = undef;            # slurp
+    $data           = <DATA>;
+    close DATA 
+        or $err->crash ( $err->{ _close } );
+    return $data;
+}; ## get
 
 
 
 ## END MODULE
 1;
 #============================================================================#
-__END__
 
 =head1 NAME
 
@@ -181,7 +176,6 @@ its very own section. Sorry if you disagree.
 
 =cut
 
+__DATA__
 
-
-
-
+foo
