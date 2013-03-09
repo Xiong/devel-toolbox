@@ -54,6 +54,7 @@ sub get_paths {
     my $qr_empty    = qr/^\s*$/;
     @$paths         = grep { not /$qr_comment|$qr_empty/ } @$paths;
     
+    ### $paths
     return $paths;
 }; ## get_paths
 
@@ -187,7 +188,8 @@ __DATA__
 # This is not the place to list all the config files you have; 
 #   ideally there is only one path *here*. 
 # If multiple paths are given here, 
-#   they will be searched until a 'paths' file is found. 
+#   they will be searched until a 'paths' file is found.
+#   So first in the list takes priority over any later.  
 #
 # paths.* may be any file accepted by Config::Any. 
 # The 'paths' file contains paths to all config files; see which. 

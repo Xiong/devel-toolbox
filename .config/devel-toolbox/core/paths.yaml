@@ -1,0 +1,4 @@
+# Locations of config files in sequence
+# Later configs take priority over earlier
+
+- foo/bar/path

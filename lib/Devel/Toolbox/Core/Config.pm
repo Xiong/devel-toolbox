@@ -38,57 +38,158 @@ my $err     = Error::Base->new(
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~     load_files();     # short
+#~     load_files();     # load all config files and merge contents into $U
 #
-#   
+#   $paths is an aryref of paths to search for paths.* file
+#   $configs is contents of paths.* file
+#   $u is the parsed config to merge to $U
 #   
 sub load_files {
-    my $u           ;                       # config hashref
-    my $p           ;                       # 
-    my $paths       ;                       # search for paths.*
-    my $eval_err    ;                       # don't let $@ get stale
+    my $u           ;           # hashref: config data
+    my $configs     ;           # aryref:  search for config files
+    my $paths       ;           # aryref:  search for paths.* file
     
     # Get primary config path(s).
     $paths      = Devel::Toolbox::Core::Config::Primary::get_paths();
+#~     ### Config - before interpolation
+#~     ### $paths
+    _interpolate_placeholders(@$paths);
+    ### Config - after interpolation
+    ### $paths
     
-    # Search for a good paths.* file.
-    for my $path (@$paths) {
-        my $try         = File::Spec->catfile( $path, 'paths' );    # stem
-#~         ### $try
-#~         stat $try;                          # file system status
-#~         next if not -e _;                   # exists (not zero size)?
-#~         next if not -f _;                   # file (not dir)?
-#~         next if not -T _;                   # text file (not binary)?
-        
-        # Read the paths.* file (with any extension), if possible.
-        eval { 
-            $p  = Config::Any->load_stems({ 
-                stems       => [$try],      # ... with any extension
-                use_ext     => 1,           # format must match extension
-            }) 
-        };
-        $eval_err   = $@;
-#~         ### $eval_err
-        next if $eval_err;
-        
-        # Store the location of the paths.* file.
-        $u->{-core}{-path}{-paths_file}     = $try;
-    };
-    if ( not defined $u->{-core}{-path}{-paths_file} ) {
-        @$paths     = map { qq{\n} . $_ } @$paths;
-        $err->crash([ 
-            "Can't find any primary config path file, 'paths.*'" , qq{\n},
-            " Searched:", @$paths,
-        ])
-    };
+    $configs    = _do_config_any({
+        -paths      => $paths,          # searching for paths.* file
+        -stems      => ['paths', 'foo'],       # stem of paths.* file
+    });
     
-    ### $p
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#    # FLATTEN-OUT LOGIC -- TODO
+    
+#    #~             ### $rv;
+#    #~             say 'KEYS: ';
+#    #~             say for keys %$rv;
+#                my ($key)   = keys %$rv;        # force list context
+#    #~             ### $key;
+#                die 'NO KEY' if not $key;       # get out now; avoid warning
+#                $configs    = $rv->{$key};      # get the aryref
+    
+#            next if not $configs;               # found only a bad file
+            
+#            # Store the location of the good file.
+#            $u->{-core}{-path}{-paths_file}     = $try;
+    
+#        # Crash on failure.
+#        if ( not $configs ) {
+#            @$paths     = map { qq{\n} . $_ } @$paths;
+#            $err->crash([ 
+#                "Can't find any primary config path file, 'paths.*'" , qq{\n},
+#                " Searched:", @$paths,
+#            ])
+#        };
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+    ### Config - before interpolation
+    ### $configs
+#~     _interpolate_placeholders(@$configs);
+#~     ### Config - after interpolation
+#~     ### $configs
+    
+    # Now (attempt to) load all config files.
+    
+    
+    
+    
+    
+    
+    
     ### $u
     
     
-    
-    
 }; ## load_files
+
+#=========# EXTERNAL FUNCTION
+#~     $username   = get_user();       # username of current script user
+#
+#   A variety of methods are used to try to get the username. First wins!
+#   
+sub get_user {
+    my $user        = $ENV{LOGNAME} || $ENV{USER} || getlogin || getpwuid($<);
+    
+#~     # DEBUG ONLY BLOCK
+#~     my $env_logname     = $ENV{LOGNAME}; 
+#~     my $env_user        = $ENV{USER}; 
+#~     my $getlogin        = getlogin; 
+#~     my $getpwuid        = getpwuid($<);
+#~     ### $env_logname
+#~     ### $env_user
+#~     ### $getlogin
+#~     ### $getpwuid
+    
+    #### $user
+    return $user;
+}; ## get_user
+
+#=========# INTERNAL FUNCTION
+#~     _interpolate_placeholders();     # short
+#
+#   Acts directly on arguments so no need to assign. 
+#   
+sub _interpolate_placeholders {
+    my $user    = get_user();
+    @_          = map { s|/\$user/|/$user/|g; $_ } @_;  # This is not fancy. 
+
+}; ## _interpolate_placeholders
+
+#=========# INTERNAL FUNCTION
+#~     $hashref    = _do_config_any({
+#~         -paths      => \@paths,         # paths only
+#~         -stems      => \@stems,         # filename stems; C::A will search
+#~     });
+#
+#   
+#   
+sub _do_config_any {
+    my $args        = shift;
+    my @paths       = @{ $args->{-paths} };
+    my @stems       = @{ $args->{-stems} };
+    
+    my $found       = {};       # returns a hashref
+    
+    my $eval_err    ;           # don't let $@ get stale
+    
+    # Cross-join; try every stem with every path. Returns AoA.
+    my @searches    ;
+    for my $path (@paths) {
+        for my $stem (@stems) {
+            push @searches, File::Spec->catfile( $path, $stem );
+        };
+    };
+    ### @paths
+    ### @stems
+    ### @searches
+    
+    # Search all files and load.
+    my $rv          ;
+    eval { 
+        # Read and load the file(s) (with any extension), if possible.
+        $rv             = Config::Any->load_stems({ 
+            stems           => \@searches,  # aryref
+            use_ext         => 1,           # format must match extension
+#~                 flatten_to_hash => 1,
+        });
+        # Returns AoH keyed on actual filename.
+    };
+    $eval_err   = $@;
+    ### $eval_err
+    next if $eval_err;                  # not a good stem; keep trying
+    ### $rv
+    push @{ $found->{-returns} }, $rv;  # good; store results
+    
+    ### $found
+    return $found;
+}; ## _do_config_any
 
 #=========# EXTERNAL FUNCTION
 #~     function();     # short
@@ -101,6 +202,9 @@ sub function {
     
 }; ## function
 
+    
+    
+    
 
 
 ## END MODULE

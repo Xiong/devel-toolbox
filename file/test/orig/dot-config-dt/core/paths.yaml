@@ -1,6 +1,10 @@
-Projects:
-  C/C++ Libraries:
-  - libyaml       # "C" Fast YAML 1.1
-  - Syck          # (dated) "C" YAML 1.0
-  - yaml-cpp      # C++ YAML 1.1 implementation
-  
+# Locations of config files in sequence
+# Later configs take priority over earlier
+
+- /usr/share/devel-toolbox/core
+- /usr/local/share/devel-toolbox/core
+- /etc/devel-toolbox/core
+- /home/$user/.config/devel-toolbox/core
+- .config/devel-toolbox/core
+- file/dot-config-dt/core
+- file/test/orig/dot-config-dt/core
