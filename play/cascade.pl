@@ -24,16 +24,18 @@ use Devel::Comments '###';                                               #~
 #============================================================================#
 
 my @paths   = qw( . play zaamm );
+my $merge   = 1;
 
 
 my $returned  = Devel::Toolbox::Core::Config::Cascade->get({
-    -paths  => \@paths,     # filesystem paths to search    # q{.}
-#~     -stems  => \@stems,     # filename stems to search      # q{config}
-#~     -flip   => $bool,       # invert cross-join matrix      # undef
-#~     -merge  => $unsnd_int,  # level of flattening           # 1
-#~     -stop   => $unsnd_int,  # stop after so many files      # undef
-#~     -status => $hashref,    # RETURNS status results        writable
-#~     -config => $hashref,    # RETURNS configuration         writable
+    -paths      => \@paths,     # filesystem paths to search
+#~     -stems      => \@stems,     # filename stems to search
+#~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORAGE', 'RETAINMENT'
+#~     -flip       => $bool,       # invert cross-join matrix
+    -merge      => $merge,      # discard filename keys
+#~     -stop       => $natural,    # stop after so many files
+#~     -status     => $hashref,    # RETURNS status results
+#~     -config     => $hashref,    # RETURNS configuration (merged)
 });
 
 ### main script:

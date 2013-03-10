@@ -11,6 +11,8 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
+use Hash::Merge();              # Merge deep hashes into a single hash
+
 #~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 #~     exports     => [ qw( declare ) ],
 #~     groups      => { default => [ qw( declare ) ] },
@@ -38,19 +40,18 @@ my $err     = Error::Base->new(
 
 #=========# EXTERNAL FUNCTION
 #~ my $config  = Devel::Toolbox::Core::Config::Cascade->get({
-#~     -paths  => \@paths,     # filesystem paths to search    # q{.}
-#~     -stems  => \@stems,     # filename stems to search      # q{config}
-#~     -flip   => $bool,       # invert cross-join matrix      # 0
-#~     -merge  => $unsnd_int,  # level of flattening           # 1
-#~     -stop   => $unsnd_int,  # stop after so many files      # undef
-#~     -status => $hashref,    # RETURNS status results        writable
-#~     -config => $hashref,    # RETURNS configuration         writable
+#~     -paths      => \@paths,     # filesystem paths to search
+#~     -stems      => \@strings,   # filename stems to search
+#~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORAGE', 'RETAINMENT'
+#~     -flip       => $bool,       # invert cross-join matrix
+#~     -merge      => $bool,       # discard filename keys
+#~     -stop       => $natural,    # stop after so many files
+#~     -status     => $hashref,    # RETURNS status results
+#~     -config     => $hashref,    # RETURNS configuration (merged)
 #~ });
 #
-#      -merge  => 0,   # no merge; returns each contents keyed to fqfilename
-#      -merge  => 1,   # discard fqfilename keys and merge 'RIGHT_PRECEDENT'
-#      -merge  => 2,   # also collapse all single-item arrays
-#      -merge  => 3,   # also collapse all single-key hashes
+#   ?? -merge  => 2,   # also collapse all single-item arrays
+#   ?? -merge  => 3,   # also collapse all single-key hashes
 #   
 #   
 sub get {
@@ -58,20 +59,32 @@ sub get {
        $args        = shift
         if not ref $args;       # discard class if called as class method
     
-    # Initialize. 
+    # Arguments... 
     #  var                       -key          default
     my @paths       = @{ $args->{-paths}    // [ q{.} ]         };
     my @stems       = @{ $args->{-stems}    // [ q{config} ]    };
+    my $priority    =    $args->{-priority} // 'RIGHT'          ;
     my $flip        =    $args->{-flip}     // 0                ;
     my $merge       =    $args->{-merge}    // 1                ;
     my $stop        =    $args->{-stop}     // undef            ;
     my $status      =    $args->{-status}   // {}               ;
     my $config      =    $args->{-config}   // {}               ;
+    
+    # Fixup; see Hash::Merge 'BUILT-IN BEHAVIORS'.
+    # Don't validate (in case H::M is extended) but be more tolerant
+    $priority       = uc $priority;             # forgive lowercase
+    $priority =~ s/^\W//;                       # forgive a leading symbol
+    $priority =~ s/$|_PRECEDENT$/_PRECEDENT/;   # append if forgotten
+    $priority =~ s/STORE_/STORAGE_/;            # allow some abbreviation
+    $priority =~ s/RETAIN_/RETAINMENT_/;        # allow some abbreviation
+    Hash::Merge::set_behavior( $priority );     # global?
         
+    # Internal use...
     my $eval_err    ;           # don't let $@ get stale
     my @good_files  ;           # files found to contain config data
+    my $raw         = {};       # data as it comes from Config::Any
     
-    # Cross-join; try every stem with every path. Returns AoA.
+    # Cross-join; try every stem with every path.
     my @searches    ;
     for my $path (@paths) {
         for my $stem (@stems) {
@@ -104,14 +117,24 @@ sub get {
         # Save successful searches.
         push @good_files, keys $rv;
         
-        # Merge without possibility of key collision...
+        # "Merge" without possibility of key collision...
         # ... since primary keys are filenames.
-        %$config    = ( %$config, %$rv );
+        %$raw    = ( %$raw, %$rv );
         
     }; ## for searches
     
     ### @good_files
+    ### $raw
     
+    # Merge if requested.
+    if ($merge) {
+        for my $file (@good_files) {
+            $config     = Hash::Merge::merge( $config, $raw->{$file} );
+        };
+    }
+    else {
+        $config     = $raw;
+    }; ## if merge
     
     return $config;
     
