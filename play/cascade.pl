@@ -23,8 +23,11 @@ use Devel::Comments '###';                                               #~
 ## use
 #============================================================================#
 
-my $rv  = Devel::Toolbox::Core::Config::Cascade->get({
-#~     -paths  => \@paths,     # filesystem paths to search    # q{.}
+my @paths   = qw( . play zaamm );
+
+
+my $returned  = Devel::Toolbox::Core::Config::Cascade->get({
+    -paths  => \@paths,     # filesystem paths to search    # q{.}
 #~     -stems  => \@stems,     # filename stems to search      # q{config}
 #~     -flip   => $bool,       # invert cross-join matrix      # undef
 #~     -merge  => $unsnd_int,  # level of flattening           # 1
@@ -34,7 +37,7 @@ my $rv  = Devel::Toolbox::Core::Config::Cascade->get({
 });
 
 ### main script:
-### $rv
+### $returned
 
 
 

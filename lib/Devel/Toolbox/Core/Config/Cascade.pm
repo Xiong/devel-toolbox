@@ -47,6 +47,10 @@ my $err     = Error::Base->new(
 #~     -config => $hashref,    # RETURNS configuration         writable
 #~ });
 #
+#      -merge  => 0,   # no merge; returns each contents keyed to fqfilename
+#      -merge  => 1,   # discard fqfilename keys and merge 'RIGHT_PRECEDENT'
+#      -merge  => 2,   # also collapse all single-item arrays
+#      -merge  => 3,   # also collapse all single-key hashes
 #   
 #   
 sub get {
@@ -65,6 +69,7 @@ sub get {
     my $config      =    $args->{-config}   // {}               ;
         
     my $eval_err    ;           # don't let $@ get stale
+    my @good_files  ;           # files found to contain config data
     
     # Cross-join; try every stem with every path. Returns AoA.
     my @searches    ;
@@ -79,24 +84,33 @@ sub get {
     
     # Search all files and load.
     for my $search (@searches) {
+        # Try to load this search.
         my $rv          ;
         eval { 
             # Read and load the file(s) (with any extension), if possible.
             $rv             = Config::Any->load_stems({ 
-                stems           => \@searches,  # aryref
+                stems           => [$search],   # aryref
                 use_ext         => 1,           # format must match extension
-                    flatten_to_hash => 1,
+                flatten_to_hash => 1,
             });
             # Returns AoH keyed on actual filename.
         };
         $eval_err   = $@;
         ### $eval_err
-        next if $eval_err;                  # not a good stem; keep trying
+        next if $eval_err;                  # keep trying
         ### $rv
-    #~     push @$found, $rv;  # good; store results
+        next if not $rv;                    # nothing found
+        
+        # Save successful searches.
+        push @good_files, keys $rv;
+        
+        # Merge without possibility of key collision...
+        # ... since primary keys are filenames.
+        %$config    = ( %$config, %$rv );
+        
     }; ## for searches
     
-    
+    ### @good_files
     
     
     return $config;
