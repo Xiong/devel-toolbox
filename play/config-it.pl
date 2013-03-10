@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#  config.pl
+#  config-it.pl
 #  =  Copyright 2013 Xiong Changnian <xiong@cpan.org>   =
 #  = Free Software = Artistic License 2.0 = NO WARRANTY =
 
