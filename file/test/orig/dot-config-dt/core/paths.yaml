@@ -1,6 +1,6 @@
 # Locations of config files in sequence
 # Later configs take priority over earlier
-
+config_paths:
 - /usr/share/devel-toolbox/core
 - /usr/local/share/devel-toolbox/core
 - /etc/devel-toolbox/core

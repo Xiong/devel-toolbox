@@ -155,7 +155,7 @@ sub _do_config_any {
     my @paths       = @{ $args->{-paths} };
     my @stems       = @{ $args->{-stems} };
     
-    my $found       = {};       # returns a hashref
+    my $found       = [];       # returns an aryref
     
     my $eval_err    ;           # don't let $@ get stale
     
@@ -177,7 +177,7 @@ sub _do_config_any {
         $rv             = Config::Any->load_stems({ 
             stems           => \@searches,  # aryref
             use_ext         => 1,           # format must match extension
-#~                 flatten_to_hash => 1,
+                flatten_to_hash => 1,
         });
         # Returns AoH keyed on actual filename.
     };
@@ -185,7 +185,7 @@ sub _do_config_any {
     ### $eval_err
     next if $eval_err;                  # not a good stem; keep trying
     ### $rv
-    push @{ $found->{-returns} }, $rv;  # good; store results
+    push @$found, $rv;  # good; store results
     
     ### $found
     return $found;
