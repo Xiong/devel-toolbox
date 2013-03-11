@@ -23,7 +23,7 @@ use Devel::Comments '###';                                               #~
 ## use
 #============================================================================#
 
-my @paths   = qw( play . zaamm );
+my @dirs    = qw( play . zaamm );
 my @stems   = qw( config confoozly );
 my $flip    = 1;
 my $merge   = 0;
@@ -33,21 +33,21 @@ my $config  = {};
 #~ say 'main-before: ', $config;                               # DEBUG ONLY ~#
 
 
-my $returned  = Devel::Toolbox::Core::Config::Cascade->get({
-    -paths      => \@paths,     # filesystem paths to search
+my $return  = Devel::Toolbox::Core::Config::Cascade->get({
+    -dirs       => \@dirs,      # filesystem dirs to search
     -stems      => \@stems,     # filename stems to search
 #~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORAGE', 'RETAINMENT'
 #~     -flip       => $flip,       # invert cross-join matrix
 #~     -merge      => $merge,      # discard filename keys
 #~     -stop       => $stop,       # stop after so many files
-    -status     => \$status,     # RETURNS status results
-    -config     => \$config,     # RETURNS configuration (merged)
+    -status     => $status,     # RETURNS status results
+    -config     => $config,     # RETURNS configuration (merged)
 });
 #~ say 'main-after: ', $config;                                # DEBUG ONLY ~#
 ### main script:
 ### $status
-#~ ### $config
-### $returned
+### $config
+### $return
 
 
 

@@ -23,7 +23,7 @@ use Hash::Merge();              # Merge deep hashes into a single hash
 #~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -40,7 +40,7 @@ my $err     = Error::Base->new(
 
 #=========# EXTERNAL FUNCTION
 #~ my $config  = Devel::Toolbox::Core::Config::Cascade->get({
-#~     -dirs      => \@dirs,     # filesystem dirs to search
+#~     -dirs       => \@dirs,      # filesystem dirs to search
 #~     -stems      => \@strings,   # filename stems to search
 #~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
 #~     -flip       => $bool,       # invert cross-join matrix
@@ -66,12 +66,12 @@ sub get {
     my $flip        =    $args->{-flip}     // 0                ;
     my $merge       =    $args->{-merge}    // 1                ;
     my $stop        =    $args->{-stop}     // undef            ;
-    my $status      = ${ $args->{-status}   // \{}              };
-    my $config      = ${ $args->{-config}   // \{}              };
+    my $status      =    $args->{-status}   // \{}              ; # RETURNS
+    my $config      =    $args->{-config}   // \{}              ; # RETURNS
 #~ say 'cascade-before: ', $config;                            # DEBUG ONLY ~#
     
     # Fixup; see Hash::Merge 'BUILT-IN BEHAVIORS'.
-    # Don't validate (in case H::M is extended) but be more tolerant
+    # Don't validate (in case H::M is extended) but be more tolerant...
     $priority       = uc $priority;             # forgive lowercase
     $priority =~ s/^\W//;                       # forgive a leading symbol
     $priority =~ s/$|_PRECEDENT$/_PRECEDENT/;   # append if forgotten
@@ -157,8 +157,6 @@ sub get {
     
     
 #~ say 'cascade-after: ', $config;                             # DEBUG ONLY ~#
-#~     $args->{-status}    = \$status;
-#~     $args->{-config}    = \$config;
     return $config;
 }; ## get
 
