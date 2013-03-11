@@ -66,8 +66,8 @@ sub get {
     my $flip        =    $args->{-flip}     // 0                ;
     my $merge       =    $args->{-merge}    // 1                ;
     my $stop        =    $args->{-stop}     // undef            ;
-    my $status      =    $args->{-status}   // \{}              ; # RETURNS
-    my $config      =    $args->{-config}   // \{}              ; # RETURNS
+    my $status      =    $args->{-status}   // {}               ; # RETURNS
+    my $config      =    $args->{-config}   // {}               ; # RETURNS
 #~ say 'cascade-before: ', $config;                            # DEBUG ONLY ~#
     
     # Fixup; see Hash::Merge 'BUILT-IN BEHAVIORS'.

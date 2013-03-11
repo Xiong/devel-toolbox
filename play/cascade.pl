@@ -40,8 +40,8 @@ my $return  = Devel::Toolbox::Core::Config::Cascade->get({
 #~     -flip       => $flip,       # invert cross-join matrix
 #~     -merge      => $merge,      # discard filename keys
 #~     -stop       => $stop,       # stop after so many files
-    -status     => $status,     # RETURNS status results
-    -config     => $config,     # RETURNS configuration (merged)
+#~     -status     => $status,     # RETURNS status results
+#~     -config     => $config,     # RETURNS configuration (merged)
 });
 #~ say 'main-after: ', $config;                                # DEBUG ONLY ~#
 ### main script:
