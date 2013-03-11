@@ -58,6 +58,7 @@ sub get {
     my $args        = shift;
        $args        = shift
         if not ref $args;       # discard class if called as class method
+    ### $args
     
     # Arguments... 
     #  var                       -key          default
@@ -67,8 +68,9 @@ sub get {
     my $flip        =    $args->{-flip}     // 0                ;
     my $merge       =    $args->{-merge}    // 1                ;
     my $stop        =    $args->{-stop}     // undef            ;
-    my $status      =    $args->{-status}   // {}               ;
-    my $config      =    $args->{-config}   // {}               ;
+    my $status      = ${ $args->{-status} } // {}               ;
+    my $config      = ${ $args->{-config} } // {}               ;
+#~ say 'cascade-before: ', $config;                            # DEBUG ONLY ~#
     
     # Fixup; see Hash::Merge 'BUILT-IN BEHAVIORS'.
     # Don't validate (in case H::M is extended) but be more tolerant
@@ -91,12 +93,13 @@ sub get {
             push @searches, File::Spec->catfile( $path, $stem );
         };
     };
-    ### @paths
-    ### @stems
-    ### @searches
+#~     ### @paths
+#~     ### @stems
+#~     ### @searches
     
     # Search all files and load.
     for my $search (@searches) {
+#~         ### $search
         # Try to load this search.
         my $rv          ;
         eval { 
@@ -109,35 +112,46 @@ sub get {
             # Returns AoH keyed on actual filename.
         };
         $eval_err   = $@;
-        ### $eval_err
+#~         ### $eval_err
         next if $eval_err;                  # keep trying
-        ### $rv
-        next if not $rv;                    # nothing found
+#~         ### $rv
+        next if not $rv;                    # didn't even return a hashref
         
         # Save successful searches.
+#~         ### PUSH
         push @good_files, keys $rv;
         
         # "Merge" without possibility of key collision...
-        # ... since primary keys are filenames.
+        # ... since primary keys are fqfilenames.
         %$raw    = ( %$raw, %$rv );
         
+        # Is that enough files?
+        if ( defined $stop ) {
+            last if scalar @good_files >= $stop;
+        };
+        
     }; ## for searches
+    $status->{-good_files}  = \@good_files;
     
     ### @good_files
     ### $raw
     
-    # Merge if requested.
+    # Merge out filename keys if requested.
+    # Operate on the underlying hash, not on the reference. 
     if ($merge) {
         for my $file (@good_files) {
-            $config     = Hash::Merge::merge( $config, $raw->{$file} );
+            %$config     = %{ Hash::Merge::merge( $config, $raw->{$file} ) };
         };
     }
     else {
-        $config     = $raw;
+        %$config     = %$raw;
     }; ## if merge
     
-    return $config;
     
+#~ say 'cascade-after: ', $config;                             # DEBUG ONLY ~#
+#~     $args->{-status}    = \$status;
+#~     $args->{-config}    = \$config;
+    return $config;
 }; ## get
 
 

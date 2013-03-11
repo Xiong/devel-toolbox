@@ -24,7 +24,11 @@ use Devel::Comments '###';                                               #~
 #============================================================================#
 
 my @paths   = qw( . play zaamm );
-my $merge   = 1;
+my $merge   = 0;
+my $stop    = 1;
+my $status  = {};
+my $config  = {};
+#~ say 'main-before: ', $config;                               # DEBUG ONLY ~#
 
 
 my $returned  = Devel::Toolbox::Core::Config::Cascade->get({
@@ -32,15 +36,16 @@ my $returned  = Devel::Toolbox::Core::Config::Cascade->get({
 #~     -stems      => \@stems,     # filename stems to search
 #~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORAGE', 'RETAINMENT'
 #~     -flip       => $bool,       # invert cross-join matrix
-    -merge      => $merge,      # discard filename keys
-#~     -stop       => $natural,    # stop after so many files
-#~     -status     => $hashref,    # RETURNS status results
-#~     -config     => $hashref,    # RETURNS configuration (merged)
+#~     -merge      => $merge,      # discard filename keys
+#~     -stop       => $stop,       # stop after so many files
+    -status     => \$status,     # RETURNS status results
+    -config     => \$config,     # RETURNS configuration (merged)
 });
-
+#~ say 'main-after: ', $config;                                # DEBUG ONLY ~#
 ### main script:
 ### $returned
-
+### $status
+### $config
 
 
 
