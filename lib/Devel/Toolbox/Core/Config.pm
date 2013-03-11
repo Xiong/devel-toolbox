@@ -19,7 +19,7 @@ use Config::Any;                # Load configs from any file format
 # Project modules
 #~ use Devel::Toolbox;             # Simple custom project tool management
 #~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
-use Devel::Toolbox::Core::Config::Primary;  # get config paths IMPORTANT HERE!
+use Devel::Toolbox::Core::Config::Master;   # get master dirs  IMPORTANT HERE!
 use Devel::Toolbox::Core::Config::Cascade;  # get config data  IMPORTANT HERE!
 
 # Alternate uses
@@ -41,34 +41,33 @@ my $err     = Error::Base->new(
 #=========# EXTERNAL FUNCTION
 #~     load_files();     # load all config files and merge contents into $U
 #
-#   $paths is an aryref of paths to search for paths.* file
-#   $config_paths is contents of paths.* file
+#   $master_dirs is an aryref of dirs to search for master.* file
+#   $config_dirs is contents of master.* file
 #   $u is the parsed config to merge to $U
 #   
-#       In other words: 
-#   Primary::DATA    contains a list of paths to search for the master paths.*
-#   paths.*          contains a list of paths to search for config.* files
-#   */config.* files contain config data
+#   ::Master::DATA      $master_dirs    contain master.* file
+#   master.*            $config_dirs    contain config.* files
+#   */config.* files    $u              contains config data
 #   
 sub load_files {
-    my $paths       ;           # aryref:  search for paths.* file
-    my $config_paths;           # hashref:  search for config files
+    my $master_dirs ;           # hashref: search for master.* file
+    my $config_dirs ;           # hashref: search for config files
     my $u           ;           # hashref: config data
     
-    my $paths_stems     = [qw( paths foo )];
+    my $master_stems    = [qw( master foo )];
     
-    # Get primary config path(s).
-    $paths      = Devel::Toolbox::Core::Config::Primary::get_paths();
+    # Get primary config dir(s).
+    $master_dirs        = get_master_dirs();
 #~     ### Config - before interpolation
-#~     ### $paths
-    _interpolate_placeholders(@$paths);
+#~     ### $master_dirs
+    _interpolate_placeholders(@$master_dirs);
     ### Config - after interpolation
-    ### $paths
+    ### $master_dirs
     
     # Search for config files.
-    $config_paths       = Devel::Toolbox::Core::Config::Cascade->get({
-        -paths      => $paths,          # filesystem paths to search
-        -stems      => $paths_stems,   # filename stems to search
+    $config_dirs       = Devel::Toolbox::Core::Config::Cascade->get({
+        -dirs       => $master_dirs,    # filesystem dirs to search
+        -stems      => $master_stems,   # filename stems to search
 #~         -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
 #~         -flip       => $bool,       # invert cross-join matrix
 #~         -merge      => $bool,       # discard filename keys
@@ -78,10 +77,10 @@ sub load_files {
     });
     
     ### Config - before interpolation
-    ### $config_paths
-    _interpolate_placeholders( @{ $config_paths->{'config_paths'} } );
+    ### $config_dirs
+    _interpolate_placeholders( @{ $config_dirs->{'config_dirs'} } );
     ### Config - after interpolation
-    ### $config_paths
+    ### $config_dirs
     
     # Now (attempt to) load all config files.
     
@@ -128,55 +127,6 @@ sub _interpolate_placeholders {
     @_          = map { s|/\$user/|/$user/|g; $_ } @_;  # This is not fancy. 
 
 }; ## _interpolate_placeholders
-
-#=========# INTERNAL FUNCTION
-#~     $hashref    = _do_config_any({
-#~         -paths      => \@paths,         # paths only
-#~         -stems      => \@stems,         # filename stems; C::A will search
-#~     });
-#
-#   
-#   
-sub _do_config_any {
-    my $args        = shift;
-    my @paths       = @{ $args->{-paths} };
-    my @stems       = @{ $args->{-stems} };
-    
-    my $found       = [];       # returns an aryref
-    
-    my $eval_err    ;           # don't let $@ get stale
-    
-    # Cross-join; try every stem with every path. Returns AoA.
-    my @searches    ;
-    for my $path (@paths) {
-        for my $stem (@stems) {
-            push @searches, File::Spec->catfile( $path, $stem );
-        };
-    };
-    ### @paths
-    ### @stems
-    ### @searches
-    
-    # Search all files and load.
-    my $rv          ;
-    eval { 
-        # Read and load the file(s) (with any extension), if possible.
-        $rv             = Config::Any->load_stems({ 
-            stems           => \@searches,  # aryref
-            use_ext         => 1,           # format must match extension
-                flatten_to_hash => 1,
-        });
-        # Returns AoH keyed on actual filename.
-    };
-    $eval_err   = $@;
-    ### $eval_err
-    next if $eval_err;                  # not a good stem; keep trying
-    ### $rv
-    push @$found, $rv;  # good; store results
-    
-    ### $found
-    return $found;
-}; ## _do_config_any
 
 #=========# EXTERNAL FUNCTION
 #~     function();     # short

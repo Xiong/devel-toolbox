@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Devel::Toolbox::Core::Config::Primary;      # Starting point for configs
+use Devel::Toolbox::Core::Config::Master;       # Starting point for configs
 
 # Compiled regexes
 our $QRFALSE            = qr/\A0?\z/            ;
@@ -14,7 +14,7 @@ our $QRTRUE             = qr/\A(?!$QRFALSE)/    ;
 #----------------------------------------------------------------------------#
 
 my $tc          ;
-my $base        = 'Devel::Toolbox::Core::Config::Primary::get_paths(): ';
+my $base        = 'Devel::Toolbox::Core::Config::Master::get_master_paths(): ';
 my $diag        = $base;
 my @rv          ;
 my $got         ;
@@ -31,10 +31,10 @@ my $Verbose     = 0;
 
 $diag   = $base . 'execute';
 $tc++;
-my $config  = Devel::Toolbox::Core::Config::Primary::get_paths();
+my $config  = Devel::Toolbox::Core::Config::Master::get_master_paths();
 pass($diag);
 
-note('Primary config paths: ');
+note('Master config paths: ');
 note(":$_") for @$config;
 note('____');
 exit;

@@ -40,7 +40,7 @@ my $err     = Error::Base->new(
 
 #=========# EXTERNAL FUNCTION
 #~ my $config  = Devel::Toolbox::Core::Config::Cascade->get({
-#~     -paths      => \@paths,     # filesystem paths to search
+#~     -dirs      => \@dirs,     # filesystem dirs to search
 #~     -stems      => \@strings,   # filename stems to search
 #~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
 #~     -flip       => $bool,       # invert cross-join matrix
@@ -60,7 +60,7 @@ sub get {
     
     # Arguments... 
     #  var                       -key          default
-    my @paths       = @{ $args->{-paths}    // [ q{.} ]         };
+    my @dirs        = @{ $args->{-dirs}     // [ q{.} ]         };
     my @stems       = @{ $args->{-stems}    // [ q{config} ]    };
     my $priority    =    $args->{-priority} // 'RIGHT'          ;
     my $flip        =    $args->{-flip}     // 0                ;
@@ -84,24 +84,24 @@ sub get {
     my @good_files  ;           # files found to contain config data
     my $raw         = {};       # data as it comes from Config::Any
     
-    # Cross-join; try every stem with every path.
+    # Cross-join; try every stem with every directory.
     my @searches    ;
     if ( not $flip ) {          # i, j
-        for my $path (@paths) {
+        for my $dir (@dirs) {
             for my $stem (@stems) {
-                push @searches, File::Spec->catfile( $path, $stem );
+                push @searches, File::Spec->catfile( $dir, $stem );
             };
         };
     }
     else {                      # j, i
         for my $stem (@stems) {
-            for my $path (@paths) {
-                push @searches, File::Spec->catfile( $path, $stem );
+            for my $dir (@dirs) {
+                push @searches, File::Spec->catfile( $dir, $stem );
             };
         };
     }; ## if not flip else flip
     
-#~     ### @paths
+#~     ### @dirs
 #~     ### @stems
 #~     ### @searches
     

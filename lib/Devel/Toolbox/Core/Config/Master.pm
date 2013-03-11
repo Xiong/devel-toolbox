@@ -1,4 +1,4 @@
-package Devel::Toolbox::Core::Config::Primary;
+package Devel::Toolbox::Core::Config::Master;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
@@ -10,11 +10,10 @@ use version; our $VERSION = qv('v0.0.0');
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-#~ use Class::Inspector;           # Get info about a class and its structure
-#~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
-#~     exports     => [ qw( declare ) ],
-#~     groups      => { default => [ qw( declare ) ] },
-#~ };
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports     => [ qw( get_master_dirs ) ],
+    groups      => { default => [ qw( get_master_dirs ) ] },
+};
 
 # Project modules
 #~ use Devel::Toolbox;             # Simple custom project tool management
@@ -28,7 +27,7 @@ use Error::Base;                # Simple structured errors with full backtrace
 #============================================================================#
 # Pseudo-globals
 my $err     = Error::Base->new(
-    -base   => '! DTC-Config-Primary:',
+    -base   => '! DTC-Config-Master:',
     _close  => 'Failed to close DATA after reading.',
 );
 #~ our $U      = get_global_pool();            # common to all toolsets
@@ -38,25 +37,25 @@ my $err     = Error::Base->new(
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~     $paths  = get_paths();     # get primary config paths
+#~     $dirs  = get_master_dirs();     # get dirs to master.* file
 #
 #   
 #   
-sub get_paths {
-    my $paths       ;
-    @$paths         = <DATA>;
+sub get_master_dirs {
+    my $dirs       ;
+    @$dirs         = <DATA>;
     close DATA 
         or $err->crash ( $err->{ _close } );
     
     # Filter out comments and similar rubbish.
-    chomp @$paths;
+    chomp @$dirs;
     my $qr_comment  = qr/^\s*#/;
     my $qr_empty    = qr/^\s*$/;
-    @$paths         = grep { not /$qr_comment|$qr_empty/ } @$paths;
+    @$dirs         = grep { not /$qr_comment|$qr_empty/ } @$dirs;
     
-    ### $paths
-    return $paths;
-}; ## get_paths
+    ### $dirs
+    return $dirs;
+}; ## get_master_dirs
 
 
 
@@ -66,15 +65,15 @@ sub get_paths {
 
 =head1 NAME
 
-Devel::Toolbox::Core::Config::Primary - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Config::Master - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::Config::Primary version v0.0.0
+This document describes Devel::Toolbox::Core::Config::Master version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::Config::Primary;
+    use Devel::Toolbox::Core::Config::Master;
 
 =head1 DESCRIPTION
 
@@ -183,17 +182,17 @@ its very own section. Sorry if you disagree.
 =cut
 
 __DATA__
-# Location of the primary config path file, paths.* 
+# Location(s) of the master config directory file, master.* 
 #   You may edit *here* and move that file. 
-# This is not the place to list all the config files you have; 
-#   ideally there is only one path *here*. 
-# If multiple paths are given here, 
-#   they will be searched until a 'paths' file is found.
-#   So first in the list takes priority over any later.  
+# *This* is not the place to list all the config files you have; 
+#   ideally there is only one directory *here*. 
+# If multiple dirs are given *here*, 
+#   they will be searched until a master file is found.
+#   Search will halt after the first master file is found.  
 #
-# paths.* may be any file accepted by Config::Any. 
-# The 'paths' file contains paths to all config files; see which. 
-# This information may be modified when this module is installed. 
+# master.* may be any file accepted by Config::Any, with correct extension. 
+# The master.* file contains dirs to all config files; see which. 
+# *This* information may be modified when this module is installed. 
 
 /usr/share/devel-toolbox/core
 /usr/local/share/devel-toolbox/core
