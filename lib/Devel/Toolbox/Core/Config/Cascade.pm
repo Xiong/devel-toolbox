@@ -13,10 +13,11 @@ use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
 use Hash::Merge();              # Merge deep hashes into a single hash
 
-#~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
-#~     exports     => [ qw( declare ) ],
-#~     groups      => { default => [ qw( declare ) ] },
-#~ };
+# Exports
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports     => [ qw( get ) ],
+    groups      => { default => [ qw( get ) ] },
+};
 
 # Project modules
 #~ use Devel::Toolbox;             # Simple custom project tool management

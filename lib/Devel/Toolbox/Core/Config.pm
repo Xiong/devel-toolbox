@@ -11,6 +11,8 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
+
+# Exports
 #~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 #~     exports     => [ qw( declare ) ],
 #~     groups      => { default => [ qw( declare ) ] },
@@ -19,9 +21,10 @@ use Config::Any;                # Load configs from any file format
 # Project modules
 #~ use Devel::Toolbox;             # Simple custom project tool management
 #~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
-use Devel::Toolbox::Core::Config::Master;   # get master dirs  IMPORTANT HERE!
-use Devel::Toolbox::Core::Config::Cascade;  # get config data  IMPORTANT HERE!
-
+use Devel::Toolbox::Core::Config::Master    # get master dirs  IMPORTANT HERE!
+    'get_master_dirs';
+use Devel::Toolbox::Core::Config::Cascade   # get config data  IMPORTANT HERE!
+    get => { -as => 'get_cascaded' };
 # Alternate uses
 use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -50,11 +53,12 @@ my $err     = Error::Base->new(
 #   */config.* files    $u              contains config data
 #   
 sub load_files {
-    my $master_dirs ;           # hashref: search for master.* file
-    my $config_dirs ;           # hashref: search for config files
-    my $u           ;           # hashref: config data
+    my $master_dirs = {};           # search for master.* file
+    my $config_dirs = {};           # search for config files
+    my $u           = {};           # config data
     
-    my $master_stems    = [qw( master foo )];
+    my $master_stems    = [qw( master foo )];   # master.yaml, master.ini,...
+    my $config_stems    = [qw( config )];       # config.yaml, config.pl,...
     
     # Get primary config dir(s).
     $master_dirs        = get_master_dirs();
@@ -65,7 +69,7 @@ sub load_files {
     ### $master_dirs
     
     # Search for config files.
-    $config_dirs       = Devel::Toolbox::Core::Config::Cascade->get({
+    $config_dirs        = get_cascaded({
         -dirs       => $master_dirs,    # filesystem dirs to search
         -stems      => $master_stems,   # filename stems to search
 #~         -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
@@ -76,23 +80,26 @@ sub load_files {
 #~         -config     => $hashref,    # RETURNS configuration (merged)
     });
     
-    ### Config - before interpolation
-    ### $config_dirs
+#~     ### Config - before interpolation
+#~     ### $config_dirs
     _interpolate_placeholders( @{ $config_dirs->{'config_dirs'} } );
     ### Config - after interpolation
     ### $config_dirs
     
     # Now (attempt to) load all config files.
-    
-    
-    
-    
-    
+    my $config          = get_cascaded({
+        -dirs       => $config_dirs,    # filesystem dirs to search
+        -stems      => $config_stems,   # filename stems to search
+#~         -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
+#~         -flip       => $bool,       # invert cross-join matrix
+#~         -merge      => $bool,       # discard filename keys
+#~         -stop       => $natural,    # stop after so many files
+#~         -status     => $hashref,    # RETURNS status results
+        -config     => $u,          # RETURNS configuration (merged)
+    });
     
     
     ### $u
-    
-    
 }; ## load_files
 
 #=========# EXTERNAL FUNCTION
