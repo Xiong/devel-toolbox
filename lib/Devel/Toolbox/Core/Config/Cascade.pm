@@ -42,7 +42,7 @@ my $err     = Error::Base->new(
 #~ my $config  = Devel::Toolbox::Core::Config::Cascade->get({
 #~     -paths      => \@paths,     # filesystem paths to search
 #~     -stems      => \@strings,   # filename stems to search
-#~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORAGE', 'RETAINMENT'
+#~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
 #~     -flip       => $bool,       # invert cross-join matrix
 #~     -merge      => $bool,       # discard filename keys
 #~     -stop       => $natural,    # stop after so many files
@@ -50,8 +50,6 @@ my $err     = Error::Base->new(
 #~     -config     => $hashref,    # RETURNS configuration (merged)
 #~ });
 #
-#   ?? -merge  => 2,   # also collapse all single-item arrays
-#   ?? -merge  => 3,   # also collapse all single-key hashes
 #   
 #   
 sub get {
@@ -68,8 +66,8 @@ sub get {
     my $flip        =    $args->{-flip}     // 0                ;
     my $merge       =    $args->{-merge}    // 1                ;
     my $stop        =    $args->{-stop}     // undef            ;
-    my $status      = ${ $args->{-status} } // {}               ;
-    my $config      = ${ $args->{-config} } // {}               ;
+    my $status      = ${ $args->{-status}   // \{}              };
+    my $config      = ${ $args->{-config}   // \{}              };
 #~ say 'cascade-before: ', $config;                            # DEBUG ONLY ~#
     
     # Fixup; see Hash::Merge 'BUILT-IN BEHAVIORS'.

@@ -20,6 +20,7 @@ use Config::Any;                # Load configs from any file format
 #~ use Devel::Toolbox;             # Simple custom project tool management
 #~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 use Devel::Toolbox::Core::Config::Primary;  # get config paths IMPORTANT HERE!
+use Devel::Toolbox::Core::Config::Cascade;  # get config data  IMPORTANT HERE!
 
 # Alternate uses
 use Devel::Comments '###';                                               #~
@@ -41,13 +42,20 @@ my $err     = Error::Base->new(
 #~     load_files();     # load all config files and merge contents into $U
 #
 #   $paths is an aryref of paths to search for paths.* file
-#   $configs is contents of paths.* file
+#   $config_paths is contents of paths.* file
 #   $u is the parsed config to merge to $U
 #   
+#       In other words: 
+#   Primary::DATA    contains a list of paths to search for the master paths.*
+#   paths.*          contains a list of paths to search for config.* files
+#   */config.* files contain config data
+#   
 sub load_files {
-    my $u           ;           # hashref: config data
-    my $configs     ;           # aryref:  search for config files
     my $paths       ;           # aryref:  search for paths.* file
+    my $config_paths;           # hashref:  search for config files
+    my $u           ;           # hashref: config data
+    
+    my $paths_stems     = [qw( paths foo )];
     
     # Get primary config path(s).
     $paths      = Devel::Toolbox::Core::Config::Primary::get_paths();
@@ -57,44 +65,23 @@ sub load_files {
     ### Config - after interpolation
     ### $paths
     
-    $configs    = _do_config_any({
-        -paths      => $paths,          # searching for paths.* file
-        -stems      => ['paths', 'foo'],       # stem of paths.* file
+    # Search for config files.
+    $config_paths       = Devel::Toolbox::Core::Config::Cascade->get({
+        -paths      => $paths,          # filesystem paths to search
+        -stems      => $paths_stems,   # filename stems to search
+#~         -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
+#~         -flip       => $bool,       # invert cross-join matrix
+#~         -merge      => $bool,       # discard filename keys
+#~         -stop       => $natural,    # stop after so many files
+#~         -status     => $hashref,    # RETURNS status results
+#~         -config     => $hashref,    # RETURNS configuration (merged)
     });
     
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#    # FLATTEN-OUT LOGIC -- TODO
-    
-#    #~             ### $rv;
-#    #~             say 'KEYS: ';
-#    #~             say for keys %$rv;
-#                my ($key)   = keys %$rv;        # force list context
-#    #~             ### $key;
-#                die 'NO KEY' if not $key;       # get out now; avoid warning
-#                $configs    = $rv->{$key};      # get the aryref
-    
-#            next if not $configs;               # found only a bad file
-            
-#            # Store the location of the good file.
-#            $u->{-core}{-path}{-paths_file}     = $try;
-    
-#        # Crash on failure.
-#        if ( not $configs ) {
-#            @$paths     = map { qq{\n} . $_ } @$paths;
-#            $err->crash([ 
-#                "Can't find any primary config path file, 'paths.*'" , qq{\n},
-#                " Searched:", @$paths,
-#            ])
-#        };
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-
     ### Config - before interpolation
-    ### $configs
-#~     _interpolate_placeholders(@$configs);
-#~     ### Config - after interpolation
-#~     ### $configs
+    ### $config_paths
+    _interpolate_placeholders( @{ $config_paths->{'config_paths'} } );
+    ### Config - after interpolation
+    ### $config_paths
     
     # Now (attempt to) load all config files.
     
