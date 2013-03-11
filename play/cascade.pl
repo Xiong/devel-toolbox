@@ -23,7 +23,9 @@ use Devel::Comments '###';                                               #~
 ## use
 #============================================================================#
 
-my @paths   = qw( . play zaamm );
+my @paths   = qw( play . zaamm );
+my @stems   = qw( config confoozly );
+my $flip    = 1;
 my $merge   = 0;
 my $stop    = 1;
 my $status  = {};
@@ -33,9 +35,9 @@ my $config  = {};
 
 my $returned  = Devel::Toolbox::Core::Config::Cascade->get({
     -paths      => \@paths,     # filesystem paths to search
-#~     -stems      => \@stems,     # filename stems to search
+    -stems      => \@stems,     # filename stems to search
 #~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORAGE', 'RETAINMENT'
-#~     -flip       => $bool,       # invert cross-join matrix
+#~     -flip       => $flip,       # invert cross-join matrix
 #~     -merge      => $merge,      # discard filename keys
 #~     -stop       => $stop,       # stop after so many files
     -status     => \$status,     # RETURNS status results
@@ -43,9 +45,9 @@ my $returned  = Devel::Toolbox::Core::Config::Cascade->get({
 });
 #~ say 'main-after: ', $config;                                # DEBUG ONLY ~#
 ### main script:
-### $returned
 ### $status
-### $config
+#~ ### $config
+### $returned
 
 
 

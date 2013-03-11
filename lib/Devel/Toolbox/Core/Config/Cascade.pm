@@ -88,11 +88,21 @@ sub get {
     
     # Cross-join; try every stem with every path.
     my @searches    ;
-    for my $path (@paths) {
-        for my $stem (@stems) {
-            push @searches, File::Spec->catfile( $path, $stem );
+    if ( not $flip ) {          # i, j
+        for my $path (@paths) {
+            for my $stem (@stems) {
+                push @searches, File::Spec->catfile( $path, $stem );
+            };
         };
-    };
+    }
+    else {                      # j, i
+        for my $stem (@stems) {
+            for my $path (@paths) {
+                push @searches, File::Spec->catfile( $path, $stem );
+            };
+        };
+    }; ## if not flip else flip
+    
 #~     ### @paths
 #~     ### @stems
 #~     ### @searches
