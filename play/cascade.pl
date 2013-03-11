@@ -29,7 +29,7 @@ my $flip    = 1;
 my $merge   = 0;
 my $stop    = 1;
 my $status  = {};
-my $config  = {};
+my $config  = { -try => 'fail' };
 #~ say 'main-before: ', $config;                               # DEBUG ONLY ~#
 
 
