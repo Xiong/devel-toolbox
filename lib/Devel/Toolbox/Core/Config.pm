@@ -53,17 +53,22 @@ my $err     = Error::Base->new(
 #   */config.* files    $u              contains config data
 #   
 sub load_files {
-    my $master_dirs = {};           # search for master.* file
-    my $config_dirs = {};           # search for config files
-    my $u           = {};           # config data
-    
+    my $master_href     = {};       # returned from get_master_dirs
+    my $master_dirs     = [];       # search for master.* file
     my $master_stems    = [qw( master foo )];   # master.yaml, master.ini,...
+    
+    my $config_href     = {};       # returned from get_cascaded($master_dirs)
+    my $config_dirs     = [];       # search for config files
     my $config_stems    = [qw( config )];       # config.yaml, config.pl,...
     
+    my $u               = {};       # returned from get_cascaded($config_dirs)
+                                    # ... is config data
+    
     # Get primary config dir(s).
-    $master_dirs        = get_master_dirs();
+    $master_href        = get_master_dirs();
 #~     ### Config - before interpolation
-#~     ### $master_dirs
+#~     ### $master_href
+    $master_stems, $
     _interpolate_placeholders(@$master_dirs);
     ### Config - after interpolation
     ### $master_dirs

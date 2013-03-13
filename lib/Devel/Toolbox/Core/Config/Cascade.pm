@@ -12,6 +12,8 @@ use File::Spec;                 # Portably perform operations on file names
 use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
 use Hash::Merge();              # Merge deep hashes into a single hash
+use Scalar::Util                # General-utility scalar subroutines
+    qw( reftype );
 
 # Exports
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
@@ -41,14 +43,13 @@ my $err     = Error::Base->new(
 
 #=========# EXTERNAL FUNCTION
 #~ my $config  = Devel::Toolbox::Core::Config::Cascade->get({
-#~     -dirs       => \@dirs,      # filesystem dirs to search
-#~     -stems      => \@strings,   # filename stems to search
+#~     -search     => $ref,        # stems => dirs
 #~     -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
-#~     -flip       => $bool,       # invert cross-join matrix
-#~     -merge      => $bool,       # discard filename keys
+#~     -join       => $literal,    # cross-join choices: TRUE, FALSE, 'flip'
+#~     -flatten    => $natural,    # discard so many keys
 #~     -stop       => $natural,    # stop after so many files
 #~     -status     => $hashref,    # RETURNS status results
-#~     -config     => $hashref,    # RETURNS configuration (merged)
+#~     -config     => $ref,        # RETURNS config contents
 #~ });
 #
 #   
@@ -61,8 +62,7 @@ sub get {
     
     # Arguments... 
     #  var                       -key          default
-    my @dirs        = @{ $args->{-dirs}     // [ q{.} ]         };
-    my @stems       = @{ $args->{-stems}    // [ q{config} ]    };
+    my $search      =    $args->{-search}   // [ { config => '.' } ]
     my $priority    =    $args->{-priority} // 'RIGHT'          ;
     my $flip        =    $args->{-flip}     // 0                ;
     my $merge       =    $args->{-merge}    // 1                ;
@@ -84,37 +84,50 @@ sub get {
     my $eval_err    ;           # don't let $@ get stale
     my @good_files  ;           # files found to contain config data
     my $raw         = {};       # data as it comes from Config::Any
+    my @scouts      ;           # each dir/stem
     
-    # Cross-join; try every stem with every directory.
-    my @searches    ;
+    # Handle different refs passed as the search...
+    # ... may be AoHoA, HoA, or just aryref
+    # Build them up to AoHoA anyway:
+    # $search = [
+    #     a_stem     => [qw( c_dir d_dir )],
+    #     b_stem     => [qw( e_dir f_dir )],
+    # ];
+    my $outer_type  = reftype $search;
+    my $inner_type NO NO NO
+    
+    
+    
+    
+    # Assign scouts to specific targets of search.
     if ( not $flip ) {          # i, j
         for my $dir (@dirs) {
             for my $stem (@stems) {
-                push @searches, File::Spec->catfile( $dir, $stem );
+                push @scouts, File::Spec->catfile( $dir, $stem );
             };
         };
     }
     else {                      # j, i
         for my $stem (@stems) {
             for my $dir (@dirs) {
-                push @searches, File::Spec->catfile( $dir, $stem );
+                push @scouts, File::Spec->catfile( $dir, $stem );
             };
         };
     }; ## if not flip else flip
     
 #~     ### @dirs
 #~     ### @stems
-#~     ### @searches
+#~     ### @scouts
     
-    # Search all files and load.
-    for my $search (@searches) {
-#~         ### $search
-        # Try to load this search.
-        my $rv          ;
+    # Send out scouts and load targets.
+    for my $scout (@scouts) {
+#~         ### $scout
+        # This scout...
+        my $rv          ;                   # results of this scout
         eval { 
             # Read and load the file(s) (with any extension), if possible.
             $rv             = Config::Any->load_stems({ 
-                stems           => [$search],   # aryref
+                stems           => [$scout],    # aryref
                 use_ext         => 1,           # format must match extension
                 flatten_to_hash => 1,
             });
@@ -126,7 +139,7 @@ sub get {
 #~         ### $rv
         next if not $rv;                    # didn't even return a hashref
         
-        # Save successful searches.
+        # Save successful scouts.
 #~         ### PUSH
         push @good_files, keys $rv;
         
@@ -139,7 +152,7 @@ sub get {
             last if scalar @good_files >= $stop;
         };
         
-    }; ## for searches
+    }; ## for scouts
     $status->{-good_files}  = \@good_files;
     
     ### @good_files
