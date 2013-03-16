@@ -11,11 +11,11 @@ use version; our $VERSION = qv('v0.0.0');
 # Core modules
 use lib 'lib';
 
-# Project module
+# Project moduleS
 # Define pool first! 
 BEGIN {                         #    $::U or $main::U
-    $::U      = {}; 
-    say 'dt-BEGIN: ', $::U;
+    $::U      = {};             # package variable escapes BEGIN block
+#~ say 'dt-BEGIN: ', $::U;                                      DEBUG ONLY  #~
     # Make get_global_pool work now.
     use Devel::Toolbox::Core::Pool qw( -main );
     init_global_pool($::U);

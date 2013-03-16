@@ -11,6 +11,7 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
+use Hash::Merge();              # Merge deep hashes into a single hash
 
 # Exports
 #~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
@@ -19,12 +20,13 @@ use Config::Any;                # Load configs from any file format
 #~ };
 
 # Project modules
-#~ use Devel::Toolbox;             # Simple custom project tool management
-#~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
-use Devel::Toolbox::Core::Config::Master    # get master dirs  IMPORTANT HERE!
-    'get_master_dirs';
-use Devel::Toolbox::Core::Config::Cascade   # get config data  IMPORTANT HERE!
-    get => { -as => 'get_cascaded' };
+use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
+    qw( merge_global_pool );
+#~ use Devel::Toolbox::Core::Config::Master    # get master dirs  IMPORTANT HERE!
+#~     'get_master_dirs';
+#~ use Devel::Toolbox::Core::Config::Cascade   # get config data  IMPORTANT HERE!
+#~     get => { -as => 'get_cascaded' };
 # Alternate uses
 use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -35,77 +37,24 @@ use Devel::Comments '###';                                               #~
 my $err     = Error::Base->new(
     -base   => '! DTC-Config:',
 );
-#~ our $U      = get_global_pool();            # common to all toolsets
+our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~     load_files();     # load all config files and merge contents into $U
+#~     load_config_files();     # load from disk and merge contents into $U
 #
-#   $master_dirs is an aryref of dirs to search for master.* file
-#   $config_dirs is contents of master.* file
-#   $u is the parsed config to merge to $U
 #   
-#   ::Master::DATA      $master_dirs    contain master.* file
-#   master.*            $config_dirs    contain config.* files
-#   */config.* files    $u              contains config data
 #   
-sub load_files {
-    my $master_href     = {};       # returned from get_master_dirs
-    my $master_dirs     = [];       # search for master.* file
-    my $master_stems    = [qw( master foo )];   # master.yaml, master.ini,...
+sub load_config_files {
     
-    my $config_href     = {};       # returned from get_cascaded($master_dirs)
-    my $config_dirs     = [];       # search for config files
-    my $config_stems    = [qw( config )];       # config.yaml, config.pl,...
     
-    my $u               = {};       # returned from get_cascaded($config_dirs)
-                                    # ... is config data
-    
-    # Get primary config dir(s).
-    $master_href        = get_master_dirs();
-#~     ### Config - before interpolation
-#~     ### $master_href
-    $master_stems, $
-    _interpolate_placeholders(@$master_dirs);
-    ### Config - after interpolation
-    ### $master_dirs
-    
-    # Search for config files.
-    $config_dirs        = get_cascaded({
-        -dirs       => $master_dirs,    # filesystem dirs to search
-        -stems      => $master_stems,   # filename stems to search
-#~         -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
-#~         -flip       => $bool,       # invert cross-join matrix
-#~         -merge      => $bool,       # discard filename keys
-#~         -stop       => $natural,    # stop after so many files
-#~         -status     => $hashref,    # RETURNS status results
-#~         -config     => $hashref,    # RETURNS configuration (merged)
-    });
-    
-#~     ### Config - before interpolation
-#~     ### $config_dirs
-    _interpolate_placeholders( @{ $config_dirs->{'config_dirs'} } );
-    ### Config - after interpolation
-    ### $config_dirs
-    
-    # Now (attempt to) load all config files.
-    my $config          = get_cascaded({
-        -dirs       => $config_dirs,    # filesystem dirs to search
-        -stems      => $config_stems,   # filename stems to search
-#~         -priority   => $literal,    # 'LEFT', 'RIGHT', 'STORE', 'RETAIN'
-#~         -flip       => $bool,       # invert cross-join matrix
-#~         -merge      => $bool,       # discard filename keys
-#~         -stop       => $natural,    # stop after so many files
-#~         -status     => $hashref,    # RETURNS status results
-        -config     => $u,          # RETURNS configuration (merged)
-    });
     
     
     ### $u
-}; ## load_files
+}; ## load_config_files
 
 #=========# EXTERNAL FUNCTION
 #~     $username   = get_user();       # username of current script user
