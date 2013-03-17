@@ -11,15 +11,20 @@ use warnings;
 use lib 'lib';
 
 # Project modules
+# Define pool first! 
+BEGIN {                         #    $::U or $main::U
+    $::U      = {};             # package variable escapes BEGIN block
+#~ say 'dt-BEGIN: ', $::U;                                      DEBUG ONLY  #~
+    # Make get_global_pool work now.
+    use Devel::Toolbox::Core::Pool qw( -main );
+    init_global_pool($::U);
+}
 use Devel::Toolbox::Core::Config;
 
 say "$0 running...";
-my $rc  = Devel::Toolbox::Core::Config::load_files();
+my $rc  = Devel::Toolbox::Core::Config::load_config_files();
 say "Done.";
 exit 0;
 
 #----------------------------------------------------------------------------#
-
-__DATA__
-foo
-bar
+__END__

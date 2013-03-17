@@ -23,10 +23,6 @@ use Hash::Merge();              # Merge deep hashes into a single hash
 use Devel::Toolbox;             # Simple custom project tool management
 use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
     qw( merge_global_pool );
-#~ use Devel::Toolbox::Core::Config::Master    # get master dirs  IMPORTANT HERE!
-#~     'get_master_dirs';
-#~ use Devel::Toolbox::Core::Config::Cascade   # get config data  IMPORTANT HERE!
-#~     get => { -as => 'get_cascaded' };
 # Alternate uses
 use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -38,6 +34,10 @@ my $err     = Error::Base->new(
     -base   => '! DTC-Config:',
 );
 our $U      = get_global_pool();            # common to all toolsets
+my $hard_dirs   = [                         # yeh, hardcoded, sorry, TODO.
+    '/home/$user/.config/devel-toolbox/config',     # user      abs_dir
+    '.config/devel-toolbox/config',                 # project   rel_dir
+];
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
@@ -49,11 +49,12 @@ our $U      = get_global_pool();            # common to all toolsets
 #   
 #   
 sub load_config_files {
+    ### Config-lcf-begin
+    ### $U
     
     
-    
-    
-    ### $u
+    ### Config-lcf-end
+    ### $U
 }; ## load_config_files
 
 #=========# EXTERNAL FUNCTION

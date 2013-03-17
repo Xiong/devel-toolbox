@@ -15,7 +15,7 @@ use Error::Base;                # Simple structured errors with full backtrace
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
