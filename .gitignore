@@ -33,3 +33,9 @@ test/dest/
 # Ignore Devel::Comments debugging log
 debug.log
 
+# Ignore ~/projects/$project/.config
+# ... since if project-related, it's already sync'd with Unison
+#                                               to file/config/project/
+# ... and if it's not project-related, it's None Of Our Business. 
+.config/
+
