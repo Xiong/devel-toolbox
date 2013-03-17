@@ -110,8 +110,15 @@ sub merge_global_pool {
     ### Pool-mgp
     ### $caller
     ### $U
-    my $args        = shift or return $U;
-    %{$U}           = ( %{$U}, %{$args} );   # merge
+    my $arg         = shift or return $U;
+    
+    # Primary key is compacted caller; 
+    #   this means each caller has its own namespace.
+    my $pk          = $caller =~ s/^Devel::Toolbox::(\w)(?:[^:]*::)/DT$1-/r;
+    my $keyed       = { $pk => $arg };
+    %{$U}           = ( %{$U}, %{$keyed} );   # merge
+    ### after merge
+    ### $U
     return $U;
 }; ## merge_global_pool
 

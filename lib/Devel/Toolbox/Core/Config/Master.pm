@@ -1,18 +1,23 @@
-package Devel::Toolbox::Core::App;
+package Devel::Toolbox::Core::Config::Master;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
+#~ use lib 'lib';
 #~ use File::Spec;                 # Portably perform operations on file names
-#~ use File::Copy;                 # Copy files or filehandles
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports     => [ qw( get_master_dirs ) ],
+    groups      => { default => [ qw( get_master_dirs ) ] },
+};
 
-# Project module
-use Devel::Toolbox;             # Simple custom project tool management
+# Project modules
+#~ use Devel::Toolbox;             # Simple custom project tool management
+#~ use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -20,88 +25,55 @@ use Devel::Toolbox;             # Simple custom project tool management
 
 ## use
 #============================================================================#
-
 # Pseudo-globals
-my $err = Error::Base->new (
-    -base           => '! DTC-App:',
+my $err     = Error::Base->new(
+    -base   => '! DTC-Config-Master:',
+    _close  => 'Failed to close DATA after reading.',
 );
-
-our $U      = get_global_pool();            # common to all toolsets
-### App-package
-### $U
+#~ our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
-# METHODS
+# FUNCTIONS
 
 #=========# EXTERNAL FUNCTION
-#~ my $perl_exit   = Devel::Toolbox::Core::App::app_execute({});  # 1 for okay
+#~     $dirs  = get_master_dirs();     # get dirs to master.* file
 #
-#   Runs the dt application. Normally invoked only by script, $ dt <usage>
 #   
-#   $option     hashref containing all command line options 
-#                (such as -n, -v, --help) as output by Getopt::*
 #   
-#   $words      arrayref containing all the barewords on command line
-#   
-#   See: dt, DTC::Pool
-#   
-sub app_execute {
-    my $args        = shift;
-    ### App-execute
-    ### $U
-    my $option      = $U->{-script}{-cmdline_opt};
-    my $words       = $U->{-script}{-cmdline_words};
+sub get_master_dirs {
+    my $dirs       ;
+    @$dirs         = <DATA>;
+    close DATA 
+        or $err->crash ( $err->{ _close } );
     
-    # Option handling here.                                 TODO
+    # Filter out comments and similar rubbish.
+    chomp @$dirs;
+    my $qr_comment  = qr/^\s*#/;
+    my $qr_empty    = qr/^\s*$/;
+    @$dirs         = grep { not /$qr_comment|$qr_empty/ } @$dirs;
     
-    # Get config.                                           TODO
-    
-    # Dispatch
-    
-    my $set_name            = ucfirst shift $words;
-    my $tool_name           = shift $words;
-    my $import_name         = join q{_}, lc $set_name, $tool_name;
-    ### $set_name
-    ### $tool_name
-    ### $import_name
-    
-    ### $words
-    
-    claim "::$set_name";        # expands and imports mashed-up: set_tool()
-    ### App (claimed)
-#~     ### $U
-    
-    my @tools       = @{ Class::Inspector->functions( __PACKAGE__ ) };
-    ### @tools
-    
-    no strict 'refs';
-    &$import_name($words);
-    
-    return 1;
-}; ## app_execute
-
-
-
+    ### $dirs
+    return $dirs;
+}; ## get_master_dirs
 
 
 
 ## END MODULE
 1;
 #============================================================================#
-__END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::App - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Config::Master - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::App version v0.0.0
+This document describes Devel::Toolbox::Core::Config::Master version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::App;
+    use Devel::Toolbox::Core::Config::Master;
 
 =head1 DESCRIPTION
 
@@ -209,7 +181,23 @@ its very own section. Sorry if you disagree.
 
 =cut
 
+__DATA__
+# Location(s) of the master config directory file, master.* 
+#   You may edit *here* and move that file. 
+# *This* is not the place to list all the config files you have; 
+#   ideally there is only one directory *here*. 
+# If multiple dirs are given *here*, 
+#   they will be searched until a master file is found.
+#   Search will halt after the first master file is found.  
+#
+# master.* may be any file accepted by Config::Any, with correct extension. 
+# The master.* file contains dirs to all config files; see which. 
+# *This* information may be modified when this module is installed. 
 
-
-
-
+/usr/share/devel-toolbox/core
+/usr/local/share/devel-toolbox/core
+/etc/devel-toolbox/core
+/home/$user/.config/devel-toolbox/core
+.config/devel-toolbox/core
+file/dot-config-dt/core
+file/test/orig/dot-config-dt/core

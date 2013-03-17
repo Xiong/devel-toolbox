@@ -1,5 +1,4 @@
-# Basic config file for devel-toolbox.
+# Basic user-level config file for devel-toolbox.
 
-config:
-    author_fullname: Xiong Changnian
+author_fullname: Xiong Changnian
     

@@ -16,7 +16,7 @@ use Text::Template;             # Expand template text with embedded Perl
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -34,11 +34,11 @@ our $U      = get_global_pool();            # common to all toolsets
 # METHODS
 
 #=========# EXTERNAL FUNCTION
-#~ module({ -module => $path });
+#~ module({ -module => $dir });
 #
 #   Create a new module in an existing project.
-#   $path and -module_template must both be platform-expanded; e.g.: 
-#       $path               = /home/foo/projects/bar/lib/
+#   $dir and -module_template must both be platform-expanded; e.g.: 
+#       $dir                = /home/foo/projects/bar/lib/
 #       -module_template    = /home/foo/.config/templates/Module.pm
 #   
 #   -template_delimiters can be any pair of strings; watch for conflicts!
@@ -58,7 +58,7 @@ sub module {
     
     # Polymorphic API.
     if    ( ref $args eq 'HASH' ) {
-        $module     = $args->{-module};     # path of new module
+        $module     = $args->{-module};     # dir of new module
     }
     elsif ( ref $args eq 'SCALAR' ) {
         $module     = $$args;
