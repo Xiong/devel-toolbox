@@ -24,7 +24,7 @@ use Devel::Toolbox;             # Simple custom project tool management
 use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
     qw( merge_global_pool );
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use

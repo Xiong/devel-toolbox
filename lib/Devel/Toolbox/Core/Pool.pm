@@ -29,7 +29,7 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 };  ## use sub exporter
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
