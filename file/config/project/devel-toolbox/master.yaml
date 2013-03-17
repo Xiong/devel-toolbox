@@ -1,6 +1,0 @@
-# Locations of config files in sequence
-# Later configs take priority over earlier
-config_dirs:
-- foo/bar/path
-
-hoge: piyo
