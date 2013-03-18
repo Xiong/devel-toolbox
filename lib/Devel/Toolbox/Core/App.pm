@@ -52,8 +52,8 @@ sub app_execute {
     my $args        = shift;    # arguments to invocation itself
     ### App-execute
     ### $U
-    my $option      = $U->{main}{-cmdline_opt};
-    my $words       = $U->{main}{-cmdline_words};
+    my $option      = $U->{main}{cmdline_opt};
+    my $words       = $U->{main}{cmdline_words};
     
     # Option handling here.                                 TODO
     

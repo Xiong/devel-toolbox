@@ -112,10 +112,10 @@ sub claim {
     $prepend =~ s/:://g;
     
     _export_all ({
-        -expkg      => $perl_name,
-        -impkg      => $base_name,
-        -symbols    => \@tools,
-        -prepend    => $prepend,
+        expkg       => $perl_name,
+        impkg       => $base_name,
+        symbols     => \@tools,
+        prepend     => $prepend,
     });
     
 #~ @base_tools     = @{ Class::Inspector->functions( $base_name ) };
@@ -125,10 +125,10 @@ sub claim {
 
 #=========# INTERNAL ROUTINE
 #~     _export_all ({
-#~         -expkg      => $exporting_package,   # 'Foo::Bar'
-#~         -impkg      => $importing_package,   # 'Hoge::Piyo'
-#~         -symbols    => \@symbol_list,        # [ sub, $scalar, %hash ]
-#~         -prepend    => $string,              # 'foo_bar'
+#~         expkg       => $exporting_package,   # 'Foo::Bar'
+#~         impkg       => $importing_package,   # 'Hoge::Piyo'
+#~         symbols     => \@symbol_list,        # [ sub, $scalar, %hash ]
+#~         prepend     => $string,              # 'foo_bar'
 #~     });
 #
 #   This came from Exporter via Acme::Teddy. 
@@ -140,11 +140,11 @@ sub claim {
 #   
 sub _export_all {
     my $args        = shift;
-    my $expkg       = $args->{-expkg};          # package to export from
-    my $impkg       = $args->{-impkg};          # package to import into
-    my @exsyms      = @{ $args->{-symbols} };   # aryref of strings
+    my $expkg       = $args->{expkg};           # package to export from
+    my $impkg       = $args->{impkg};           # package to import into
+    my @exsyms      = @{ $args->{symbols} };    # aryref of strings
                                                 #  include sigils $@%    
-    my $prepend      = $args->{-prepend};       # prepended to exports
+    my $prepend      = $args->{prepend};        # prepended to exports
     ### $expkg
     ### $impkg
     ### @exsyms
@@ -172,7 +172,7 @@ sub _export_all {
         else {
             my $imsym   = $exsym;                           # don't prepend
             warn "Exporting symbol: $type$exsym to $impkg"
-                unless $U->{main}{-flags}{-quiet};
+                unless $U->{main}{flags}{quiet};
             no strict 'refs';                   # For we doeth darke magiks.
             *{"${impkg}::$imsym"} =
                 $type eq '&' ? \&{"${expkg}::$exsym"} :

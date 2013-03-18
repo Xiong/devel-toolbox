@@ -106,7 +106,7 @@ sub init_global_pool {
     our $U      = $mainU;
     
     # Initial values.                                   TODO
-#~     $U->{-somekey}      = 42;
+#~     $U->{somekey}      = 42;
     
     return $mainU;
 }; ## init_global_pool
@@ -141,15 +141,15 @@ sub merge_global_pool {
 
 #=========# EXTERNAL FUNCTION
 #~ my $flat_hash   = flat_from_pool({ 
-#~     -want_keys      => $aryref,
-#~     -strip_level    => $natural,
+#~     want_keys       => $aryref,
+#~     strip_level     => $natural,
 #~ });
 #
-#   -want_keys  : aryref of strings         optional
+#   want_keys   : aryref of strings         optional
 #                   list of keys to return flattened
 #                   default is all keys
 #   
-#   -strip_level: natural number            optional
+#   strip_level : natural number            optional
 #                   strip these many levels of keys before flattening
 #                   default is 0
 #   
@@ -159,8 +159,8 @@ sub merge_global_pool {
 sub flat_from_pool {
     my $args            = shift;
     ### $args
-    my @want_keys       = @{ $args->{-want_keys}        // []       };
-    my $strip_level     =    $args->{-strip_level}      // 0        ;
+    my @want_keys       = @{ $args->{want_keys}         // []       };
+    my $strip_level     =    $args->{strip_level}       // 0        ;
     
     my $want_all_keys   = @want_keys ? 0 : 1;
     

@@ -48,7 +48,7 @@ our $U      = get_global_pool();            # common to all toolsets
 sub declare {
     my $caller          = caller;
     my $args            = shift;
-    my $tool            = $args->{-name};
+    my $tool            = $args->{name};
     my $u               ;
     ### declaring...
     ### $caller
@@ -58,11 +58,11 @@ sub declare {
     %$copy              = %$args;       # don't tamper with caller's ref
     
     # Store the sub itself.
-    $u->{-tools}{$tool}{-sub}   = $copy->{-sub};
-    delete $copy->{-sub};               # avoid duplication
+    $u->{tools}{$tool}{sub}     = $copy->{sub};
+    delete $copy->{sub};                # avoid duplication
     
     # Store all metadata.
-    $u->{-tools}{$tool}{-meta}  = $copy;
+    $u->{tools}{$tool}{meta}    = $copy;
     
     # Merge results.
     merge_global_pool( $u, $caller );

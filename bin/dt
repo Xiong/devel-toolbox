@@ -53,8 +53,8 @@ my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
 ## TODO: config
 
 merge_global_pool({
-    -cmdline_opt    => $option,  # hashref
-    -cmdline_words  => $words,   # aryref
+    cmdline_opt     => $option,  # hashref
+    cmdline_words   => $words,   # aryref
 });
 ### $::U
 

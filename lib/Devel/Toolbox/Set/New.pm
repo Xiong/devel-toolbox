@@ -34,20 +34,20 @@ our $U      = get_global_pool();            # common to all toolsets
 # METHODS
 
 #=========# EXTERNAL FUNCTION
-#~ module({ -module => $dir });
+#~ module({ module => $dir });
 #
 #   Create a new module in an existing project.
-#   $dir and -module_template must both be platform-expanded; e.g.: 
+#   $dir and $u->module_template must both be platform-expanded; e.g.: 
 #       $dir                = /home/foo/projects/bar/lib/
-#       -module_template    = /home/foo/.config/templates/Module.pm
+#       $u->module_template = /home/foo/.config/templates/Module.pm
 #   
-#   -template_delimiters can be any pair of strings; watch for conflicts!
+#   template_delimiters can be any pair of strings; watch for conflicts!
 #   All other arguments and all existing keys are available to templates!
 #   
 sub module;     # forward
 declare {
-    -name       => 'module',
-    -sub        => \&module,
+    name        => 'module',
+    sub         => \&module,
 };
 sub module {
     my $args        = shift;
@@ -58,7 +58,7 @@ sub module {
     
     # Polymorphic API.
     if    ( ref $args eq 'HASH' ) {
-        $module     = $args->{-module};     # dir of new module
+        $module     = $args->{module};     # dir of new module
     }
     elsif ( ref $args eq 'SCALAR' ) {
         $module     = $$args;
@@ -77,28 +77,23 @@ sub module {
 #~     %{$u}       = ( %{$u}, %{$args} );
     
     my $u       = flat_from_pool({ 
-#~         -want_keys      => ['foo'],
-        -strip_level    => 1,
+#~         want_keys       => ['foo'],
+        strip_level     => 1,
     });
     ### $u
 ### Aborting...
 exit 0;                                     # DEBUG
+    my $tt_delimiters   = [
+        $u->{template_delimiters__0}, 
+        $u->{template_delimiters__1},
+    ];
     my $tt      = Text::Template->new(
-                    SOURCE      => $u->{-template}{-module},
-                    DELIMITERS  => $u->{-template}{-delimiters},
+                    SOURCE      => $u->{new_module_template},
+                    DELIMITERS  => $tt_delimiters,
                 );
     my $out     ;
     
-    
-    # Strip leading dash from hash keys; 
-    #   Text::Template will supply the correct sigil.
-    #   ( This actually duplicates keys so the originals remain. )
-    for ( keys $u ) {
-        my $val     = $u->{$_};
-        s/^-//;
-        $u->{$_}    = $val;
-    };
-    
+        
     ### New-template-ready
     ### $u
     $out    = $tt->fill_in( HASH => $u );
@@ -117,8 +112,8 @@ exit 0;                                     # DEBUG
 #=========# DUMMY FUNCTION
 sub foo_tool;   # forward
 declare {
-    -name       => 'foo_tool',
-    -sub        => \&foo_tool,
+    name        => 'foo_tool',
+    sub         => \&foo_tool,
 };
 sub foo_tool { 1 };
 
