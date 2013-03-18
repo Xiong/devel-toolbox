@@ -10,7 +10,8 @@ use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-use Class::Inspector;           # Get info about a class and its structure
+#~ use Class::Inspector;           # Get info about a class and its structure
+use Hash::Merge();              # Merge deep hashes into a single hash
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
     exports         => [qw| 
                                 get_global_pool
@@ -20,6 +21,10 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
     groups  => { 
         default     => [qw| 
                                 get_global_pool 
+        |],
+        core        => [qw|
+                                get_global_pool
+                              merge_global_pool
         |],
         main        => [qw|
                                 get_global_pool
@@ -40,6 +45,8 @@ my $err     = Error::Base->new(
     -base   => '! DTC-Pool:'
 );
 
+my $hash_merger     = Hash::Merge->new( 'RIGHT_PRECEDENT' );
+
 # $U is a hashref, the big global pool per each script invocation of D::T. 
 # The pool contains stuff common to all D::T modules. Look here first.
 # $U is an implicit argument to all tools.
@@ -50,7 +57,8 @@ my $err     = Error::Base->new(
 #  $U is instead set directly during init_global_pool().
 our $U      ;                               # common to all toolsets
 
-#   Only calling *scripts* should incorporate this block: 
+#   Only calling *scripts* should incorporate this block.
+#   Callers other than 'main' will fatal! 
 #~ # Define pool first! 
 #~ BEGIN {                         #    $::U or $main::U
 #~     $::U      = {}; 
@@ -99,25 +107,28 @@ sub init_global_pool {
 }; ## init_global_pool
 
 #=========# EXTERNAL FUNCTION
-#~ merge_global_pool({
-#~     -key        => 'value',
-#~ });
+#~ merge_global_pool($u);
+#~ merge_global_pool( $u, $caller );
 #
-#   Merge arguments into pool. You probably don't want this outside of ::Core.  
+#   Merge local pool into global pool. 
 #   New values overwrite old values without touching other keys.
+#   Defaults to namespacing under a compact'ed form of caller;
+#       this can be overridden with another caller.
+#       You probably don't want to do this outside of ::Core.
 #   
 sub merge_global_pool {
-    my $caller = caller;
     ### Pool-mgp
     ### $caller
     ### $U
     my $arg         = shift or return $U;
+    my $caller      = shift // caller;      # allow fake caller
     
     # Primary key is compacted caller; 
     #   this means each caller has its own namespace.
     my $pk          = $caller =~ s/^Devel::Toolbox::(\w)(?:[^:]*::)/DT$1-/r;
     my $keyed       = { $pk => $arg };
-    %{$U}           = ( %{$U}, %{$keyed} );   # merge
+#~     %{$U}           = ( %{$U}, %{$keyed} );   # merge
+    %$U = %{ $hash_merger->merge( $U, $keyed ) };
     ### after merge
     ### $U
     return $U;

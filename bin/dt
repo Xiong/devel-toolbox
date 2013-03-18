@@ -52,7 +52,7 @@ my $orig_path       = File::Spec->catdir (
 my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
 ## TODO: config
 
-Devel::Toolbox::Core::Pool::merge_global_pool({
+merge_global_pool({
     -cmdline_opt    => $option,  # hashref
     -cmdline_words  => $words,   # aryref
 });

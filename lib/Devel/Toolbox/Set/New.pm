@@ -107,6 +107,13 @@ sub module {
     return 1;
 }; ## module
 
+#=========# DUMMY FUNCTION
+sub foo_tool;   # forward
+declare {
+    -name       => 'foo_tool',
+    -sub        => \&foo_tool,
+};
+sub foo_tool { 1 };
 
 
 ## END MODULE

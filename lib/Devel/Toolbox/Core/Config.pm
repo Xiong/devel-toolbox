@@ -11,7 +11,6 @@ use File::Spec;                 # Portably perform operations on file names
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
-use Hash::Merge();              # Merge deep hashes into a single hash
 
 # Exports
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
@@ -24,7 +23,8 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 # Project modules
 use Devel::Toolbox;             # Simple custom project tool management
 use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
-    qw| merge_global_pool |;
+    qw| :core |;
+
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~

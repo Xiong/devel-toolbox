@@ -10,7 +10,7 @@ use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-use Class::Inspector;           # Get info about a class and its structure
+#~ use Class::Inspector;           # Get info about a class and its structure
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
     exports         => [qw| declare |],
     groups  => { 
@@ -20,10 +20,11 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 
 # Project modules
 use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
+use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
+    qw| :core |;
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -44,15 +45,27 @@ our $U      = get_global_pool();            # common to all toolsets
 #   
 #   
 sub declare {
-    my $caller                      = caller;
-    my $args                        = shift;
-    my $tool                        = $args->{-name};
+    my $caller          = caller;
+    my $args            = shift;
+    my $tool            = $args->{-name};
+    my $u               ;
     ### declaring...
     ### $caller
     ### $args
     
-    $U->{-meta}{$caller}{$tool}     = $args;
-    $U->{-sub}{$caller}{$tool}      = $args->{-sub};
+    my $copy            ;
+    %$copy              = %$args;       # don't tamper with caller's ref
+    
+    # Store the sub itself.
+    $u->{-tools}{$tool}{-sub}   = $copy->{-sub};
+    delete $copy->{-sub};               # avoid duplication
+    
+    # Store all metadata.
+    $u->{-tools}{$tool}{-meta}  = $copy;
+    
+    # Merge results.
+    merge_global_pool( $u, $caller );
+    
     ### $U
     
     return 1;

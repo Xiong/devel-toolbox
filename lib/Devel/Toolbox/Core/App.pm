@@ -67,21 +67,14 @@ sub app_execute {
     my $import_name         = join q{_}, lc $set_name, $tool_name;
     ### $set_name
     ### $tool_name
-    ### $import_name
-    
+    ### $import_name    
     ### $words
     
     claim "::$set_name";        # expands and imports mashed-up: set_tool()
     ### App (after claim'ing set)
     ### $U
     
-#~     my @tools       = @{ Class::Inspector->functions( __PACKAGE__ ) };
-#~     ### @tools
-#~     
-#~     no strict 'refs';
-#~     &$import_name($words);
-#~     
-#~     return 1;
+    return 1;
 }; ## app_execute
 
 
