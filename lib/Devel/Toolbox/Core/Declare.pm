@@ -5,15 +5,17 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports     => [ qw( declare ) ],
-    groups      => { default => [ qw( declare ) ] },
+    exports         => [qw| declare |],
+    groups  => { 
+        default     => [qw| declare |],
+    },
 };
 
 # Project modules

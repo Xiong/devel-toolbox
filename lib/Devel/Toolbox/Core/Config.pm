@@ -5,7 +5,7 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
@@ -15,14 +15,16 @@ use Hash::Merge();              # Merge deep hashes into a single hash
 
 # Exports
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports     => [ qw( load_config_files ) ],
-#~     groups      => { default => [ qw( declare ) ] },
+    exports         => [qw| load_config_files |],
+    groups  => { 
+#       default     => [qw| load_config_files |],   # nah; explicitly import
+    },
 };
 
 # Project modules
 use Devel::Toolbox;             # Simple custom project tool management
 use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
-    qw( merge_global_pool );
+    qw| merge_global_pool |;
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~

@@ -5,26 +5,27 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports                 => [qw( 
+    exports         => [qw| 
                                 get_global_pool
                                init_global_pool
                               merge_global_pool
-        )],
-    groups  => { default    => [qw( 
+        |],
+    groups  => { 
+        default     => [qw| 
                                 get_global_pool 
-        ) ],
-                 main       => [qw(
+        |],
+        main        => [qw|
                                 get_global_pool
                                init_global_pool
                               merge_global_pool
-        )],
+        |],
     },
 };  ## use sub exporter
 
@@ -55,7 +56,7 @@ our $U      ;                               # common to all toolsets
 #~     $::U      = {}; 
 #~     say 'dt-BEGIN: ', $::U;
 #~     # Make get_global_pool work now.
-#~     use Devel::Toolbox::Core::Pool qw( -main );
+#~     use Devel::Toolbox::Core::Pool qw| :main |;
 #~     init_global_pool($::U);
 #~ }
 #~ use Devel::Toolbox;             # Simple custom project tool management

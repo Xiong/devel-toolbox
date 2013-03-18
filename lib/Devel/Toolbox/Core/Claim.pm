@@ -5,15 +5,17 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports     => [ qw( claim ) ],
-    groups      => { default => [ qw( claim ) ] },
+    exports         => [qw| claim |],
+    groups  => { 
+        default     => [qw| claim |],
+    },
 };
 
 # Project module
@@ -57,7 +59,7 @@ sub claim {
     say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
     my $toolset     = shift;    # just what was given (in the request)
     my $perl_name   ;           # full Perlish module name
-    my @path_parts  = (qw( Devel ::Toolbox ::Set ));    # search up from here
+    my @path_parts  = (qw| Devel ::Toolbox ::Set |);    # search up from here
     my $base_name   = $caller;                          # export methods here
     my $eval_err    ;
     

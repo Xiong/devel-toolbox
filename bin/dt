@@ -9,7 +9,7 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 
 # Project moduleS
 # Define pool first! 
@@ -17,7 +17,7 @@ BEGIN {                         #    $::U or $main::U
     $::U      = {};             # package variable escapes BEGIN block
 #~ say 'dt-BEGIN: ', $::U;                                      DEBUG ONLY  #~
     # Make get_global_pool work now.
-    use Devel::Toolbox::Core::Pool qw( -main );
+    use Devel::Toolbox::Core::Pool qw| :main |;
     init_global_pool($::U);
 }
 use Devel::Toolbox;             # Simple custom project tool management
@@ -47,7 +47,7 @@ use File::Spec;                 # Portably perform operations on file names
 my $root_path       = File::Spec->rootdir ();
 my $orig_path       = File::Spec->catdir (
     $root_path,
-    qw( home xiong .config devel-toolbox templates ),
+    qw| home xiong .config devel-toolbox templates |,
 );
 my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
 ## TODO: config
