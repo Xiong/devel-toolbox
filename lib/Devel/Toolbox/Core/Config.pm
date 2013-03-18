@@ -21,8 +21,11 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 };
 
 # Project modules
-use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
+#~ use Devel::Toolbox;             # Simple custom project tool management
+#~ use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
+#~     qw| :core |;
+#~ 
+use Devel::Toolbox              # Simple custom project tool management
     qw| :core |;
 
 # Alternate uses

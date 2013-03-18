@@ -15,21 +15,20 @@ use Hash::Merge();              # Merge deep hashes into a single hash
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
     exports         => [qw| 
                                 get_global_pool
-                               init_global_pool
                               merge_global_pool
+                               init_global_pool
         |],
     groups  => { 
         default     => [qw| 
                                 get_global_pool 
         |],
         core        => [qw|
-                                get_global_pool
+                                       :default
                               merge_global_pool
         |],
         main        => [qw|
-                                get_global_pool
+                                         :core
                                init_global_pool
-                              merge_global_pool
         |],
     },
 };  ## use sub exporter

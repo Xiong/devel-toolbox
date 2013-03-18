@@ -15,6 +15,7 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
     exports         => [qw| claim |],
     groups  => { 
         default     => [qw| claim |],
+        core        => [qw| claim |],
     },
 };
 
