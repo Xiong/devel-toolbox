@@ -20,12 +20,16 @@ BEGIN {                         #    $::U or $main::U
     init_global_pool($::U);
 }
 use Devel::Toolbox::Core::Config;
+
+use Devel::Comments '###';                                               #~
 #============================================================================#
+our $U;
 
 say "$0 running...";
 my $u   = { hoge => 'piyo' };
 merge_global_pool($u);
 my $rc  = Devel::Toolbox::Core::Config::load_config_files();
+### $U
 say "$0 Done.";
 exit 0;
 

@@ -1,4 +1,17 @@
 # Basic project-level config file for devel-toolbox.
 
-project_name: devel-toolbox
-    
+project_name: 
+    working_tree    : devel-toolbox     # parent dir of project; cwd
+    pause_dist      : Devel-Toolbox     # PAUSE upload name of dist tarball
+    github          : devel-toolbox     # GitHub repo name
+    use_cpan        : Devel::Toolbox    # use-lines; Perlish main module name
+
+copyright_years : '2013'                # text; may be a range (2000-2013)
+
+tagquote:
+    lines: 
+        - 'Anyone can tell the truth, '
+        - 'but only very few of us can make epigrams.'
+    cite        : 'W. Somerset Maugham'
+
+

@@ -1,4 +1,16 @@
 # Basic user-level config file for devel-toolbox.
 
-author_fullname: Xiong Changnian
-    
+author:
+    fullname        : Xiong Changnian
+    email           : 'xiong@cpan.org'
+    github          : 'Xiong'
+
+template:
+    delimiters :    # enclose placeholders; aryref needed by Text::Template
+        - '[% '             # opening delimiter
+        - ' %]'             # closing delimiter
+
+new_module:
+    template : Module.pm
+    abstract : '.................. 44 chars in PAUSE upload!'
+    version  : 'v0.0.0'
