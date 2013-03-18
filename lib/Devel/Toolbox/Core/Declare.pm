@@ -24,7 +24,7 @@ use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
     qw| :core |;
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use

@@ -20,7 +20,8 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
+use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
+    qw| :core |;
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -170,7 +171,7 @@ sub _export_all {
         else {
             my $imsym   = $exsym;                           # don't prepend
             warn "Exporting symbol: $type$exsym to $impkg"
-                unless $U->{-core}{-flags}{-quiet};
+                unless $U->{main}{-flags}{-quiet};
             no strict 'refs';                   # For we doeth darke magiks.
             *{"${impkg}::$imsym"} =
                 $type eq '&' ? \&{"${expkg}::$exsym"} :

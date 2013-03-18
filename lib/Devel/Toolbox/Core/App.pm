@@ -74,6 +74,11 @@ sub app_execute {
     ### App (after claim'ing set)
     ### $U
     
+    {
+        no strict 'refs';
+        &{ "$import_name" }(@$words);
+    }
+    
     return 1;
 }; ## app_execute
 
