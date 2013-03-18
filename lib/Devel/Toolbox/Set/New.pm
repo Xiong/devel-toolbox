@@ -16,7 +16,7 @@ use Text::Template;             # Expand template text with embedded Perl
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -52,8 +52,8 @@ declare {
 sub module {
     my $args        = shift;
     my $module      ;
-    my $u           ;                       # local this sub only
-    %{$u}           = ( %{$U} );
+#~     my $u               ;
+#~     %$u                 = %$U;      # local copy this sub only
     
     
     # Polymorphic API.
@@ -73,9 +73,16 @@ sub module {
         $args       = {};                   # dummy
     };
     
-    # Merge this functions's arguments with pool for template substitution
-    %{$u}        = ( %{$u}, %{$args} );
+#~     # Merge this functions's arguments with pool for template substitution
+#~     %{$u}       = ( %{$u}, %{$args} );
     
+    my $u       = flat_from_pool({ 
+#~         -want_keys      => ['foo'],
+        -strip_level    => 1,
+    });
+    ### $u
+### Aborting...
+exit 0;                                     # DEBUG
     my $tt      = Text::Template->new(
                     SOURCE      => $u->{-template}{-module},
                     DELIMITERS  => $u->{-template}{-delimiters},

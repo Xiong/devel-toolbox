@@ -12,15 +12,20 @@ use File::Spec;                 # Portably perform operations on file names
 use Error::Base;                # Simple structured errors with full backtrace
 #~ use Class::Inspector;           # Get info about a class and its structure
 use Hash::Merge();              # Merge deep hashes into a single hash
+use Hash::Flatten;              # Flatten/unflatten complex data hashes
+use List::MoreUtils             # The stuff missing in List::Util
+    qw| any |;
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
     exports         => [qw| 
                                 get_global_pool
+                                 flat_from_pool
                               merge_global_pool
                                init_global_pool
         |],
     groups  => { 
         default     => [qw| 
                                 get_global_pool 
+                                 flat_from_pool
         |],
         core        => [qw|
                                        :default
@@ -34,7 +39,7 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 };  ## use sub exporter
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -44,7 +49,8 @@ my $err     = Error::Base->new(
     -base   => '! DTC-Pool:'
 );
 
-my $hash_merger     = Hash::Merge->new( 'RIGHT_PRECEDENT' );
+my $do_hash_merge   = Hash::Merge->new( 'RIGHT_PRECEDENT' );
+my $do_hash_flat    = Hash::Flatten->new();
 
 # $U is a hashref, the big global pool per each script invocation of D::T. 
 # The pool contains stuff common to all D::T modules. Look here first.
@@ -116,22 +122,73 @@ sub init_global_pool {
 #       You probably don't want to do this outside of ::Core.
 #   
 sub merge_global_pool {
+    my $arg         = shift or return $U;
+    my $caller      = shift // caller;      # allow fake caller
     ### Pool-mgp
     ### $caller
     ### $U
-    my $arg         = shift or return $U;
-    my $caller      = shift // caller;      # allow fake caller
     
     # Primary key is compacted caller; 
     #   this means each caller has its own namespace.
     my $pk          = $caller =~ s/^Devel::Toolbox::(\w)(?:[^:]*::)/DT$1-/r;
     my $keyed       = { $pk => $arg };
 #~     %{$U}           = ( %{$U}, %{$keyed} );   # merge
-    %$U = %{ $hash_merger->merge( $U, $keyed ) };
+    %$U = %{ $do_hash_merge->merge( $U, $keyed ) };
     ### after merge
     ### $U
     return $U;
 }; ## merge_global_pool
+
+#=========# EXTERNAL FUNCTION
+#~ my $flat_hash   = flat_from_pool({ 
+#~     -want_keys      => $aryref,
+#~     -strip_level    => $natural,
+#~ });
+#
+#   -want_keys  : aryref of strings         optional
+#                   list of keys to return flattened
+#                   default is all keys
+#   
+#   -strip_level: natural number            optional
+#                   strip these many levels of keys before flattening
+#                   default is 0
+#   
+#   Specified keys are extracted from pool
+#     and flattened into a single-level hashref.
+#   
+sub flat_from_pool {
+    my $args            = shift;
+    ### $args
+    my @want_keys       = @{ $args->{-want_keys}        // []       };
+    my $strip_level     =    $args->{-strip_level}      // 0        ;
+    
+    my $want_all_keys   = @want_keys ? 0 : 1;
+    
+    my $flat            = {};       # return value
+    my $acc             = {};       # accumulator
+    my $u               ;
+    %$u                 = %$U;      # local copy this sub only
+    
+    while ($strip_level) {
+        # Strip one level's worth of keys and merge results.
+        $acc    = {};               # start clean
+        for my $pk ( keys $u ) {
+            if (
+                   ( $want_all_keys )
+                or ( any { /^$pk$/ } @want_keys )           # key is wanted
+            ) 
+            {
+                %$acc   = %{ $do_hash_merge->merge( $acc, $u->{$pk} ) };
+            };
+        };
+        $strip_level--;
+        %$u     = %$acc;   # recycle for next pass through while loop
+    };
+    
+    $flat       = $do_hash_flat->flatten($u);
+    
+    return $flat;
+}; ## flat_from_pool
 
 
 
