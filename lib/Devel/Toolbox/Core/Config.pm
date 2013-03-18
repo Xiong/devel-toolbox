@@ -14,10 +14,10 @@ use Config::Any;                # Load configs from any file format
 use Hash::Merge();              # Merge deep hashes into a single hash
 
 # Exports
-#~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
-#~     exports     => [ qw( declare ) ],
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports     => [ qw( load_config_files ) ],
 #~     groups      => { default => [ qw( declare ) ] },
-#~ };
+};
 
 # Project modules
 use Devel::Toolbox;             # Simple custom project tool management
@@ -47,7 +47,7 @@ my $stem        = 'config';                 # config.yaml, config.ini
 #=========# EXTERNAL FUNCTION
 #~     load_config_files();     # load from disk and merge contents into $U
 #
-#   
+#   Takes no arguments, returns nothing.
 #   
 sub load_config_files {
     ### Config-lcf-begin
@@ -81,6 +81,7 @@ sub load_config_files {
     
     ### Config-lcf-end
     ### $U
+    return 1;
 }; ## load_config_files
 
 #=========# EXTERNAL FUNCTION
@@ -113,7 +114,7 @@ sub get_user {
 sub _interpolate_placeholders {
     my $user    = get_user();
     @_          = map { s|/\$user/|/$user/|g; $_ } @_;  # This is not fancy. 
-
+    return 1;
 }; ## _interpolate_placeholders
 
 #=========# EXTERNAL FUNCTION
