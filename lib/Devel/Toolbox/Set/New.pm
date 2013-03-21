@@ -7,10 +7,13 @@ use version; our $VERSION = qv('v0.0.0');
 # Core modules
 use File::Spec;                 # Portably perform operations on file names
 use File::Copy();               # Copy files or filehandles
+#~ use File::Path                  # Create or remove directory trees
+#~     qw| make_path |;
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Text::Template;             # Expand template text with embedded Perl
+use File::Path::Tiny;           # mk(), rm() dirs with less overhead
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
@@ -104,13 +107,25 @@ sub module {
     ### $u
     my $out     = $tt->fill_in( HASH => $u );
     
+    # Figure out the qualified relative filename.
+    my @path_parts      = ( 'lib', split q{::}, $module );
+    my $module_file_rel = File::Spec->catfile( @path_parts ) . q{.pm};
+    ### $module_file_rel
+    ### @path_parts
+    
+    # Create any missing dirs along the path.
+    pop @path_parts;    # no sense creating a dir with the actual filename
+    my $path        = File::Spec->catdir(@path_parts);
+    File::Path::Tiny::mk($path)
+        or $err->crash("Failed to make path $path");
+    
     # Put new module file
-    open my $m_fh, '>', $module
-                or $err->crash("Failed to open $module for writing.");
+    open my $m_fh, '>', $module_file_rel
+                or $err->crash("Failed to open $module_file_rel for writing.");
     print {$m_fh} $out
-                or $err->crash("Failed while writing $module");
+                or $err->crash("Failed while writing $module_file_rel");
     close $m_fh
-                or $err->crash("Failed to close $module after writing.");
+                or $err->crash("Failed to close $module_file_rel after writing.");
     
     return 1;
 }; ## module
