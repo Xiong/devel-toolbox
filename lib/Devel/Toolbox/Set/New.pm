@@ -58,31 +58,37 @@ sub module {
     
     # Polymorphic API.
     if    ( ref $args eq 'HASH' ) {
-        $module     = $args->{module};     # dir of new module
+        $module     =  $args->{module}     # name of new module
+                    // $args->{module_name}
+                    // $args->{new_module_name}
+                    // 'FOO::BAR'
+                    ;
     }
     elsif ( ref $args eq 'SCALAR' ) {
         $module     = $$args;
-        $args       = {};                   # dummy
+        $err->crash("Unsupported args in call to New::Module: $args");
     }
     elsif ( ref $args eq 'ARRAY' ) {
         $module     = shift @$args;
-        $args       = {};                   # dummy
+        $err->crash("Unsupported args in call to New::Module: $args");
     }
     else {
         $module     = $args;
-        $args       = {};                   # dummy
+        $args       = { new_module_name => $module };
     };
     
-#~     # Merge this functions's arguments with pool for template substitution
-#~     %{$u}       = ( %{$u}, %{$args} );
-    
+    # Obtain flattened $U for template substitution.
     my $u       = flat_from_pool({ 
-#~         want_keys       => ['foo'],
+#~         want_keys       => ['foo'],         # all keys by default
         strip_level     => 1,
     });
+    ### Flat pool in New:
     ### $u
-### Aborting...
-exit 0;                                     # DEBUG
+    
+    # Merge this functions's arguments with pool for template substitution.
+    %{$u}       = ( %{$u}, %{$args} );
+    
+    # Do the substitution.
     my $tt_delimiters   = [
         $u->{template_delimiters__0}, 
         $u->{template_delimiters__1},
@@ -91,12 +97,12 @@ exit 0;                                     # DEBUG
                     SOURCE      => $u->{new_module_template},
                     DELIMITERS  => $tt_delimiters,
                 );
-    my $out     ;
+    $err->crash("Couldn't use template: $u->{new_module_template}")
+        if not $tt;
     
-        
     ### New-template-ready
     ### $u
-    $out    = $tt->fill_in( HASH => $u );
+    my $out     = $tt->fill_in( HASH => $u );
     
     # Put new module file
     open my $m_fh, '>', $module
@@ -110,12 +116,12 @@ exit 0;                                     # DEBUG
 }; ## module
 
 #=========# DUMMY FUNCTION
-sub foo_tool;   # forward
+sub foolish;   # forward
 declare {
-    name        => 'foo_tool',
-    sub         => \&foo_tool,
+    name        => 'foolish',
+    sub         => \&foolish,
 };
-sub foo_tool { 1 };
+sub foolish { 1 };
 
 
 ## END MODULE

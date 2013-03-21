@@ -11,6 +11,6 @@ template:
         - ' %]'             # closing delimiter
 
 new_module:
-    template : Module.pm
+    template : .config/devel-toolbox/templates/Module.pm
     abstract : '.................. 44 chars in PAUSE upload!'
     version  : 'v0.0.0'

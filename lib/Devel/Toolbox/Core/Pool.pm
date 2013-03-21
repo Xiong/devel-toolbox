@@ -50,7 +50,19 @@ my $err     = Error::Base->new(
 );
 
 my $do_hash_merge   = Hash::Merge->new( 'RIGHT_PRECEDENT' );
-my $do_hash_flat    = Hash::Flatten->new();
+my $do_hash_flat    = Hash::Flatten->new({
+    HashDelimiter       => ' _', 
+    ArrayDelimiter      => '__',
+    EscapeSequence      => 'xxx',
+    escapesequence      => 'xxx',
+#~     DisableEscapes      => 1,
+});
+#~ my $hash_flat_opts  = {
+#~     HashDelimiter       => '_', 
+#~     ArrayDelimiter      => '*',
+#~     EscapeSequence      => '#',
+#~     DisableEscapes      => 1,
+#~ };
 
 # $U is a hashref, the big global pool per each script invocation of D::T. 
 # The pool contains stuff common to all D::T modules. Look here first.
@@ -158,7 +170,7 @@ sub merge_global_pool {
 #   
 sub flat_from_pool {
     my $args            = shift;
-    ### $args
+#~     ### $args
     my @want_keys       = @{ $args->{want_keys}         // []       };
     my $strip_level     =    $args->{strip_level}       // 0        ;
     
@@ -185,10 +197,36 @@ sub flat_from_pool {
         %$u     = %$acc;   # recycle for next pass through while loop
     };
     
-    $flat       = $do_hash_flat->flatten($u);
+    $flat       = $do_hash_flat->flatten( $u );
+    
+    # Since the Hash::Flatten::flatten routine does a terrible job with 
+    #   any combination of options; fix the result by deleting illegal spaces.
+    $flat          = _fix_flat($flat);
+#~     ### $flat
     
     return $flat;
 }; ## flat_from_pool
+
+#=========# INTERNAL ROUTINE
+#~ my $hashref     = _fix_flat($hashref_corrupted);
+#
+#   Deletes Hash::Flatten junk from a single-level hashref.
+#   
+sub _fix_flat {
+    my $in      = shift;
+    my $ok      ;
+#~     ### $in
+    
+    if ( ref $in ne 'HASH' ) { return $in };    # not a hashref; crash? TODO
+    
+    %$ok     = map {                        # return a key/value list
+        my $key     = $_;                   # preserve original key
+        $key =~ s/\s_/_/g;
+        ( $key, $in->{$_} )                 # return value of original key
+    } keys %$in;
+    
+    return $ok;
+}; ## _fix_flat
 
 
 
