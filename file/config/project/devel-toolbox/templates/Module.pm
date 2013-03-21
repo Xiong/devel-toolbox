@@ -1,4 +1,4 @@
-package [% $module_name %];
+package [% $new_module_name %];
 # Choose minimum perl interpreter version; delete the rest.
 # Do you want to enforce the bugfix level?
 #~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
@@ -9,7 +9,7 @@ package [% $module_name %];
 #~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-use version; our $VERSION = qv('[% $version %]');
+use version; our $VERSION = qv('[% $new_module_version %]');
 
 # Core modules
 
@@ -35,21 +35,22 @@ __END__
 
 =head1 NAME
 
-[% $module_name %] - [% $module_abstract %]
+[% $new_module_name %] - [% $new_module_abstract %]
 
 =head1 VERSION
 
-This document describes [% $module_name %] version [% $version %]
+This document describes [% $new_module_name %] version [% $new_module_version %]
 
 =head1 SYNOPSIS
 
-    use [% $module_name %];
+    use [% $new_module_name %];
 
 =head1 DESCRIPTION
 
 =over
 
-I<[% $tagquote %]> 
+I<[% $tagquote_lines__0 %]> 
+I<[% $tagquote_lines__1 %]> 
 -- [% $tagquote_cite %]
 
 =back
@@ -113,12 +114,12 @@ None known.
 This is an early release. Reports and suggestions will be warmly welcomed. 
 
 Please report any issues to: 
-L<https://github.com/[% $author_github %]/[% $dist_name %]/issues>.
+L<https://github.com/[% $author_github %]/[% $project_name_github %]/issues>.
 
 =head1 DEVELOPMENT
 
 This project is hosted on GitHub at: 
-L<https://github.com/[% $author_github %]/[% $dist_name %]>. 
+L<https://github.com/[% $author_github %]/[% $project_name_github %]>. 
 
 =head1 THANKS
 

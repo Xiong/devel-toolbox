@@ -5,7 +5,7 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-#~ use lib 'lib';
+#~ use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
@@ -13,12 +13,14 @@ use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
 use Hash::Merge();              # Merge deep hashes into a single hash
 use Scalar::Util                # General-utility scalar subroutines
-    qw( reftype );
+    qw| reftype |;
 
 # Exports
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports     => [ qw( get ) ],
-    groups      => { default => [ qw( get ) ] },
+    exports         => [qw| get |],
+    groups  => { 
+        default     => [qw| get |],
+    },
 };
 
 # Project modules
@@ -90,8 +92,8 @@ sub get {
     # ... may be AoHoA, HoA, or just aryref
     # Build them up to AoHoA anyway:
     # $search = [
-    #     a_stem     => [qw( c_dir d_dir )],
-    #     b_stem     => [qw( e_dir f_dir )],
+    #     a_stem     => [qw| c_dir d_dir |],
+    #     b_stem     => [qw| e_dir f_dir |],
     # ];
     my $outer_type  = reftype $search;
     my $inner_type NO NO NO

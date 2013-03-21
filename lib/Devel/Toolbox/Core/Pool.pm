@@ -5,31 +5,41 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
-use Class::Inspector;           # Get info about a class and its structure
+#~ use Class::Inspector;           # Get info about a class and its structure
+use Hash::Merge();              # Merge deep hashes into a single hash
+use Hash::Flatten;              # Flatten/unflatten complex data hashes
+use List::MoreUtils             # The stuff missing in List::Util
+    qw| any |;
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports                 => [qw( 
+    exports         => [qw| 
                                 get_global_pool
-                               init_global_pool
+                                 flat_from_pool
                               merge_global_pool
-        )],
-    groups  => { default    => [qw( 
+                               init_global_pool
+        |],
+    groups  => { 
+        default     => [qw| 
                                 get_global_pool 
-        ) ],
-                 main       => [qw(
-                                get_global_pool
-                               init_global_pool
+                                 flat_from_pool
+        |],
+        core        => [qw|
+                                       :default
                               merge_global_pool
-        )],
+        |],
+        main        => [qw|
+                                         :core
+                               init_global_pool
+        |],
     },
 };  ## use sub exporter
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -38,6 +48,21 @@ use Sub::Exporter -setup => {   # Sophisticated custom exporter
 my $err     = Error::Base->new(
     -base   => '! DTC-Pool:'
 );
+
+my $do_hash_merge   = Hash::Merge->new( 'RIGHT_PRECEDENT' );
+my $do_hash_flat    = Hash::Flatten->new({
+    HashDelimiter       => ' _', 
+    ArrayDelimiter      => '__',
+    EscapeSequence      => 'xxx',
+    escapesequence      => 'xxx',
+#~     DisableEscapes      => 1,
+});
+#~ my $hash_flat_opts  = {
+#~     HashDelimiter       => '_', 
+#~     ArrayDelimiter      => '*',
+#~     EscapeSequence      => '#',
+#~     DisableEscapes      => 1,
+#~ };
 
 # $U is a hashref, the big global pool per each script invocation of D::T. 
 # The pool contains stuff common to all D::T modules. Look here first.
@@ -49,13 +74,14 @@ my $err     = Error::Base->new(
 #  $U is instead set directly during init_global_pool().
 our $U      ;                               # common to all toolsets
 
-#   Only calling *scripts* should incorporate this block: 
+#   Only calling *scripts* should incorporate this block.
+#   Callers other than 'main' will fatal! 
 #~ # Define pool first! 
 #~ BEGIN {                         #    $::U or $main::U
 #~     $::U      = {}; 
 #~     say 'dt-BEGIN: ', $::U;
 #~     # Make get_global_pool work now.
-#~     use Devel::Toolbox::Core::Pool qw( -main );
+#~     use Devel::Toolbox::Core::Pool qw| :main |;
 #~     init_global_pool($::U);
 #~ }
 #~ use Devel::Toolbox;             # Simple custom project tool management
@@ -92,35 +118,115 @@ sub init_global_pool {
     our $U      = $mainU;
     
     # Initial values.                                   TODO
-#~     $U->{-somekey}      = 42;
+#~     $U->{somekey}      = 42;
     
     return $mainU;
 }; ## init_global_pool
 
 #=========# EXTERNAL FUNCTION
-#~ merge_global_pool({
-#~     -key        => 'value',
-#~ });
+#~ merge_global_pool($u);
+#~ merge_global_pool( $u, $caller );
 #
-#   Merge arguments into pool. You probably don't want this outside of ::Core.  
+#   Merge local pool into global pool. 
 #   New values overwrite old values without touching other keys.
+#   Defaults to namespacing under a compact'ed form of caller;
+#       this can be overridden with another caller.
+#       You probably don't want to do this outside of ::Core.
 #   
 sub merge_global_pool {
-    my $caller = caller;
+    my $arg         = shift or return $U;
+    my $caller      = shift // caller;      # allow fake caller
     ### Pool-mgp
     ### $caller
     ### $U
-    my $arg         = shift or return $U;
     
     # Primary key is compacted caller; 
     #   this means each caller has its own namespace.
     my $pk          = $caller =~ s/^Devel::Toolbox::(\w)(?:[^:]*::)/DT$1-/r;
     my $keyed       = { $pk => $arg };
-    %{$U}           = ( %{$U}, %{$keyed} );   # merge
+#~     %{$U}           = ( %{$U}, %{$keyed} );   # merge
+    %$U = %{ $do_hash_merge->merge( $U, $keyed ) };
     ### after merge
     ### $U
     return $U;
 }; ## merge_global_pool
+
+#=========# EXTERNAL FUNCTION
+#~ my $flat_hash   = flat_from_pool({ 
+#~     want_keys       => $aryref,
+#~     strip_level     => $natural,
+#~ });
+#
+#   want_keys   : aryref of strings         optional
+#                   list of keys to return flattened
+#                   default is all keys
+#   
+#   strip_level : natural number            optional
+#                   strip these many levels of keys before flattening
+#                   default is 0
+#   
+#   Specified keys are extracted from pool
+#     and flattened into a single-level hashref.
+#   
+sub flat_from_pool {
+    my $args            = shift;
+#~     ### $args
+    my @want_keys       = @{ $args->{want_keys}         // []       };
+    my $strip_level     =    $args->{strip_level}       // 0        ;
+    
+    my $want_all_keys   = @want_keys ? 0 : 1;
+    
+    my $flat            = {};       # return value
+    my $acc             = {};       # accumulator
+    my $u               ;
+    %$u                 = %$U;      # local copy this sub only
+    
+    while ($strip_level) {
+        # Strip one level's worth of keys and merge results.
+        $acc    = {};               # start clean
+        for my $pk ( keys $u ) {
+            if (
+                   ( $want_all_keys )
+                or ( any { /^$pk$/ } @want_keys )           # key is wanted
+            ) 
+            {
+                %$acc   = %{ $do_hash_merge->merge( $acc, $u->{$pk} ) };
+            };
+        };
+        $strip_level--;
+        %$u     = %$acc;   # recycle for next pass through while loop
+    };
+    
+    $flat       = $do_hash_flat->flatten( $u );
+    
+    # Since the Hash::Flatten::flatten routine does a terrible job with 
+    #   any combination of options; fix the result by deleting illegal spaces.
+    $flat          = _fix_flat($flat);
+#~     ### $flat
+    
+    return $flat;
+}; ## flat_from_pool
+
+#=========# INTERNAL ROUTINE
+#~ my $hashref     = _fix_flat($hashref_corrupted);
+#
+#   Deletes Hash::Flatten junk from a single-level hashref.
+#   
+sub _fix_flat {
+    my $in      = shift;
+    my $ok      ;
+#~     ### $in
+    
+    if ( ref $in ne 'HASH' ) { return $in };    # not a hashref; crash? TODO
+    
+    %$ok     = map {                        # return a key/value list
+        my $key     = $_;                   # preserve original key
+        $key =~ s/\s_/_/g;
+        ( $key, $in->{$_} )                 # return value of original key
+    } keys %$in;
+    
+    return $ok;
+}; ## _fix_flat
 
 
 

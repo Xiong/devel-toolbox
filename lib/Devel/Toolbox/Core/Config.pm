@@ -5,24 +5,29 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Config::Any;                # Load configs from any file format
-use Hash::Merge();              # Merge deep hashes into a single hash
 
 # Exports
-#~ use Sub::Exporter -setup => {   # Sophisticated custom exporter
-#~     exports     => [ qw( declare ) ],
-#~     groups      => { default => [ qw( declare ) ] },
-#~ };
+use Sub::Exporter -setup => {   # Sophisticated custom exporter
+    exports         => [qw| load_config_files |],
+    groups  => { 
+#       default     => [qw| load_config_files |],   # nah; explicitly import
+    },
+};
 
 # Project modules
-use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
-    qw( merge_global_pool );
+#~ use Devel::Toolbox;             # Simple custom project tool management
+#~ use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
+#~     qw| :core |;
+#~ 
+use Devel::Toolbox              # Simple custom project tool management
+    qw| :core |;
+
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -47,7 +52,7 @@ my $stem        = 'config';                 # config.yaml, config.ini
 #=========# EXTERNAL FUNCTION
 #~     load_config_files();     # load from disk and merge contents into $U
 #
-#   
+#   Takes no arguments, returns nothing.
 #   
 sub load_config_files {
     ### Config-lcf-begin
@@ -81,6 +86,7 @@ sub load_config_files {
     
     ### Config-lcf-end
     ### $U
+    return 1;
 }; ## load_config_files
 
 #=========# EXTERNAL FUNCTION
@@ -113,7 +119,7 @@ sub get_user {
 sub _interpolate_placeholders {
     my $user    = get_user();
     @_          = map { s|/\$user/|/$user/|g; $_ } @_;  # This is not fancy. 
-
+    return 1;
 }; ## _interpolate_placeholders
 
 #=========# EXTERNAL FUNCTION

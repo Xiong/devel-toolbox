@@ -1,76 +1,30 @@
-package Devel::Toolbox::Core::Declare;
-use 5.016002;   # 5.16.2    # 2012  # __SUB__
+package Foo::Bar;
+# Choose minimum perl interpreter version; delete the rest.
+# Do you want to enforce the bugfix level?
+#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
+#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
+#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
+#~ use 5.012003;   # 5.12.5    # 2011  # yada
+#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
+#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib qw| lib |;
-use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
-use Error::Base;                # Simple structured errors with full backtrace
-#~ use Class::Inspector;           # Get info about a class and its structure
-use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports         => [qw| declare |],
-    groups  => { 
-        default     => [qw| declare |],
-        core        => [qw| declare |],
-    },
-};
-
-# Project modules
-use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
-    qw| :core |;
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
+
 # Pseudo-globals
-my $err     = Error::Base->new(
-    -base   => '! DTC-Declare:'
-);
-our $U      = get_global_pool();            # common to all toolsets
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
-# FUNCTIONS
-
-#=========# EXTERNAL FUNCTION
-#~     declare();     # short
-#
-#   
-#   
-sub declare {
-    my $caller          = caller;
-    my $args            = shift;
-    my $tool            = $args->{name};
-    my $u               ;
-    ### declaring...
-    ### $caller
-    ### $args
-    
-    my $copy            ;
-    %$copy              = %$args;       # don't tamper with caller's ref
-    
-    # Store the sub itself.
-    $u->{tools}{$tool}{sub}     = $copy->{sub};
-    delete $copy->{sub};                # avoid duplication
-    
-    # Store all metadata.
-    $u->{tools}{$tool}{meta}    = $copy;
-    
-    # Merge results.
-    merge_global_pool( $u, $caller );
-    
-    ### $U
-    
-    return 1;
-}; ## declare
 
 
 
@@ -81,22 +35,22 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::Declare - .................. 44 chars in PAUSE upload!
+Foo::Bar - .................. 44 chars in PAUSE upload!
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::Declare version v0.0.0
+This document describes Foo::Bar version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::Declare;
+    use Foo::Bar;
 
 =head1 DESCRIPTION
 
 =over
 
-I<Anyone can tell the truth, 
-but only very few of us can make epigrams.> 
+I<Anyone can tell the truth, > 
+I<but only very few of us can make epigrams.> 
 -- W. Somerset Maugham
 
 =back
@@ -173,12 +127,12 @@ Somebody helped!
 
 =head1 AUTHOR
 
-Xiong Changnian  C<< <xiong@cpan.org> >>
+  C<< <xiong@cpan.org> >>
 
 =head1 LICENSE
 
 Copyright (C) 2013 
-Xiong Changnian C<< <xiong@cpan.org> >>
+ C<< <xiong@cpan.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 

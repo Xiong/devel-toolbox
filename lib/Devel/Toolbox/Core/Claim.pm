@@ -5,20 +5,24 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
-use lib 'lib';
+use lib qw| lib |;
 use File::Spec;                 # Portably perform operations on file names
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Class::Inspector;           # Get info about a class and its structure
 use Sub::Exporter -setup => {   # Sophisticated custom exporter
-    exports     => [ qw( claim ) ],
-    groups      => { default => [ qw( claim ) ] },
+    exports         => [qw| claim |],
+    groups  => { 
+        default     => [qw| claim |],
+        core        => [qw| claim |],
+    },
 };
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Core::Pool; # Global data pool IMPORTANT HERE!
+use Devel::Toolbox::Core::Pool  # Global data pool IMPORTANT HERE!
+    qw| :core |;
 
 # Alternate uses
 #~ use Devel::Comments '###';                                               #~
@@ -57,7 +61,7 @@ sub claim {
     say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
     my $toolset     = shift;    # just what was given (in the request)
     my $perl_name   ;           # full Perlish module name
-    my @path_parts  = (qw( Devel ::Toolbox ::Set ));    # search up from here
+    my @path_parts  = (qw| Devel ::Toolbox ::Set |);    # search up from here
     my $base_name   = $caller;                          # export methods here
     my $eval_err    ;
     
@@ -108,10 +112,10 @@ sub claim {
     $prepend =~ s/:://g;
     
     _export_all ({
-        -expkg      => $perl_name,
-        -impkg      => $base_name,
-        -symbols    => \@tools,
-        -prepend    => $prepend,
+        expkg       => $perl_name,
+        impkg       => $base_name,
+        symbols     => \@tools,
+        prepend     => $prepend,
     });
     
 #~ @base_tools     = @{ Class::Inspector->functions( $base_name ) };
@@ -121,10 +125,10 @@ sub claim {
 
 #=========# INTERNAL ROUTINE
 #~     _export_all ({
-#~         -expkg      => $exporting_package,   # 'Foo::Bar'
-#~         -impkg      => $importing_package,   # 'Hoge::Piyo'
-#~         -symbols    => \@symbol_list,        # [ sub, $scalar, %hash ]
-#~         -prepend    => $string,              # 'foo_bar'
+#~         expkg       => $exporting_package,   # 'Foo::Bar'
+#~         impkg       => $importing_package,   # 'Hoge::Piyo'
+#~         symbols     => \@symbol_list,        # [ sub, $scalar, %hash ]
+#~         prepend     => $string,              # 'foo_bar'
 #~     });
 #
 #   This came from Exporter via Acme::Teddy. 
@@ -136,11 +140,11 @@ sub claim {
 #   
 sub _export_all {
     my $args        = shift;
-    my $expkg       = $args->{-expkg};          # package to export from
-    my $impkg       = $args->{-impkg};          # package to import into
-    my @exsyms      = @{ $args->{-symbols} };   # aryref of strings
+    my $expkg       = $args->{expkg};           # package to export from
+    my $impkg       = $args->{impkg};           # package to import into
+    my @exsyms      = @{ $args->{symbols} };    # aryref of strings
                                                 #  include sigils $@%    
-    my $prepend      = $args->{-prepend};       # prepended to exports
+    my $prepend      = $args->{prepend};        # prepended to exports
     ### $expkg
     ### $impkg
     ### @exsyms
@@ -168,7 +172,7 @@ sub _export_all {
         else {
             my $imsym   = $exsym;                           # don't prepend
             warn "Exporting symbol: $type$exsym to $impkg"
-                unless $U->{-core}{-flags}{-quiet};
+                unless $U->{main}{flags}{quiet};
             no strict 'refs';                   # For we doeth darke magiks.
             *{"${impkg}::$imsym"} =
                 $type eq '&' ? \&{"${expkg}::$exsym"} :

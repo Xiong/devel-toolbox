@@ -13,9 +13,11 @@ use Error::Base;                # Simple structured errors with full backtrace
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
+use Devel::Toolbox::Core::Config
+    qw| load_config_files |;
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -47,36 +49,35 @@ our $U      = get_global_pool();            # common to all toolsets
 #   See: dt, DTC::Pool
 #   
 sub app_execute {
-    my $args        = shift;
+    my $args        = shift;    # arguments to invocation itself
     ### App-execute
     ### $U
-    my $option      = $U->{-script}{-cmdline_opt};
-    my $words       = $U->{-script}{-cmdline_words};
+    my $option      = $U->{main}{cmdline_opt};
+    my $words       = $U->{main}{cmdline_words};
     
     # Option handling here.                                 TODO
     
-    # Get config.                                           TODO
+    # Load after option processing; 
+    #   might pass arg to optionally load different config files
+    load_config_files();     # load from disk and merge contents into $U
     
     # Dispatch
-    
     my $set_name            = ucfirst shift $words;
     my $tool_name           = shift $words;
     my $import_name         = join q{_}, lc $set_name, $tool_name;
     ### $set_name
     ### $tool_name
-    ### $import_name
-    
+    ### $import_name    
     ### $words
     
     claim "::$set_name";        # expands and imports mashed-up: set_tool()
-    ### App (claimed)
-#~     ### $U
+    ### App (after claim'ing set)
+    ### $U
     
-    my @tools       = @{ Class::Inspector->functions( __PACKAGE__ ) };
-    ### @tools
-    
-    no strict 'refs';
-    &$import_name($words);
+    {
+        no strict 'refs';
+        &{ "$import_name" }(@$words);
+    }
     
     return 1;
 }; ## app_execute

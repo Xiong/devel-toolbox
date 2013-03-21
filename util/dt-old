@@ -6,7 +6,7 @@
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-use lib 'lib';
+use lib qw| lib |;
 
 use File::Spec;                 # Portably perform operations on file names
 
@@ -26,14 +26,14 @@ $module_name     = "Devel::Toolbox::$module_name";
 my $root_path       = File::Spec->rootdir ();
 my $orig_path       = File::Spec->catdir (
     $root_path,
-    qw( home xiong .config devel-toolbox templates ),
+    qw| home xiong .config devel-toolbox templates |,
 );
 my $template        = File::Spec->catfile( $orig_path, 'Module.pm' );
 
 my $cwd_path        = File::Spec->curdir ();
 my $dest_path       = File::Spec->catdir (
     $cwd_path, 
-    qw( lib Devel Toolbox ),
+    qw| lib Devel Toolbox |,
 );
 my $module          = File::Spec->catfile( $dest_path, @module );
 

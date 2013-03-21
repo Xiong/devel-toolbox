@@ -7,16 +7,19 @@ use version; our $VERSION = qv('v0.0.0');
 # Core modules
 use File::Spec;                 # Portably perform operations on file names
 use File::Copy();               # Copy files or filehandles
+#~ use File::Path                  # Create or remove directory trees
+#~     qw| make_path |;
 
 # CPAN modules
 use Error::Base;                # Simple structured errors with full backtrace
 use Text::Template;             # Expand template text with embedded Perl
+use File::Path::Tiny;           # mk(), rm() dirs with less overhead
 
 # Project module
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-#~ use Devel::Comments '###';                                               #~
+use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -34,79 +37,106 @@ our $U      = get_global_pool();            # common to all toolsets
 # METHODS
 
 #=========# EXTERNAL FUNCTION
-#~ module({ -module => $dir });
+#~ module({ module => $dir });
 #
 #   Create a new module in an existing project.
-#   $dir and -module_template must both be platform-expanded; e.g.: 
+#   $dir and $u->module_template must both be platform-expanded; e.g.: 
 #       $dir                = /home/foo/projects/bar/lib/
-#       -module_template    = /home/foo/.config/templates/Module.pm
+#       $u->module_template = /home/foo/.config/templates/Module.pm
 #   
-#   -template_delimiters can be any pair of strings; watch for conflicts!
+#   template_delimiters can be any pair of strings; watch for conflicts!
 #   All other arguments and all existing keys are available to templates!
 #   
 sub module;     # forward
 declare {
-    -name       => 'module',
-    -sub        => \&module,
+    name        => 'module',
+    sub         => \&module,
 };
 sub module {
     my $args        = shift;
     my $module      ;
-    my $u           ;                       # local this sub only
-    %{$u}           = ( %{$U} );
+#~     my $u               ;
+#~     %$u                 = %$U;      # local copy this sub only
     
     
     # Polymorphic API.
     if    ( ref $args eq 'HASH' ) {
-        $module     = $args->{-module};     # dir of new module
+        $module     =  $args->{module}     # name of new module
+                    // $args->{module_name}
+                    // $args->{new_module_name}
+                    // 'FOO::BAR'
+                    ;
     }
     elsif ( ref $args eq 'SCALAR' ) {
         $module     = $$args;
-        $args       = {};                   # dummy
+        $err->crash("Unsupported args in call to New::Module: $args");
     }
     elsif ( ref $args eq 'ARRAY' ) {
         $module     = shift @$args;
-        $args       = {};                   # dummy
+        $err->crash("Unsupported args in call to New::Module: $args");
     }
     else {
         $module     = $args;
-        $args       = {};                   # dummy
+        $args       = { new_module_name => $module };
     };
     
-    # Merge this functions's arguments with pool for template substitution
-    %{$u}        = ( %{$u}, %{$args} );
+    # Obtain flattened $U for template substitution.
+    my $u       = flat_from_pool({ 
+#~         want_keys       => ['foo'],         # all keys by default
+        strip_level     => 1,
+    });
+    ### Flat pool in New:
+    ### $u
     
+    # Merge this functions's arguments with pool for template substitution.
+    %{$u}       = ( %{$u}, %{$args} );
+    
+    # Do the substitution.
+    my $tt_delimiters   = [
+        $u->{template_delimiters__0}, 
+        $u->{template_delimiters__1},
+    ];
     my $tt      = Text::Template->new(
-                    SOURCE      => $u->{-template}{-module},
-                    DELIMITERS  => $u->{-template}{-delimiters},
+                    SOURCE      => $u->{new_module_template},
+                    DELIMITERS  => $tt_delimiters,
                 );
-    my $out     ;
-    
-    
-    # Strip leading dash from hash keys; 
-    #   Text::Template will supply the correct sigil.
-    #   ( This actually duplicates keys so the originals remain. )
-    for ( keys $u ) {
-        my $val     = $u->{$_};
-        s/^-//;
-        $u->{$_}    = $val;
-    };
+    $err->crash("Couldn't use template: $u->{new_module_template}")
+        if not $tt;
     
     ### New-template-ready
     ### $u
-    $out    = $tt->fill_in( HASH => $u );
+    my $out     = $tt->fill_in( HASH => $u );
+    
+    # Figure out the qualified relative filename.
+    my @path_parts      = ( 'lib', split q{::}, $module );
+    my $module_file_rel = File::Spec->catfile( @path_parts ) . q{.pm};
+    ### $module_file_rel
+    ### @path_parts
+    
+    # Create any missing dirs along the path.
+    pop @path_parts;    # no sense creating a dir with the actual filename
+    my $path        = File::Spec->catdir(@path_parts);
+    File::Path::Tiny::mk($path)
+        or $err->crash("Failed to make path $path");
     
     # Put new module file
-    open my $m_fh, '>', $module
-                or $err->crash("Failed to open $module for writing.");
+    open my $m_fh, '>', $module_file_rel
+                or $err->crash("Failed to open $module_file_rel for writing.");
     print {$m_fh} $out
-                or $err->crash("Failed while writing $module");
+                or $err->crash("Failed while writing $module_file_rel");
     close $m_fh
-                or $err->crash("Failed to close $module after writing.");
+                or $err->crash("Failed to close $module_file_rel after writing.");
     
     return 1;
 }; ## module
 
+#=========# DUMMY FUNCTION
+sub foolish;   # forward
+declare {
+    name        => 'foolish',
+    sub         => \&foolish,
+};
+sub foolish { 1 };
 
 
 ## END MODULE
