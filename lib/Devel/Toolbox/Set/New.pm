@@ -19,7 +19,7 @@ use File::Path::Tiny;           # mk(), rm() dirs with less overhead
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
