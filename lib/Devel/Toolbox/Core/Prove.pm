@@ -28,7 +28,7 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::Prove - Test framework: high productivity, correctness
+Devel::Toolbox::Core::Prove - High productivity testing: correct, complete
 
 =head1 VERSION
 
