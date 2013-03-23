@@ -32,14 +32,21 @@ $self->{script}     = 'valet-self-check';
 # Declarations
 
 # Declare checkers.
-$self->{checker}{ return    }
-    = sub { $_[0]->return_is( 0, $_[1], $_[2]) };
+sub return_is { $_[0]->return_is( 0, $_[1], $_[2]) };
+$self->{checker}{ return_is}    = \&return_is;
 
 # Which cases to enforce?
-$self->enable ({
-    null    => 1,
-});
-#~ ### $self
+        # =EITHER=
+#~ $self->{enable}     = {
+#~     null    => 1,
+#~ };
+        # =OR=
+#~ $self->{enable}     = {
+#~    ':all'   => 1,
+#~     null    => 0,
+#~ };
+
+### $self
 
 # Declare cases themselves.
 #            {               }   #
@@ -48,7 +55,7 @@ $self->{case}{ null          }   = {
     sub     => sub {  },
     args    => undef,
     want    => {
-        return  => undef,
+        return_is       => undef,
     },
 };  ## case
 
@@ -59,7 +66,7 @@ $self->{case}{ teddy_roar     }   = {
     },
     args    => undef,
     want    => {
-        return  => 'Roar!',
+        return_is       => 'Roar!',
     },
 };  ## case
 

@@ -35,15 +35,34 @@ sub enforce {
     my $checker     = $self->{checker}  // die "! No checkers declared.";
     
     # A hash is declared but we want to enforce in predictable order. 
-    my @sorted_keys = sort {
+    my @sorted_case_keys = sort {
         $cases->{$a}{sort}
         cmp
         $cases->{$b}{sort}
     } keys $cases;
     
+    # Delete disabled cases.
+    if ( exists $self->{enable} ) {     # if not then feature unused; skip
+        if ( $self->{enable}{':all'} ) {    # disable only if case == false
+            @sorted_case_keys 
+                = grep { 
+                    (
+                        defined $self->{enable}{$_} 
+                         && not $self->{enable}{$_}
+                    )
+                     ? 0 : 1 
+                } @sorted_case_keys;
+        }
+        else {                              # enable only if case == true
+            @sorted_case_keys 
+                = grep { $self->{enable}{$_} } 
+                    @sorted_case_keys;
+        };
+    }; ## if exists enable
+    
     # Unpack case, execute, check.
     CASE_KEY:
-    for my $case_key ( @sorted_keys ) {
+    for my $case_key ( @sorted_case_keys ) {
         $self->{check_count}++;
         my $base        = _append( $self->{script}, $case_key );
         my $extra       ;
@@ -69,7 +88,7 @@ sub enforce {
         };
         
         # Store for possible later examination.
-        %{ $self->{trap}{$case_key} }   = %$trap;
+        $self->{case}{$case_key}{trap}      = $trap;
         
         # Do all checks for this case (as a subtest).
         subtest $case_key => sub {  # $case_key follows checks in TAP output
@@ -107,22 +126,6 @@ sub enforce {
     
     return $self;
 }; ## enforce
-
-#=========# OBJECT METHOD
-#~ 
-#
-#   @
-#   
-sub enable {
-    my $self        = shift;  
-    
-#~     my $roar        = Acme::Teddy::roar();
-#~     my $bear        = sub { Acme::Teddy::roar() };
-#~     my $roar        = &$bear;
-#~     ### $roar
-    
-    return $self;
-}; ## enable
 
 #=========# OBJECT METHOD
 #~ 
