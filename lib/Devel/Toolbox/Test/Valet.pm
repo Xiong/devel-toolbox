@@ -31,8 +31,8 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #   
 sub enforce {
     my $self        = shift;  
-    my $cases       = $self->{case}         // die "No test cases declared.";
-    my $checker     = $self->{checker}      // note("No checkers declared.");
+    my $cases       = $self->{case}     // die "! No test cases declared.";
+    my $checker     = $self->{checker}  // die "! No checkers declared.";
     
     # A hash is declared but we want to enforce in predictable order. 
     my @sorted_keys = sort {
@@ -48,7 +48,7 @@ sub enforce {
         my $base        = _append( $self->{script}, $case_key );
         my $extra       ;
         my $diag        ;
-        note( "---- $case_key" );
+        note( "---- $case_key:" );
         my $case        = $cases->{$case_key};
         my $context     = uc( $case->{context} // 'SCALAR' );   # VOID, ARRAY
         
@@ -67,18 +67,13 @@ sub enforce {
                 die "! Invalid context demanded: $context";
             }
         };
-        pass('execute');
         
         # Store for possible later examination.
         %{ $self->{trap}{$case_key} }   = %$trap;
         
-        next CASE_KEY if not ref $checker;      # no checkers defined
-        
         # Do all checks for this case (as a subtest).
-        $self->{check_count}++;
-        $extra          = 'case_complete';      # printed after checks
-        $diag           = _append( $case_key, $extra );
-        subtest $diag => sub {
+        subtest $case_key => sub {  # $case_key follows checks in TAP output
+            pass('execute');
             my $want        = $case->{want};
             my $sub_check_count;
             CHECK_KEY:
