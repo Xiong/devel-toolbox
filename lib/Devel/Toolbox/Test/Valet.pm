@@ -1,4 +1,4 @@
-package Devel::Toolbox::Core::Prove;
+package Devel::Toolbox::Test::Valet;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
@@ -28,23 +28,22 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::Prove - implements 'prove' for 'dt'
+Devel::Toolbox::Test::Valet - High productivity testing: correct, complete
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::Prove version v0.0.0
+This document describes Devel::Toolbox::Test::Valet version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::Prove;
+    use Devel::Toolbox::Test::Valet;
 
 =head1 DESCRIPTION
 
 =over
 
-I<Doubt is useful, it keeps faith a living thing. After all, >
-I<you cannot know the strength of your faith until it has been tested. > 
--- Pi Patel
+I<A knight in shining armor has never had his mettle truly tested. > 
+-- some meme
 
 =back
 
