@@ -11,20 +11,22 @@ use parent qw| Devel::Toolbox::Test::Valet |;
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 #----------------------------------------------------------------------------#
-# inits
+# Inits
 
 my $self            = main->new();
 $self->{script}     = 'valet-self-check';
 #~ ### $self
 
 #----------------------------------------------------------------------------#
-# case declarations
+# Declarations
 
+# Which cases to enforce?
 $self->enable ({
     null    => 1,
 });
 #~ ### $self
 
+# Declare cases themselves.
 #            {               }   #
 $self->{case}{ null          }   = {
     sort    => 0,
@@ -51,13 +53,13 @@ $self->{case}{ enforce_null     }   = {
 ### $self
 
 #----------------------------------------------------------------------------#
-# execute and check
+# Execute and check
 
 $self->enforce();
 ### $self
 
 #----------------------------------------------------------------------------#
-# cleanup
+# Cleanup
 
 END {
     $self->finish();     # exits

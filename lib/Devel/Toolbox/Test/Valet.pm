@@ -150,8 +150,8 @@ This document describes Devel::Toolbox::Test::Valet version v0.0.0
 
 =over
 
-I<A knight in shining armor has never had his mettle truly tested. > 
--- some meme
+I< [Earl] Sidney Godolphin is never in the way, and never out of the way. >
+-- Charles II L<^|http://www.bartleby.com/344/90.html>
 
 =back
 
