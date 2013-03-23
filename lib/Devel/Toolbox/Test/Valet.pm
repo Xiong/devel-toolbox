@@ -9,6 +9,7 @@ use lib qw| lib |;
 use Test::More;
 
 # CPAN modules
+use Test::Trap;                 # Trap exit codes, exceptions, output, etc.
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -38,7 +39,7 @@ sub enforce {
         $cases->{$b}{sort}
     } keys $cases;
     
-    # Do all the checks for this case.
+    # Locate case, execute, check, wrapup.
     for my $case ( @sorted_keys ) {
         my $base        = _append( $self->{script}, $case );
         my $check       = $case;
@@ -46,8 +47,10 @@ sub enforce {
         note( "---- $case" );
         
         # Execute code under test.
+        trap { &{ $case->{sub} }( @{ $case->{args} } ) };
         
         # Do all checks for this case.
+        
         
         # Wrapup.
         $self->{check_count}++;

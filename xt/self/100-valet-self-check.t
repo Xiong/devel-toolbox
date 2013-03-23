@@ -28,7 +28,7 @@ $self->enable ({
 #            {               }   #
 $self->{case}{ null          }   = {
     sort    => 0,
-    code    => sub {  },
+    sub     => sub {  },
     args    => undef,
     want    => {
         return  => undef,
@@ -37,7 +37,7 @@ $self->{case}{ null          }   = {
 
 $self->{case}{ enforce_null     }   = {
     sort    => 1,
-    code    => sub {
+    sub     => sub {
         my $s   = main->new();
         $s->enforce();
     },
