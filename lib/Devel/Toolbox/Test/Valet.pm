@@ -5,6 +5,8 @@ use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
 # Core modules
+use lib qw| lib |;
+use Test::More;
 
 # CPAN modules
 
@@ -13,11 +15,89 @@ use version; our $VERSION = qv('v0.0.0');
 
 ## use
 #============================================================================#
-
 # Pseudo-globals
+
+
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub enforce {
+    my $self        = shift;  
+    my $cases       = $self->{case} // die "No test cases declared.";
+    
+    for my $case ( keys $cases ) {
+        my $diag    = $self->{script} . q{ };
+        
+        
+        $self->{check_count}++;
+        $diag   .= 'case_complete';
+        pass($diag);
+    };
+    
+    return $self;
+}; ## enforce
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub enable {
+    my $self        = shift;  
+    
+    
+    return $self;
+}; ## enable
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub finish {
+    my $self        = shift; 
+    ### $self
+     
+    done_testing( $self->{check_count} );
+    
+    exit;       # NEVER RETURNS
+}; ## finish
+
+#=========# CLASS METHOD
+#~ my $self    = Devel::Toolbox::Core::Base->new({
+#~                 -key        => 'value',
+#~             });
+#
+#   Classic hashref-based-object constructor.
+#   
+sub new {
+    my $class   = shift;
+    my $self    = {};
+    bless ( $self => $class );
+    $self->init(@_);                            # init remaining args
+    return $self;
+}; ## new
+
+#=========# OBJECT METHOD
+#~ $self->init({
+#~     -key        => 'value',
+#~ });
+#
+#   Standard hashref-merge initializer. 
+#   New values overwrite old values without touching other attributes.
+#   
+sub init {
+    my $self        = shift;
+    my $args        = shift or return $self;
+    %{$self}        = ( %{$self}, %{$args} );   # merge
+    return $self;
+}; ## init
 
 
 
