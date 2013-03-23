@@ -12,7 +12,8 @@ use Test::More;
 use Test::Trap;                 # Trap exit codes, exceptions, output, etc.
 
 # Alternate uses
-#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+### DTT-VALET
 
 ## use
 #============================================================================#
@@ -30,7 +31,8 @@ use Test::Trap;                 # Trap exit codes, exceptions, output, etc.
 #   
 sub enforce {
     my $self        = shift;  
-    my $cases       = $self->{case} // die "No test cases declared.";
+    my $cases       = $self->{case}         // die "No test cases declared.";
+    my $checker     = $self->{checker}      // note("No checkers declared.");
     
     # A hash is declared but we want to enforce in predictable order. 
     my @sorted_keys = sort {
@@ -39,24 +41,73 @@ sub enforce {
         $cases->{$b}{sort}
     } keys $cases;
     
-    # Locate case, execute, check, wrapup.
-    for my $case ( @sorted_keys ) {
-        my $base        = _append( $self->{script}, $case );
-        my $check       = $case;
-        my $diag        = $case;
-        note( "---- $case" );
+    # Unpack case, execute, check.
+    CASE_KEY:
+    for my $case_key ( @sorted_keys ) {
+        $self->{check_count}++;
+        my $base        = _append( $self->{script}, $case_key );
+        my $extra       ;
+        my $diag        ;
+        note( "---- $case_key" );
+        my $case        = $cases->{$case_key};
+        my $context     = uc( $case->{context} // 'SCALAR' );   # VOID, ARRAY
         
         # Execute code under test.
-        trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+        given ($context) {
+            when ( /VOID/   ) {
+                             trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+            }
+            when ( /ARRAY/  ) {
+                my @array  = trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+            }
+            when ( /SCALAR/ ) {
+                my $scalar = trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+            }
+            default         {
+                die "! Invalid context demanded: $context";
+            }
+        };
+        pass('execute');
         
-        # Do all checks for this case.
+        # Store for possible later examination.
+        %{ $self->{trap}{$case_key} }   = %$trap;
         
+        next CASE_KEY if not ref $checker;      # no checkers defined
         
-        # Wrapup.
+        # Do all checks for this case (as a subtest).
         $self->{check_count}++;
-        $check          = 'case_complete';
-        $diag           = _append( $case, $check );
-        pass($diag);
+        $extra          = 'case_complete';      # printed after checks
+        $diag           = _append( $case_key, $extra );
+        subtest $diag => sub {
+            my $want        = $case->{want};
+            my $sub_check_count;
+            CHECK_KEY:
+            for my $check_key ( keys $want ) {
+                ### $case_key
+                ### $check_key
+                ### $want
+                $sub_check_count++;
+                if ( defined $checker->{$check_key} ) {
+                    eval { 
+                        &{ $checker->{$check_key} }(
+                            $trap,                  # $_[0]     got
+                            $want->{$check_key},    # $_[1]     want
+                            $check_key,             # $_[2]     diag
+                        ) 
+                    };
+                    my $eval_err    = $@;
+                    if ($eval_err) {
+                        diag("! Checker failure: $check_key");
+                        fail( $eval_err );
+                        next CHECK_KEY;
+                    };
+                }
+                else {
+                    pass("Missing checker: $check_key");
+                };
+            }; ## for check
+        }; ## subtest
+        
     }; ## for case
     
     return $self;
@@ -70,6 +121,10 @@ sub enforce {
 sub enable {
     my $self        = shift;  
     
+#~     my $roar        = Acme::Teddy::roar();
+#~     my $bear        = sub { Acme::Teddy::roar() };
+#~     my $roar        = &$bear;
+#~     ### $roar
     
     return $self;
 }; ## enable
@@ -80,7 +135,8 @@ sub enable {
 #   @
 #   
 sub finish {
-    my $self        = shift; 
+    my $self        = shift;
+    ### finish()
     ### $self
      
     done_testing( $self->{check_count} );

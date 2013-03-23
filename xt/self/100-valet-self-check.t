@@ -1,3 +1,11 @@
+package Acme::Teddy;
+{
+    sub roar {
+        'Roar!'
+    };
+}
+
+package main;
 use strict;
 use warnings;
 
@@ -6,6 +14,9 @@ use lib qw| lib |;
 
 # Project modules
 use parent qw| Devel::Toolbox::Test::Valet |;
+
+# Dummy testing target
+use Acme::Teddy;
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -19,6 +30,10 @@ $self->{script}     = 'valet-self-check';
 
 #----------------------------------------------------------------------------#
 # Declarations
+
+# Declare checkers.
+$self->{checker}{ return    }
+    = sub { $_[0]->return_is( 0, $_[1], $_[2]) };
 
 # Which cases to enforce?
 $self->enable ({
@@ -37,15 +52,14 @@ $self->{case}{ null          }   = {
     },
 };  ## case
 
-$self->{case}{ enforce_null     }   = {
+$self->{case}{ teddy_roar     }   = {
     sort    => 1,
     sub     => sub {
-        my $s   = main->new();
-        $s->enforce();
+        Acme::Teddy::roar();
     },
     args    => undef,
     want    => {
-        return  => undef,
+        return  => 'Roar!',
     },
 };  ## case
 
