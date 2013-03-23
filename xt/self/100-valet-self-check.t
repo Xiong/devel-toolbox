@@ -27,12 +27,27 @@ $self->enable ({
 
 #            {               }   #
 $self->{case}{ null          }   = {
+    sort    => 0,
     code    => sub {  },
     args    => undef,
     want    => {
         return  => undef,
     },
-};
+};  ## case
+
+$self->{case}{ enforce_null     }   = {
+    sort    => 1,
+    code    => sub {
+        my $s   = main->new();
+        $s->enforce();
+    },
+    args    => undef,
+    want    => {
+        return  => undef,
+    },
+};  ## case
+
+
 ### $self
 
 #----------------------------------------------------------------------------#

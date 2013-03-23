@@ -31,14 +31,30 @@ sub enforce {
     my $self        = shift;  
     my $cases       = $self->{case} // die "No test cases declared.";
     
-    for my $case ( keys $cases ) {
-        my $diag    = $self->{script} . q{ };
+    # A hash is declared but we want to enforce in predictable order. 
+    my @sorted_keys = sort {
+        $cases->{$a}{sort}
+        cmp
+        $cases->{$b}{sort}
+    } keys $cases;
+    
+    # Do all the checks for this case.
+    for my $case ( @sorted_keys ) {
+        my $base        = _append( $self->{script}, $case );
+        my $check       = $case;
+        my $diag        = $case;
+        note( "---- $case" );
         
+        # Execute code under test.
         
+        # Do all checks for this case.
+        
+        # Wrapup.
         $self->{check_count}++;
-        $diag   .= 'case_complete';
+        $check          = 'case_complete';
+        $diag           = _append( $case, $check );
         pass($diag);
-    };
+    }; ## for case
     
     return $self;
 }; ## enforce
@@ -98,6 +114,15 @@ sub init {
     %{$self}        = ( %{$self}, %{$args} );   # merge
     return $self;
 }; ## init
+
+#=========# INTERNAL ROUTINE
+#~ 
+#
+#   @
+#   
+sub _append {
+    return join q{ | }, @_;
+}; ## _append
 
 
 
