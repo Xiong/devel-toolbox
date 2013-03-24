@@ -3,7 +3,6 @@ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
-use parent 'Devel::Toolbox::Core::Base';
 
 # Core modules
 use lib qw| lib |;
@@ -11,6 +10,9 @@ use Test::More;
 
 # CPAN modules
 use Test::Trap;                 # Trap exit codes, exceptions, output, etc.
+
+# Project modules
+use parent 'Devel::Toolbox::Core::Base';
 
 # Alternate uses
 use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -33,7 +35,7 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 sub enforce {
     my $self        = shift;  
     my $cases       = $self->{case}     // die "! No test cases declared.";
-    my $checker     = $self->{checker}  // die "! No checkers declared.";
+    my $caller      = caller;
     
     # A hash is declared but we want to enforce in predictable order. 
     my @sorted_case_keys = sort {
@@ -102,23 +104,18 @@ sub enforce {
                 ### $check_key
                 ### $want
                 $sub_check_count++;
-                if ( defined $checker->{$check_key} ) {
-                    eval { 
-                        &{ $checker->{$check_key} }(
-                            $trap,                  # $_[0]     got
-                            $want->{$check_key},    # $_[1]     want
-                            $check_key,             # $_[2]     diag
-                        ) 
-                    };
-                    my $eval_err    = $@;
-                    if ($eval_err) {
-                        diag("! Checker failure: $check_key");
-                        fail( $eval_err );
-                        next CHECK_KEY;
-                    };
-                }
-                else {
-                    pass("Missing checker: $check_key");
+                eval { 
+                    $caller->$check_key( # class method; discard $_[0]
+                        $trap,                  # $_[1]     got
+                        $want->{$check_key},    # $_[2]     want
+                        $check_key,             # $_[3]     diag
+                    ) 
+                };
+                my $eval_err    = $@;
+                if ($eval_err) {
+                    diag("! Checker failure: $check_key");
+                    fail( $eval_err );
+                    next CHECK_KEY;
                 };
             }; ## for check
         }; ## subtest
