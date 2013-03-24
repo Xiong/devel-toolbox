@@ -3,6 +3,7 @@ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
+use parent 'Devel::Toolbox::Core::Base';
 
 # Core modules
 use lib qw| lib |;
@@ -141,36 +142,6 @@ sub finish {
     
     exit;       # NEVER RETURNS
 }; ## finish
-
-#=========# CLASS METHOD
-#~ my $self    = Devel::Toolbox::Core::Base->new({
-#~                 -key        => 'value',
-#~             });
-#
-#   Classic hashref-based-object constructor.
-#   
-sub new {
-    my $class   = shift;
-    my $self    = {};
-    bless ( $self => $class );
-    $self->init(@_);                            # init remaining args
-    return $self;
-}; ## new
-
-#=========# OBJECT METHOD
-#~ $self->init({
-#~     -key        => 'value',
-#~ });
-#
-#   Standard hashref-merge initializer. 
-#   New values overwrite old values without touching other attributes.
-#   
-sub init {
-    my $self        = shift;
-    my $args        = shift or return $self;
-    %{$self}        = ( %{$self}, %{$args} );   # merge
-    return $self;
-}; ## init
 
 #=========# INTERNAL ROUTINE
 #~ 
