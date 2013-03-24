@@ -8,4 +8,7 @@
 mkdir -p html/Devel/Toolbox/Test
 pod2cpanhtml lib/Devel/Toolbox/Test/Valet.pm html/Devel/Toolbox/Test/Valet.html
 
+mkdir -p html/Devel/Toolbox/Core
+pod2cpanhtml lib/Devel/Toolbox/Core/Base.pm html/Devel/Toolbox/Core/Base.html
+
 exit 0
