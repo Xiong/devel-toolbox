@@ -33,7 +33,9 @@ $self->{script}     = 'valet-self-check';
 
 # Declare checkers.
 sub return_is { $_[0]->return_is( 0, $_[1], $_[2]) };
-$self->{checker}{ return_is}    = \&return_is;
+
+# With these names...         ... employ these checkers.
+$self->{checker}{return_is}     = \&return_is;
 
 # Which cases to enforce?
         # =EITHER=
