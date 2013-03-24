@@ -237,8 +237,6 @@ Perl extension for Version Objects
 
 =end html
 
-=back
-
 This module should work with any version of perl 5.8.8 and up. 
 However, you may need to upgrade some core modules. 
 
