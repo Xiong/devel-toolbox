@@ -58,7 +58,7 @@ my $qr_errinc       = qr/locate.*?INC/;     # Can't locate Foo.pm in @INC...
 #   
 sub claim {
     my $caller      = caller;
-    say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
+#~     say '[Claim] ', $caller, ' claiming [', @_, ']';                    #~#
     my $toolset     = shift;    # just what was given (in the request)
     my $perl_name   ;           # full Perlish module name
     my @path_parts  = (qw| Devel ::Toolbox ::Set |);    # search up from here

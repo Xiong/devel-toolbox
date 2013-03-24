@@ -1,12 +1,5 @@
-package Foo::Bar;
-# Choose minimum perl interpreter version; delete the rest.
-# Do you want to enforce the bugfix level?
-#~ use 5.008008;   # 5.8.8     # 2006  # oldest sane version
-#~ use 5.008009;   # 5.8.9     # 2008  # latest 5.8
-#~ use 5.010001;   # 5.10.1    # 2009  # say, state, switch
-#~ use 5.012003;   # 5.12.5    # 2011  # yada
-#~ use 5.014002;   # 5.14.3    # 2012  # pop $arrayref, copy s///r
-#~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
+package Devel::Toolbox::Core::Prove;
+use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
@@ -35,23 +28,23 @@ __END__
 
 =head1 NAME
 
-Foo::Bar - .................. 44 chars in PAUSE upload!
+Devel::Toolbox::Core::Prove - implements 'prove' for 'dt'
 
 =head1 VERSION
 
-This document describes Foo::Bar version v0.0.0
+This document describes Devel::Toolbox::Core::Prove version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Foo::Bar;
+    use Devel::Toolbox::Core::Prove;
 
 =head1 DESCRIPTION
 
 =over
 
-I<Anyone can tell the truth, > 
-I<but only very few of us can make epigrams.> 
--- W. Somerset Maugham
+I<Doubt is useful, it keeps faith a living thing. After all, >
+I<you cannot know the strength of your faith until it has been tested. > 
+-- Pi Patel
 
 =back
 

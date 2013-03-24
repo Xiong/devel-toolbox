@@ -19,7 +19,7 @@ use File::Path::Tiny;           # mk(), rm() dirs with less overhead
 use Devel::Toolbox;             # Simple custom project tool management
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
@@ -69,11 +69,11 @@ sub module {
     }
     elsif ( ref $args eq 'SCALAR' ) {
         $module     = $$args;
-        $err->crash("Unsupported args in call to New::Module: $args");
+        $err->crash("Unsupported args in call to New::module(): $args");
     }
     elsif ( ref $args eq 'ARRAY' ) {
         $module     = shift @$args;
-        $err->crash("Unsupported args in call to New::Module: $args");
+        $err->crash("Unsupported args in call to New::module(): $args");
     }
     else {
         $module     = $args;

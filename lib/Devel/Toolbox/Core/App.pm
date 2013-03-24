@@ -17,7 +17,7 @@ use Devel::Toolbox::Core::Config
     qw| load_config_files |;
 
 # Alternate uses
-use Devel::Comments '###';                                               #~
+#~ use Devel::Comments '###';                                               #~
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use

@@ -10,9 +10,9 @@ BEGIN {
 
 BEGIN {
 #
-use Devel::Toolbox;             # Simple custom project tool management
-use Devel::Toolbox::Set::New;   # Create a project, module, test, or toolset
-
+#~ use Devel::Toolbox;             # Simple custom project tool management
+#~ use Devel::Toolbox::Set::New;   # Create a project, module, test, or toolset
+use Devel::Toolbox::Core::Prove # High productivity testing: correct, complete
 
 #    
 }
