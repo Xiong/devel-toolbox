@@ -40,21 +40,24 @@ sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
 
 # Which cases to enforce?
         # =EITHER=
-#~ $self->{enable} = {
-#~     null            => 1,
-#~ };
-        # =OR=
 $self->{enable} = {
-   ':all'       => 1,
-    bad_checker     => 0,
+    re_enter        => 1,
 };
+        # =OR=
+#~ $self->{enable} = {
+#~    ':all'       => 1,
+#~     undeclared_case => 0,
+#~     bad_checker     => 0,
+#~     re_enter        => 0,
+#~ };
 
 ### $self
 
 # Declare cases themselves.
-#            {                  }   = #
+$self->{case}{ empty_hashref    }   = {};
+
 $self->{case}{ null             }   = {
-    sort    => 0,
+    sort    => 1,
     sub     => sub {  },
     args    => undef,
     want    => {
@@ -62,17 +65,8 @@ $self->{case}{ null             }   = {
     },
 };  ## case
 
-$self->{case}{ bad_checker      }   = {
-    sort    => 0,
-    sub     => sub {  },
-    args    => undef,
-    want    => {
-        bad_checker     => undef,
-    },
-};  ## case
-
 $self->{case}{ teddy_roar       }   = {
-    sort    => 1,
+    sort    => 2,
     sub     => sub {
         Acme::Teddy::roar();
     },
@@ -81,6 +75,23 @@ $self->{case}{ teddy_roar       }   = {
         return_is       => 'Roar!',
     },
 };  ## case
+
+$self->{case}{ re_enter      }   = {
+    sort    => 3,
+    sub     => sub {
+        my $s   = Devel::Toolbox::Test::Valet->new();
+           $s->{case}{nested} = {};
+           $s->enforce();
+#~            $s->finish();
+        return undef;
+    },
+    args    => undef,
+    want    => {
+        return_is       => undef,
+    },
+};  ## case
+
+#            {                  }   = #
 
 
 ### $self

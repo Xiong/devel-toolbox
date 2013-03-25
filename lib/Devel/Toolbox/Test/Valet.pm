@@ -35,13 +35,14 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 sub enforce {
     my $self        = shift;  
     my $cases       = $self->{case}     // die "! No test cases declared.";
-    my $caller      = caller;
+    my $caller      = caller;           # calling package
+    my $script      = $self->{script}   // $0;  # self-declared?
     
     # A hash is declared but we want to enforce in predictable order. 
     my @sorted_case_keys = sort {
-        $cases->{$a}{sort}
+        $cases->{$a}{sort} // 0
         cmp
-        $cases->{$b}{sort}
+        $cases->{$b}{sort} // 0
     } keys $cases;
     
     # Delete disabled cases.
@@ -67,23 +68,31 @@ sub enforce {
     CASE_KEY:
     for my $case_key ( @sorted_case_keys ) {
         $self->{check_count}++;
-        my $base        = _append( $self->{script}, $case_key );
+        my $base        = _append( $script, $case_key );
         my $extra       ;
         my $diag        ;
         note( "---- $case_key:" );
         my $case        = $cases->{$case_key};
-        my $context     = uc( $case->{context} // 'SCALAR' );   # VOID, ARRAY
+        my $context     = uc( $case->{context}  // 'SCALAR' );   # VOID, ARRAY
+        my @args        = @{ $case->{args}      // []       };
+        my $sub         = $case->{sub}          // 0        ;
+        
+        # Skip case if no code defined, eh.
+        if ( not $sub ) {
+            pass _append( $case_key, 'Skipped, no {sub} defined.' );
+            next CASE_KEY;
+        };
         
         # Execute code under test.
         given ($context) {
             when ( /VOID/   ) {
-                             trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+                             trap { &{ $case->{sub} }( @args ) };
             }
             when ( /ARRAY/  ) {
-                my @array  = trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+                my @array  = trap { &{ $case->{sub} }( @args ) };
             }
             when ( /SCALAR/ ) {
-                my $scalar = trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+                my $scalar = trap { &{ $case->{sub} }( @args ) };
             }
             default         {
                 die "! Invalid context demanded: $context";
@@ -96,13 +105,18 @@ sub enforce {
         # Do all checks for this case (as a subtest).
         subtest $case_key => sub {  # $case_key follows checks in TAP output
             pass('execute');
-            my $want        = $case->{want};
+            my $want        = $case->{want}     // {};
+            if ( not $want ) {
+                note _append( $case_key, 'Skipped, no {want} defined.' );
+                done_testing(1);                # 1 subtest for 'execute'
+                return;
+            };
             my $sub_check_count;
             CHECK_KEY:
             for my $check_key ( keys $want ) {
-                ### $case_key
-                ### $check_key
-                ### $want
+#~                 ### $case_key
+#~                 ### $check_key
+#~                 ### $want
                 $sub_check_count++;
                 eval { 
                     $caller->$check_key( # class method; discard $_[0]
@@ -146,6 +160,8 @@ sub finish {
 #   @
 #   
 sub _append {
+#~     ### _append
+#~     ### @_
     return join q{ | }, @_;
 }; ## _append
 
