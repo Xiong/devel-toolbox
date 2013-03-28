@@ -1,14 +1,9 @@
 package Acme::Teddy;
 {
-    sub roar {
-        return 'Roar!'
-    };
-    sub roar_out {
-        print 'Roar!'
-    };
-    sub roar_err {
-        print STDERR 'Roar!'
-    };
+    sub roar        { return        'Roar!' };
+    sub roar_out    { print         'Roar!' };
+    sub roar_err    { print STDERR  'Roar!' };
+    sub roar_die    { die           'Roar!' };
 }
 
 package main;
@@ -39,22 +34,20 @@ $self->{script}     = 'valet-self-check';
 # Declarations
 
 # Override checkers.
-# 
-# Example checker uses Test::Trap method.
-#   {check}     {trap}               {want} {diag}
+# $_[0]: Checker class, usually 'main' (caller).
+#               $_[1]                $_[2]  $_[3]
+#   {check()}   $trap (have)         {want} {diag}
 sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
 
 # Which cases to enforce?
         # =EITHER=
 #~ $self->{enable} = {
-#~     re_enter        => 1,
+#~     undeclared_case => 1,
 #~ };
         # =OR=
 #~ $self->{enable} = {
 #~    ':all'       => 1,
 #~     undeclared_case => 0,
-#~     bad_checker     => 0,
-#~     re_enter        => 0,
 #~ };
 
 ### $self
@@ -72,7 +65,7 @@ $self->{case}{ null             }   = {
     },
 };  ## case
 
-$self->{case}{ teddy_roar       }   = {
+$self->{case}{ roar             }   = {
     sort    => 2,
     sub     => sub {
         Acme::Teddy::roar();
@@ -84,7 +77,7 @@ $self->{case}{ teddy_roar       }   = {
     },
 };  ## case
 
-$self->{case}{ teddy_roar_out   }   = {
+$self->{case}{ roar_out         }   = {
     sort    => 3,
     sub     => sub {
         Acme::Teddy::roar_out();
@@ -96,7 +89,7 @@ $self->{case}{ teddy_roar_out   }   = {
     },
 };  ## case
 
-$self->{case}{ teddy_roar_err   }   = {
+$self->{case}{ roar_err         }   = {
     sort    => 3,
     sub     => sub {
         Acme::Teddy::roar_err();
@@ -105,6 +98,18 @@ $self->{case}{ teddy_roar_err   }   = {
     want    => {
         return_is       => 1,
         stderr_is       => 'Roar!',
+    },
+};  ## case
+
+$self->{case}{ roar_die         }   = {
+    sort    => 3,
+    sub     => sub {
+        Acme::Teddy::roar_die();
+    },
+    args    => undef,
+    want    => {
+        died            => 1,
+        die_like        => qr/^Roar! at/,
     },
 };  ## case
 
