@@ -38,12 +38,9 @@ sub enforce {
     my $caller      = caller;           # calling package
     my $script      = $self->{script}   // $0;  # self-declared?
     
-    # A hash is declared but we want to enforce in predictable order. 
-    my @sorted_case_keys = sort {
-        $cases->{$a}{sort} // 0
-        cmp
-        $cases->{$b}{sort} // 0
-    } keys $cases;
+    # A hash is declared but we want to enforce in predictable order.
+    my %sorter     = map { $_, $cases->{$_}{sort} || 0 } keys $cases; 
+    my @sorted_case_keys = sort { $sorter{$a} cmp $sorter{$b} } keys %sorter;
     
     # Delete disabled cases.
     if ( exists $self->{enable} ) {     # if not then feature unused; skip
