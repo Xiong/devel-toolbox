@@ -64,7 +64,7 @@ We can, of course, do little to ensure the author understands the function of th
 
 =head2 The gentleman's gentleman
 
-The test script consisting of declarations of test cases must somehow be processed. The given target must be executed with the given arguments; the results we then have captured; and these checked against the results we want. This is the responsibility of ::Test::Valet::*. 
+The test script consisting of declarations of test cases must somehow be processed. The given target must be executed with the given arguments; the results we then have captured; and these checked against the results we want. This is the responsibility of C<< ::Test::Valet::* >>. 
 
 ::TV, of course, consists of a few modules of Perl code containing all the logic we redacted out of the user's test script. So ::TV must be tested; and to a high standard, too. How? 
 
@@ -72,7 +72,7 @@ The test script consisting of declarations of test cases must somehow be process
 
 A container cannot contain itself; a mirror cannot reflect itself; and our testing module cannot be used to test itself. The snake may be able to swallow its own tail but it cannot swallow its mouth. Please excuse the lack of formal proof. I say that regardless of how matters are arranged, some untested element must remain outside the closed circle. So how can ::TV itself be tested? 
 
-::TV's test battery exercises the testing module against a dummy target, L<< Acme::Teddy|Acme::Teddy >>. Each script defines the dummy differently; and each test case is processed by ::TV just as it would any target. So although the scripts become slightly more complex, the module is exercised in exactly the same context as in normal use. Although ::TV reports the dummy functions properly, what it is really doing is confirming to us that it is, itself, correct. 
+::TV's test battery exercises the testing module against a dummy target, L<< Acme::Teddy|Acme::Teddy >>. Each script defines the dummy differently; and each test case is processed by ::TV just as it would any target. So the test scripts are slightly more complex, but the testing module is exercised in exactly the same context as in normal use. Although ::TV reports the dummy functions properly, what it is really doing is confirming to us that it is, itself, correct. 
 
 
 
@@ -89,12 +89,12 @@ he now has several migranes.
 
 =head1 AUTHOR
 
-  C<< <xiong@cpan.org> >>
+C<< <xiong@cpan.org> >>
 
 =head1 LICENSE
 
 Copyright (C) 2013 
- C<< <xiong@cpan.org> >>
+C<< <xiong@cpan.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 
