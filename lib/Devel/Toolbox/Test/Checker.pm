@@ -22,6 +22,9 @@ use parent 'Devel::Toolbox::Core::Base';
 #----------------------------------------------------------------------------#
 
 sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
+sub quiet     { $_[1]->quiet    (           $_[3]) };
+sub stdout_is { $_[1]->stdout_is(    $_[2], $_[3]) };
+sub stderr_is { $_[1]->stderr_is(    $_[2], $_[3]) };
 
 
 ## END MODULE

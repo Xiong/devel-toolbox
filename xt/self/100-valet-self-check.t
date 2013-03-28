@@ -1,7 +1,13 @@
 package Acme::Teddy;
 {
     sub roar {
-        'Roar!'
+        return 'Roar!'
+    };
+    sub roar_out {
+        print 'Roar!'
+    };
+    sub roar_err {
+        print STDERR 'Roar!'
     };
 }
 
@@ -40,9 +46,9 @@ sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
 
 # Which cases to enforce?
         # =EITHER=
-$self->{enable} = {
-    re_enter        => 1,
-};
+#~ $self->{enable} = {
+#~     re_enter        => 1,
+#~ };
         # =OR=
 #~ $self->{enable} = {
 #~    ':all'       => 1,
@@ -62,6 +68,7 @@ $self->{case}{ null             }   = {
     args    => undef,
     want    => {
         return_is       => undef,
+        quiet           => 1,
     },
 };  ## case
 
@@ -73,21 +80,31 @@ $self->{case}{ teddy_roar       }   = {
     args    => undef,
     want    => {
         return_is       => 'Roar!',
+        quiet           => 1,
     },
 };  ## case
 
-$self->{case}{ re_enter      }   = {
+$self->{case}{ teddy_roar_out   }   = {
     sort    => 3,
     sub     => sub {
-        my $s   = Devel::Toolbox::Test::Valet->new();
-           $s->{case}{nested} = {};
-           $s->enforce();
-#~            $s->finish();
-        return undef;
+        Acme::Teddy::roar_out();
     },
     args    => undef,
     want    => {
-        return_is       => undef,
+        return_is       => 1,       # print returns true if successful
+        stdout_is       => 'Roar!',
+    },
+};  ## case
+
+$self->{case}{ teddy_roar_err   }   = {
+    sort    => 3,
+    sub     => sub {
+        Acme::Teddy::roar_err();
+    },
+    args    => undef,
+    want    => {
+        return_is       => 1,
+        stderr_is       => 'Roar!',
     },
 };  ## case
 
