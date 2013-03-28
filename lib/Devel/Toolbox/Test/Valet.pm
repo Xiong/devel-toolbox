@@ -117,7 +117,7 @@ sub enforce {
                 $sub_check_count++;
                 eval { 
                     $caller->$check_key( # class method; discard $_[0]
-                        $trap,                  # $_[1]     got
+                        $trap,                  # $_[1]     have
                         $want->{$check_key},    # $_[2]     want
                         $check_key,             # $_[3]     diag
                     ) 
