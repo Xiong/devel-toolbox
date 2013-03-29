@@ -241,11 +241,12 @@ Somebody helped!
 
 =head1 AUTHOR
 
-Xiong Changnian  C<< <xiong@cpan.org> >>
+Xiong Changnian C<< <xiong@cpan.org> >>
 
 =head1 LICENSE
 
-Copyright (C) 2013 Xiong Changnian C<< <xiong@cpan.org> >>
+Copyright (C) 2013 
+Xiong Changnian C<< <xiong@cpan.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 

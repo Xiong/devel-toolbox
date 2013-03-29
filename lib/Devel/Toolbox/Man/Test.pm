@@ -89,12 +89,12 @@ he now has several migranes.
 
 =head1 AUTHOR
 
-C<< <xiong@cpan.org> >>
+Xiong Changnian C<< <xiong@cpan.org> >>
 
 =head1 LICENSE
 
 Copyright (C) 2013 
-C<< <xiong@cpan.org> >>
+Xiong Changnian C<< <xiong@cpan.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 
