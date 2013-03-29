@@ -39,16 +39,16 @@ $self->{script}     = 'valet-self-check';
 #   {check()}   $trap (have)         {want} {diag}
 sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
 
-# Which cases to enforce?
-        # =EITHER=
-#~ $self->{enable} = {
-#~     undeclared_case => 1,
-#~ };
-        # =OR=
-#~ $self->{enable} = {
-#~    ':all'       => 1,
-#~     undeclared_case => 0,
-#~ };
+# Add attributes to specific cases and checks. 
+$self->sort(
+    empty_hashref,
+    null,
+    roar,
+    roar_out,
+    roar_err,
+    roar_die,
+);
+
 
 ### $self
 
@@ -56,7 +56,6 @@ sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
 $self->{case}{ empty_hashref    }   = {};
 
 $self->{case}{ null             }   = {
-    sort    => 1,
     sub     => sub {  },
     args    => undef,
     want    => {
@@ -66,7 +65,6 @@ $self->{case}{ null             }   = {
 };  ## case
 
 $self->{case}{ roar             }   = {
-    sort    => 2,
     sub     => sub {
         Acme::Teddy::roar();
     },
@@ -75,10 +73,9 @@ $self->{case}{ roar             }   = {
         return_is       => 'Roar!',
         quiet           => 1,
     },
-};  ## case
+};  ##
 
 $self->{case}{ roar_out         }   = {
-    sort    => 3,
     sub     => sub {
         Acme::Teddy::roar_out();
     },
@@ -87,10 +84,9 @@ $self->{case}{ roar_out         }   = {
         return_is       => 1,       # print returns true if successful
         stdout_is       => 'Roar!',
     },
-};  ## case
+};  ##
 
 $self->{case}{ roar_err         }   = {
-    sort    => 3,
     sub     => sub {
         Acme::Teddy::roar_err();
     },
@@ -99,10 +95,9 @@ $self->{case}{ roar_err         }   = {
         return_is       => 1,
         stderr_is       => 'Roar!',
     },
-};  ## case
+};  ##
 
 $self->{case}{ roar_die         }   = {
-    sort    => 3,
     sub     => sub {
         Acme::Teddy::roar_die();
     },
@@ -111,7 +106,7 @@ $self->{case}{ roar_die         }   = {
         died            => 1,
         die_like        => qr/^Roar! at/,
     },
-};  ## case
+};  ##
 
 #            {                  }   = #
 
