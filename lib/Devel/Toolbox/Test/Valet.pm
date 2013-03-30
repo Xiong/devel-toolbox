@@ -26,6 +26,7 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# EXECUTION
 
 #=========# OBJECT METHOD
 #~ 
@@ -34,13 +35,12 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #   
 sub enforce {
     my $self        = shift;  
-    my $cases       = $self->{case}     // die "! No test cases declared.";
-    my $caller      = caller;           # calling package
-    my $script      = $self->{script}   // $0;  # self-declared?
+    my $cases       = $self->{case}             // die "! No test cases declared.";
+    my $script      = $self->{valet}{script}    // $0;  # self-declared?
+    my $caller      = caller;                   # calling package
     
     # A hash is declared but we want to enforce in predictable order.
-    my %sorter     = map { $_, $cases->{$_}{sort} || 0 } keys $cases; 
-    my @sorted_case_keys = sort { $sorter{$a} cmp $sorter{$b} } keys %sorter;
+    my @sorted_case_keys = $self->_do_sort;
     
     # Delete disabled cases.
     if ( exists $self->{enable} ) {     # if not then feature unused; skip
@@ -151,6 +151,95 @@ sub finish {
     exit;       # NEVER RETURNS
 }; ## finish
 
+#----------------------------------------------------------------------------#
+# FLAGGING
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   Class-specific init. 
+#   
+sub init {
+    my $self            = shift;
+    my $caller_package  = caller(1);    # caller of new(), which calls init()
+    my $caller_script   = $0;
+#~     ### $caller_package
+#~     ### $caller_script
+    
+    $self->{valet}{caller_package}  = $caller_package;
+    $self->{valet}{caller_script}   = $caller_script;
+    $self->SUPER::init(@_);             # does not consume any arguments
+    
+    return $self;
+}; ## init
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   Just stashes its @args for later processing within enforce().
+#   
+sub sort {
+    my $self                        = shift;
+    $self->{valet}{sort}{arg_arf}  = @_;
+    return $self;
+}; ## sort
+
+#=========# INTERNAL OBJECT METHOD
+#~ 
+#
+#   Applies previously stashed args.
+#   
+sub _do_sort {
+    my $self                = shift;
+    my $caller_package      = $self->{valet}{caller_package};
+    my @args                = $self->{valet}{sort}{arg_arf};
+    
+    # Iterate with explicit index; this becomes the sort value.
+    for my $i (0..$#args) {                             # NOT foreach @args
+        my $i_arg   = $args[$i];
+        given ( ref $i_arg ) {
+            when ( defined $self->{case}{$i_arg}    ) { # it's a case key
+                $self->{case}{$i_arg}{sort} = $i;
+            }
+            when ( $caller_package->can($i_arg)     ) { # it's a check method
+            }
+            when ( 'HASH'                           ) { # passed pairs of...
+                my %hash   = $_;
+                for my $k ()
+                
+            }
+            default                                   {
+            }
+        }; ## given
+    }; ## for $i
+    
+    
+    
+    
+    
+#~     my %sorter     = map { $_, $cases->{$_}{sort} || 0 } keys $cases; 
+    
+    
+    return $self;
+}; ## _do_sort
+
+#=========# OBJECT METHOD
+#=========# INTERNAL ROUTINE
+#=========# EXTERNAL FUNCTION
+#~ 
+#
+#   @
+#   
+sub _do_ {
+    
+    
+    
+}; ## _do_
+
+
+#----------------------------------------------------------------------------#
+# UTILITY
+
 #=========# INTERNAL ROUTINE
 #~ 
 #
@@ -161,8 +250,6 @@ sub _append {
 #~     ### @_
     return join q{ | }, @_;
 }; ## _append
-
-
 
 ## END MODULE
 1;

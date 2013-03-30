@@ -66,6 +66,8 @@ We can, of course, do little to ensure the author understands the function of th
 
 The test script consisting of declarations of test cases must somehow be processed. The given target must be executed with the given arguments; the results we then have captured; and these checked against the results we want. This is the responsibility of C<< ::Test::Valet::* >>. 
 
+To be the perfect developer's valet, ::TV must present several faces, often somewhat contradictory. A formal OO approach will be too formal; but we employ many related techniques. 
+
 ::TV, of course, consists of a few modules of Perl code containing all the logic we redacted out of the user's test script. So ::TV must be tested; and to a high standard, too. How? 
 
 =head2 Testers cannot test themselves

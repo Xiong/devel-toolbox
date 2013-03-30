@@ -15,6 +15,8 @@ use lib qw| lib |;
 
 # Project modules
 use Devel::Toolbox::Test::Valet;
+
+# Checkers are class methods defined in this __PACKAGE__ or inherited from...
 use parent 'Devel::Toolbox::Test::Checker';
 
 # Dummy testing target
@@ -27,27 +29,26 @@ use Acme::Teddy;
 # Inits
 
 my $self            = Devel::Toolbox::Test::Valet->new();
-$self->{script}     = 'valet-self-check';
 #~ ### $self
 
 #----------------------------------------------------------------------------#
 # Declarations
 
-# Override checkers.
+# Declare, possibly override checkers.
 # $_[0]: Checker class, usually 'main' (caller).
 #               $_[1]                $_[2]  $_[3]
 #   {check()}   $trap (have)         {want} {diag}
 sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
 
 # Add attributes to specific cases and checks. 
-$self->sort(
-    empty_hashref,
-    null,
-    roar,
-    roar_out,
-    roar_err,
-    roar_die,
-);
+$self->sort(qw|
+    empty_hashref
+    null
+    roar
+    roar_out
+    roar_err
+    roar_die
+|);
 
 
 ### $self
