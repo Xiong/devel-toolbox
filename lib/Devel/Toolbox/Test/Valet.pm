@@ -10,6 +10,8 @@ use Test::More;
 
 # CPAN modules
 use Test::Trap;                 # Trap exit codes, exceptions, output, etc.
+use List::MoreUtils             # The stuff missing in List::Util
+    qw| any |;
 
 # Project modules
 use parent 'Devel::Toolbox::Core::Base';
@@ -35,44 +37,46 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #   
 sub enforce {
     my $self        = shift;  
-    my $cases       = $self->{case}             // die "! No test cases declared.";
-    my $script      = $self->{valet}{script}    // $0;  # self-declared?
-    my $caller      = caller;                   # calling package
+    my $case        = $self->{case}         // die "! No cases declared.";
+#~     my $caller_script   = $self->{attr}{caller_script};
+    my $caller_package  = $self->{attr}{caller_package};
+    my $attr        = $self->{attr};
+    my @case_keys   = keys $case;
     
-    # A hash is declared but we want to enforce in predictable order.
-    my @sorted_case_keys = $self->_do_sort;
+    # A case hash is declared but let us enforce cases in predictable order.
+    # You can alter this order by calling $self->sort(@keys)
+    @case_keys      = $self->_do_sort( @case_keys );
     
     # Delete disabled cases.
     if ( exists $self->{enable} ) {     # if not then feature unused; skip
         if ( $self->{enable}{':all'} ) {    # disable only if case == false
-            @sorted_case_keys 
+            @case_keys 
                 = grep { 
                     (
                         defined $self->{enable}{$_} 
                          && not $self->{enable}{$_}
                     )
                      ? 0 : 1 
-                } @sorted_case_keys;
+                } @case_keys;
         }
         else {                              # enable only if case == true
-            @sorted_case_keys 
+            @case_keys 
                 = grep { $self->{enable}{$_} } 
-                    @sorted_case_keys;
+                    @case_keys;
         };
     }; ## if exists enable
     
     # Unpack case, execute, check.
     CASE_KEY:
-    for my $case_key ( @sorted_case_keys ) {
+    for my $case_key ( @case_keys ) {
         $self->{check_count}++;
-        my $base        = _append( $script, $case_key );
         my $extra       ;
         my $diag        ;
         note( "---- $case_key:" );
-        my $case        = $cases->{$case_key};
-        my $context     = uc( $case->{context}  // 'SCALAR' );   # VOID, ARRAY
-        my @args        = @{ $case->{args}      // []       };
-        my $sub         = $case->{sub}          // 0        ;
+        my $i_case        = $case->{$case_key};
+        my $context     = uc( $i_case->{context}  // 'SCALAR' );   # VOID, ARRAY
+        my @args        = @{ $i_case->{args}      // []       };
+        my $sub         = $i_case->{sub}          // 0        ;
         
         # Skip case if no code defined, eh.
         if ( not $sub ) {
@@ -83,13 +87,13 @@ sub enforce {
         # Execute code under test.
         given ($context) {
             when ( /VOID/   ) {
-                             trap { &{ $case->{sub} }( @args ) };
+                             trap { &{ $i_case->{sub} }( @args ) };
             }
             when ( /ARRAY/  ) {
-                my @array  = trap { &{ $case->{sub} }( @args ) };
+                my @array  = trap { &{ $i_case->{sub} }( @args ) };
             }
             when ( /SCALAR/ ) {
-                my $scalar = trap { &{ $case->{sub} }( @args ) };
+                my $scalar = trap { &{ $i_case->{sub} }( @args ) };
             }
             default         {
                 die "! Invalid context demanded: $context";
@@ -102,7 +106,7 @@ sub enforce {
         # Do all checks for this case (as a subtest).
         subtest $case_key => sub {  # $case_key follows checks in TAP output
             pass('execute');
-            my $want        = $case->{want}     // {};
+            my $want        = $i_case->{want}     // {};
             if ( not $want ) {
                 note _append( $case_key, 'Skipped, no {want} defined.' );
                 done_testing(1);                # 1 subtest for 'execute'
@@ -115,11 +119,11 @@ sub enforce {
 #~                 ### $check_key
 #~                 ### $want
                 $sub_check_count++;
-                eval { 
-                    $caller->$check_key( # class method; discard $_[0]
-                        $trap,                  # $_[1]     have
-                        $want->{$check_key},    # $_[2]     want
-                        $check_key,             # $_[3]     diag
+                eval {
+                    $caller_package->$check_key(    # $_[0]     class, discard
+                        $trap,                      # $_[1]     have
+                        $want->{$check_key},        # $_[2]     want
+                        $check_key,                 # $_[3]     diag
                     ) 
                 };
                 my $eval_err    = $@;
@@ -131,7 +135,7 @@ sub enforce {
             }; ## for check
         }; ## subtest
         
-    }; ## for case
+    }; ## for i_case
     
     return $self;
 }; ## enforce
@@ -152,7 +156,7 @@ sub finish {
 }; ## finish
 
 #----------------------------------------------------------------------------#
-# FLAGGING
+# FLAGGING / ATTRIBUTES
 
 #=========# OBJECT METHOD
 #~ 
@@ -166,8 +170,8 @@ sub init {
 #~     ### $caller_package
 #~     ### $caller_script
     
-    $self->{valet}{caller_package}  = $caller_package;
-    $self->{valet}{caller_script}   = $caller_script;
+    $self->{attr}{caller_package}   = $caller_package;
+    $self->{attr}{caller_script}    = $caller_script;
     $self->SUPER::init(@_);             # does not consume any arguments
     
     return $self;
@@ -176,51 +180,49 @@ sub init {
 #=========# OBJECT METHOD
 #~ 
 #
-#   Just stashes its @args for later processing within enforce().
+#   Stashes a natural number to each argument, in order given.
 #   
 sub sort {
     my $self                        = shift;
-    $self->{valet}{sort}{arg_arf}  = @_;
+    my @args                        = @_;
+    $self->{attr}{sort}             = {};
+    
+    # Iterate explicitly because we assign the index value.
+    for my $i ( 0..$#args ) {
+        $self->{attr}{sort}{ $args[$i] }    = $i;
+    };
+    
     return $self;
 }; ## sort
 
 #=========# INTERNAL OBJECT METHOD
 #~ 
 #
-#   Applies previously stashed args.
+#   Just sorts a list, working from the {sort} cheat sheet if possible.
+#   $self->{attr}{sort} may contain anything or nothing, or not be defined.
+#   Performs a Tcl 'dictionary'-like sort:
+#   Strings are sorted alphabetically, numbers sort numerically; 
+#       and pseudos consisting of both kinds of parts are sorted. 
+#   
+#   See: $self->sort()
 #   
 sub _do_sort {
-    my $self                = shift;
-    my $caller_package      = $self->{valet}{caller_package};
-    my @args                = $self->{valet}{sort}{arg_arf};
+    my $self        = shift;
+    my @list        = @_;
+    my %sorta       = %{ $self->{attr}{sort} // {} };
     
-    # Iterate with explicit index; this becomes the sort value.
-    for my $i (0..$#args) {                             # NOT foreach @args
-        my $i_arg   = $args[$i];
-        given ( ref $i_arg ) {
-            when ( defined $self->{case}{$i_arg}    ) { # it's a case key
-                $self->{case}{$i_arg}{sort} = $i;
-            }
-            when ( $caller_package->can($i_arg)     ) { # it's a check method
-            }
-            when ( 'HASH'                           ) { # passed pairs of...
-                my %hash   = $_;
-                for my $k ()
-                
-            }
-            default                                   {
-            }
-        }; ## given
-    }; ## for $i
+    # Fill a hash cache completely.
+    my %cache       = map {
+        my $x   = $_;
+        $x,           # key...
+            $sorta{$x}      # ... get value from cheat sheet if defined
+            //              # or pad numeric substrings with zeros to length 8
+            lc $x =~ s/(\d+)/sprintf '%08d', $1/ger,
+    } @list;
     
+    @list           = sort { $cache{$a} cmp $cache{$b} } @list;
     
-    
-    
-    
-#~     my %sorter     = map { $_, $cases->{$_}{sort} || 0 } keys $cases; 
-    
-    
-    return $self;
+    return @list;
 }; ## _do_sort
 
 #=========# OBJECT METHOD
