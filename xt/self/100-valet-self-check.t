@@ -49,7 +49,9 @@ $self->sort(qw|
     roar_err
     roar_die
 |);
-
+$self->disable(qw|
+    disable_me
+|);
 
 ### $self
 
@@ -63,7 +65,7 @@ $self->{case}{ null             }   = {
         return_is       => undef,
         quiet           => 1,
     },
-};  ## case
+};  ##
 
 $self->{case}{ roar             }   = {
     sub     => sub {
@@ -109,7 +111,15 @@ $self->{case}{ roar_die         }   = {
     },
 };  ##
 
-#            {                  }   = #
+$self->{case}{ disable_me       }   = {
+    sub     => sub { 1 },
+    args    => undef,
+    want    => {
+        return_is       => undef,   # would fail
+    },
+};  ##
+
+#            {                  }   = # formatting guide
 
 
 ### $self

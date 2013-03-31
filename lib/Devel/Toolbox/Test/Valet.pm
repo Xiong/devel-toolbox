@@ -43,28 +43,12 @@ sub enforce {
     my $attr        = $self->{attr};
     my @case_keys   = keys $case;
     
+    # Ignore disabled cases.
+    @case_keys      = grep { $self->_is_enabled($_) } @case_keys;
+    
     # A case hash is declared but let us enforce cases in predictable order.
     # You can alter this order by calling $self->sort(@keys)
     @case_keys      = $self->_do_sort( @case_keys );
-    
-    # Delete disabled cases.
-    if ( exists $self->{enable} ) {     # if not then feature unused; skip
-        if ( $self->{enable}{':all'} ) {    # disable only if case == false
-            @case_keys 
-                = grep { 
-                    (
-                        defined $self->{enable}{$_} 
-                         && not $self->{enable}{$_}
-                    )
-                     ? 0 : 1 
-                } @case_keys;
-        }
-        else {                              # enable only if case == true
-            @case_keys 
-                = grep { $self->{enable}{$_} } 
-                    @case_keys;
-        };
-    }; ## if exists enable
     
     # Unpack case, execute, check.
     CASE_KEY:
@@ -224,6 +208,39 @@ sub _do_sort {
     
     return @list;
 }; ## _do_sort
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub disable {
+    my $self                        = shift;
+    my @args                        = @_;
+    $self->{attr}{disable}          = {};
+    
+    for my $i_arg (@args) {
+        $self->{attr}{disable}{$i_arg} = 'DISABLE';     # TRUE if disabled
+    };
+    
+    return $self;
+}; ## disable
+
+#=========# INTERNAL OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub _is_enabled {
+    my $self        = shift;
+    my $key         = shift;
+    my %disable     = %{ $self->{attr}{disable} // return 1 }; # enable all
+    my $is_enabled  ;
+    
+    $is_enabled     = $disable{$key} ? 0 : 1;
+    
+    return $is_enabled;
+}; ## _is_enabled
 
 #=========# OBJECT METHOD
 #=========# INTERNAL ROUTINE
