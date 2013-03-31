@@ -13,24 +13,23 @@ use Perl6::Form;
 use Test::Trap;
 
 #~ use Devel::Comments '###';
-#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 use Test::More;
 
+my $builder = Test::More->builder;
+### $builder
+
+$builder->output(*STDERR);
+
 my $rv  = trap{
     pass('I passed wrongly.');      # should fail
     fail('I failed correctly.');    # should pass
     
-#~     say '1..2';
-#~     say 'ok 1 fake pass';
-#~     say 'not ok 2 fake fail';
 };
 
-
-
-#~ say $trap->stdout;
 
 pass('The kids are alright.');      # should pass anyway
 
