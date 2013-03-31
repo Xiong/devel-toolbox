@@ -127,12 +127,12 @@ Somebody helped!
 
 =head1 AUTHOR
 
-[% $author_name %]  C<< <[% $author_email %]> >>
+[% $author_fullname %] C<< <[% $author_email %]> >>
 
 =head1 LICENSE
 
 Copyright (C) [% $copyright_years %] 
-[% $author_name %] C<< <[% $author_email %]> >>
+[% $author_fullname %] C<< <[% $author_email %]> >>
 
 This library and its contents are released under Artistic License 2.0:
 

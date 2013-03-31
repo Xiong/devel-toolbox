@@ -1,8 +1,9 @@
 package Acme::Teddy;
 {
-    sub roar {
-        'Roar!'
-    };
+    sub roar        { return        'Roar!' };
+    sub roar_out    { print         'Roar!' };
+    sub roar_err    { print STDERR  'Roar!' };
+    sub roar_die    { die           'Roar!' };
 }
 
 package main;
@@ -13,7 +14,10 @@ use warnings;
 use lib qw| lib |;
 
 # Project modules
-use parent qw| Devel::Toolbox::Test::Valet |;
+use Devel::Toolbox::Test::Valet;
+
+# Checkers are class methods defined in this __PACKAGE__ or inherited from...
+use parent 'Devel::Toolbox::Test::Checker';
 
 # Dummy testing target
 use Acme::Teddy;
@@ -24,53 +28,88 @@ use Acme::Teddy;
 #----------------------------------------------------------------------------#
 # Inits
 
-my $self            = main->new();
-$self->{script}     = 'valet-self-check';
+my $self            = Devel::Toolbox::Test::Valet->new();
 #~ ### $self
 
 #----------------------------------------------------------------------------#
 # Declarations
 
-# Declare checkers.
-sub return_is { $_[0]->return_is( 0, $_[1], $_[2]) };
+# Declare, possibly override checkers.
+# $_[0]: Checker class, usually 'main' (caller).
+#               $_[1]                $_[2]  $_[3]
+#   {check()}   $trap (have)         {want} {diag}
+sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
 
-# With these names...         ... employ these checkers.
-$self->{checker}{return_is}     = \&return_is;
+# Add attributes to specific cases and checks. 
+$self->sort(qw|
+    empty_hashref
+    null
+    roar
+    roar_out
+    roar_err
+    roar_die
+|);
 
-# Which cases to enforce?
-        # =EITHER=
-#~ $self->{enable}     = {
-#~     null    => 1,
-#~ };
-        # =OR=
-#~ $self->{enable}     = {
-#~    ':all'   => 1,
-#~     null    => 0,
-#~ };
 
 ### $self
 
 # Declare cases themselves.
-#            {               }   #
-$self->{case}{ null          }   = {
-    sort    => 0,
+$self->{case}{ empty_hashref    }   = {};
+
+$self->{case}{ null             }   = {
     sub     => sub {  },
     args    => undef,
     want    => {
         return_is       => undef,
+        quiet           => 1,
     },
 };  ## case
 
-$self->{case}{ teddy_roar     }   = {
-    sort    => 1,
+$self->{case}{ roar             }   = {
     sub     => sub {
         Acme::Teddy::roar();
     },
     args    => undef,
     want    => {
         return_is       => 'Roar!',
+        quiet           => 1,
     },
-};  ## case
+};  ##
+
+$self->{case}{ roar_out         }   = {
+    sub     => sub {
+        Acme::Teddy::roar_out();
+    },
+    args    => undef,
+    want    => {
+        return_is       => 1,       # print returns true if successful
+        stdout_is       => 'Roar!',
+    },
+};  ##
+
+$self->{case}{ roar_err         }   = {
+    sub     => sub {
+        Acme::Teddy::roar_err();
+    },
+    args    => undef,
+    want    => {
+        return_is       => 1,
+        stderr_is       => 'Roar!',
+    },
+};  ##
+
+$self->{case}{ roar_die         }   = {
+    sub     => sub {
+        Acme::Teddy::roar_die();
+    },
+    args    => undef,
+    want    => {
+        died            => 1,
+        die_like        => qr/^Roar! at/,
+    },
+};  ##
+
+#            {                  }   = #
 
 
 ### $self

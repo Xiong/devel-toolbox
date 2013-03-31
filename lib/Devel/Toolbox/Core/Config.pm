@@ -237,7 +237,7 @@ Somebody helped!
 
 =head1 AUTHOR
 
-Xiong Changnian  C<< <xiong@cpan.org> >>
+Xiong Changnian C<< <xiong@cpan.org> >>
 
 =head1 LICENSE
 

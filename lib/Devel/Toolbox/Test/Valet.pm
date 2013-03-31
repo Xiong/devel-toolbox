@@ -10,6 +10,11 @@ use Test::More;
 
 # CPAN modules
 use Test::Trap;                 # Trap exit codes, exceptions, output, etc.
+use List::MoreUtils             # The stuff missing in List::Util
+    qw| any |;
+
+# Project modules
+use parent 'Devel::Toolbox::Core::Base';
 
 # Alternate uses
 use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -23,6 +28,7 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# EXECUTION
 
 #=========# OBJECT METHOD
 #~ 
@@ -31,56 +37,63 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #   
 sub enforce {
     my $self        = shift;  
-    my $cases       = $self->{case}     // die "! No test cases declared.";
-    my $checker     = $self->{checker}  // die "! No checkers declared.";
+    my $case        = $self->{case}         // die "! No cases declared.";
+#~     my $caller_script   = $self->{attr}{caller_script};
+    my $caller_package  = $self->{attr}{caller_package};
+    my $attr        = $self->{attr};
+    my @case_keys   = keys $case;
     
-    # A hash is declared but we want to enforce in predictable order. 
-    my @sorted_case_keys = sort {
-        $cases->{$a}{sort}
-        cmp
-        $cases->{$b}{sort}
-    } keys $cases;
+    # A case hash is declared but let us enforce cases in predictable order.
+    # You can alter this order by calling $self->sort(@keys)
+    @case_keys      = $self->_do_sort( @case_keys );
     
     # Delete disabled cases.
     if ( exists $self->{enable} ) {     # if not then feature unused; skip
         if ( $self->{enable}{':all'} ) {    # disable only if case == false
-            @sorted_case_keys 
+            @case_keys 
                 = grep { 
                     (
                         defined $self->{enable}{$_} 
                          && not $self->{enable}{$_}
                     )
                      ? 0 : 1 
-                } @sorted_case_keys;
+                } @case_keys;
         }
         else {                              # enable only if case == true
-            @sorted_case_keys 
+            @case_keys 
                 = grep { $self->{enable}{$_} } 
-                    @sorted_case_keys;
+                    @case_keys;
         };
     }; ## if exists enable
     
     # Unpack case, execute, check.
     CASE_KEY:
-    for my $case_key ( @sorted_case_keys ) {
+    for my $case_key ( @case_keys ) {
         $self->{check_count}++;
-        my $base        = _append( $self->{script}, $case_key );
         my $extra       ;
         my $diag        ;
         note( "---- $case_key:" );
-        my $case        = $cases->{$case_key};
-        my $context     = uc( $case->{context} // 'SCALAR' );   # VOID, ARRAY
+        my $i_case        = $case->{$case_key};
+        my $context     = uc( $i_case->{context}  // 'SCALAR' );   # VOID, ARRAY
+        my @args        = @{ $i_case->{args}      // []       };
+        my $sub         = $i_case->{sub}          // 0        ;
+        
+        # Skip case if no code defined, eh.
+        if ( not $sub ) {
+            pass _append( $case_key, 'Skipped, no {sub} defined.' );
+            next CASE_KEY;
+        };
         
         # Execute code under test.
         given ($context) {
             when ( /VOID/   ) {
-                             trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+                             trap { &{ $i_case->{sub} }( @args ) };
             }
             when ( /ARRAY/  ) {
-                my @array  = trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+                my @array  = trap { &{ $i_case->{sub} }( @args ) };
             }
             when ( /SCALAR/ ) {
-                my $scalar = trap { &{ $case->{sub} }( @{ $case->{args} } ) };
+                my $scalar = trap { &{ $i_case->{sub} }( @args ) };
             }
             default         {
                 die "! Invalid context demanded: $context";
@@ -93,36 +106,36 @@ sub enforce {
         # Do all checks for this case (as a subtest).
         subtest $case_key => sub {  # $case_key follows checks in TAP output
             pass('execute');
-            my $want        = $case->{want};
+            my $want        = $i_case->{want}     // {};
+            if ( not $want ) {
+                note _append( $case_key, 'Skipped, no {want} defined.' );
+                done_testing(1);                # 1 subtest for 'execute'
+                return;
+            };
             my $sub_check_count;
             CHECK_KEY:
             for my $check_key ( keys $want ) {
-                ### $case_key
-                ### $check_key
-                ### $want
+#~                 ### $case_key
+#~                 ### $check_key
+#~                 ### $want
                 $sub_check_count++;
-                if ( defined $checker->{$check_key} ) {
-                    eval { 
-                        &{ $checker->{$check_key} }(
-                            $trap,                  # $_[0]     got
-                            $want->{$check_key},    # $_[1]     want
-                            $check_key,             # $_[2]     diag
-                        ) 
-                    };
-                    my $eval_err    = $@;
-                    if ($eval_err) {
-                        diag("! Checker failure: $check_key");
-                        fail( $eval_err );
-                        next CHECK_KEY;
-                    };
-                }
-                else {
-                    pass("Missing checker: $check_key");
+                eval {
+                    $caller_package->$check_key(    # $_[0]     class, discard
+                        $trap,                      # $_[1]     have
+                        $want->{$check_key},        # $_[2]     want
+                        $check_key,                 # $_[3]     diag
+                    ) 
+                };
+                my $eval_err    = $@;
+                if ($eval_err) {
+                    diag("! Checker failure: $check_key");
+                    fail( $eval_err );
+                    next CHECK_KEY;
                 };
             }; ## for check
         }; ## subtest
         
-    }; ## for case
+    }; ## for i_case
     
     return $self;
 }; ## enforce
@@ -142,35 +155,92 @@ sub finish {
     exit;       # NEVER RETURNS
 }; ## finish
 
-#=========# CLASS METHOD
-#~ my $self    = Devel::Toolbox::Core::Base->new({
-#~                 -key        => 'value',
-#~             });
-#
-#   Classic hashref-based-object constructor.
-#   
-sub new {
-    my $class   = shift;
-    my $self    = {};
-    bless ( $self => $class );
-    $self->init(@_);                            # init remaining args
-    return $self;
-}; ## new
+#----------------------------------------------------------------------------#
+# FLAGGING / ATTRIBUTES
 
 #=========# OBJECT METHOD
-#~ $self->init({
-#~     -key        => 'value',
-#~ });
+#~ 
 #
-#   Standard hashref-merge initializer. 
-#   New values overwrite old values without touching other attributes.
+#   Class-specific init. 
 #   
 sub init {
-    my $self        = shift;
-    my $args        = shift or return $self;
-    %{$self}        = ( %{$self}, %{$args} );   # merge
+    my $self            = shift;
+    my $caller_package  = caller(1);    # caller of new(), which calls init()
+    my $caller_script   = $0;
+#~     ### $caller_package
+#~     ### $caller_script
+    
+    $self->{attr}{caller_package}   = $caller_package;
+    $self->{attr}{caller_script}    = $caller_script;
+    $self->SUPER::init(@_);             # does not consume any arguments
+    
     return $self;
 }; ## init
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   Stashes a natural number to each argument, in order given.
+#   
+sub sort {
+    my $self                        = shift;
+    my @args                        = @_;
+    $self->{attr}{sort}             = {};
+    
+    # Iterate explicitly because we assign the index value.
+    for my $i ( 0..$#args ) {
+        $self->{attr}{sort}{ $args[$i] }    = $i;
+    };
+    
+    return $self;
+}; ## sort
+
+#=========# INTERNAL OBJECT METHOD
+#~ 
+#
+#   Just sorts a list, working from the {sort} cheat sheet if possible.
+#   $self->{attr}{sort} may contain anything or nothing, or not be defined.
+#   Performs a Tcl 'dictionary'-like sort:
+#   Strings are sorted alphabetically, numbers sort numerically; 
+#       and pseudos consisting of both kinds of parts are sorted. 
+#   
+#   See: $self->sort()
+#   
+sub _do_sort {
+    my $self        = shift;
+    my @list        = @_;
+    my %sorta       = %{ $self->{attr}{sort} // {} };
+    
+    # Fill a hash cache completely.
+    my %cache       = map {
+        my $x   = $_;
+        $x,           # key...
+            $sorta{$x}      # ... get value from cheat sheet if defined
+            //              # or pad numeric substrings with zeros to length 8
+            lc $x =~ s/(\d+)/sprintf '%08d', $1/ger,
+    } @list;
+    
+    @list           = sort { $cache{$a} cmp $cache{$b} } @list;
+    
+    return @list;
+}; ## _do_sort
+
+#=========# OBJECT METHOD
+#=========# INTERNAL ROUTINE
+#=========# EXTERNAL FUNCTION
+#~ 
+#
+#   @
+#   
+sub _do_ {
+    
+    
+    
+}; ## _do_
+
+
+#----------------------------------------------------------------------------#
+# UTILITY
 
 #=========# INTERNAL ROUTINE
 #~ 
@@ -178,10 +248,10 @@ sub init {
 #   @
 #   
 sub _append {
+#~     ### _append
+#~     ### @_
     return join q{ | }, @_;
 }; ## _append
-
-
 
 ## END MODULE
 1;
@@ -281,12 +351,12 @@ Somebody helped!
 
 =head1 AUTHOR
 
-  C<< <xiong@cpan.org> >>
+Xiong Changnian C<< <xiong@cpan.org> >>
 
 =head1 LICENSE
 
 Copyright (C) 2013 
- C<< <xiong@cpan.org> >>
+Xiong Changnian C<< <xiong@cpan.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 

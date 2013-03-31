@@ -1,4 +1,4 @@
-package Devel::Toolbox::Core::Prove;
+package Devel::Toolbox::Test::Checker;
 use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
@@ -8,17 +8,30 @@ use version; our $VERSION = qv('v0.0.0');
 
 # CPAN modules
 
+# Project modules
+use parent 'Devel::Toolbox::Core::Base';
+
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
-
 # Pseudo-globals
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# $_[0]: Checker class, usually 'main' (caller).
+#               $_[1]                $_[2]  $_[3]
+#   {check()}   $trap (have)         {want} {diag}
 
+sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
+sub stdout_is { $_[1]->stdout_is(    $_[2], $_[3]) };
+sub stderr_is { $_[1]->stderr_is(    $_[2], $_[3]) };
+
+sub die_like  { $_[1]->die_like (    $_[2], $_[3]) };
+
+sub quiet     { $_[1]->quiet    (           $_[3]) };
+sub died      { $_[1]->did_die  (           $_[3]) };
 
 
 ## END MODULE
@@ -28,23 +41,23 @@ __END__
 
 =head1 NAME
 
-Devel::Toolbox::Core::Prove - implements 'prove' for 'dt'
+Devel::Toolbox::Test::Checker - Standard checkers for Test::Valet cases
 
 =head1 VERSION
 
-This document describes Devel::Toolbox::Core::Prove version v0.0.0
+This document describes Devel::Toolbox::Test::Checker version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Devel::Toolbox::Core::Prove;
+    use Devel::Toolbox::Test::Checker;
 
 =head1 DESCRIPTION
 
 =over
 
-I<Doubt is useful, it keeps faith a living thing. After all, >
-I<you cannot know the strength of your faith until it has been tested. > 
--- Pi Patel
+I<Anyone can tell the truth, > 
+I<but only very few of us can make epigrams.> 
+-- W. Somerset Maugham
 
 =back
 

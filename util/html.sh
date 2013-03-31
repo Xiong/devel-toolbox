@@ -5,6 +5,9 @@
 
 #~ pod2cpanhtml lib/Devel/Toolbox.pm html/Devel/Toolbox.html
 
+mkdir -p html/Devel/Toolbox/Man
+pod2cpanhtml lib/Devel/Toolbox/Man/Test.pm html/Devel/Toolbox/Man/Test.html
+
 mkdir -p html/Devel/Toolbox/Test
 pod2cpanhtml lib/Devel/Toolbox/Test/Valet.pm html/Devel/Toolbox/Test/Valet.html
 
