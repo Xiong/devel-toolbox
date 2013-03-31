@@ -58,13 +58,13 @@ In practice a YAML'ish, non-Perl format is excessively rigid; we want to preserv
         },
     };  ## case
 
-This is a single statement, nothing more than an assertion that given this target code with this set of arguments, these results are wanted. It is almost certain that any mistake in this statement stems from a misconception in the author's head about what C<< some_function() >> is actually intended to do. We will hope that the perl interpreter itself will catch any syntactical errors. 
+This is a single statement, nothing more than an assertion that: Given this target code with this set of arguments, these results are wanted. It is almost certain that any mistake in this statement stems from a misconception in the author's head about what C<< some_function() >> is actually intended to do. We will hope that the perl interpreter itself will catch any syntactical errors. 
 
-We can, of course, do little to ensure the author understands the function of the target production code. We have merely avoided issues stemming from poorly constructed test script logic. So the author is free to concentrate on that production function. 
+We can, of course, do little to ensure the test script author understands the function of the target production code. We have merely avoided issues stemming from poorly constructed test script logic. So the author is free to concentrate on that production function. 
 
 =head2 The gentleman's gentleman
 
-The test script consisting of declarations of test cases must somehow be processed. The given target must be executed with the given arguments; the results we then have captured; and these checked against the results we want. This is the responsibility of C<< ::Test::Valet::* >>. 
+The test script consisting of declarations of test cases must somehow be processed. The given target must be executed with the given arguments. We then have captured results; and we check these against the results we want. This processing is the responsibility of C<< ::Test::Valet >>. 
 
 To be the perfect developer's valet, ::TV must present several faces, often somewhat contradictory. A formal OO approach will be too formal; but we employ many related techniques. 
 
@@ -76,7 +76,7 @@ A container cannot contain itself; a mirror cannot reflect itself; and our testi
 
 ::TV's test battery exercises the testing module against a dummy target, L<< Acme::Teddy|Acme::Teddy >>. Each script defines the dummy differently; and each test case is processed by ::TV just as it would any target. So the test scripts are slightly more complex, but the testing module is exercised in exactly the same context as in normal use. Although ::TV reports the dummy functions properly, what it is really doing is confirming to us that it is, itself, correct. 
 
-
+If our self-test is to be reasonably complete then our dummy must sometimes fail and ::TV report it I<< as >> failing. But then this is a I<< passing >> test of ::TV itself! So we provide means to set a C<< must_fail >> attribute on the case or check expected to fail. When ::TV sees this flag, it executes inside a vault and inverts the sense of the check: 'ok' becomes 'not ok', and bad is good. 
 
 
 =head1 SEE ALSO
