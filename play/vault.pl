@@ -76,12 +76,13 @@ sub vault (&$) {
         ### AFTER MUST FAIL
         ### @stdout
         $stdout     = join qq{\n}, @stdout;
+        $stderr     = '#   Check was declared to fail.';
     }
     else {
         $stdout     = join qq{\n}, @stdout;
-        print STDERR $stderr;
     };
     say STDOUT $stdout;
+    say STDERR $stderr;
     say STDOUT $plan;
     
     $vault->{stdout}    = $stdout;
