@@ -10,7 +10,6 @@ use warnings;
 use lib qw| lib |;
 use Error::Base;
 use Perl6::Form;
-use Test::More;
 use Test::Trap;
 
 #~ use Devel::Comments '###';
@@ -18,11 +17,25 @@ use Test::Trap;
 
 ## use
 #============================================================================#
-say "$0 Running...";
+use Test::More;
+
+my $rv  = trap{
+    pass('I passed wrongly.');      # should fail
+    fail('I failed correctly.');    # should pass
+    
+#~     say '1..2';
+#~     say 'ok 1 fake pass';
+#~     say 'not ok 2 fake fail';
+};
 
 
-say "Done.";
-exit;
+
+#~ say $trap->stdout;
+
+pass('The kids are alright.');      # should pass anyway
+
+done_testing;
+exit(0);
 #----------------------------------------------------------------------------#
 
 
