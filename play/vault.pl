@@ -27,6 +27,10 @@ use Test::More;
 sub vault (&$);      # forward
 my $must_fail       = 1;
 
+my $dummy = trap{ 
+    1;
+};
+
 pass('First check always passes.');
 
 # Checker vault, not case execution trap.
@@ -36,6 +40,8 @@ my $rv  = vault {
 #~     say 'ok 2 [say] Second check';          # talking to STDOUT directly
 #~     pass('[TM] Second check passing');      # Test::More::pass()
     fail('[TM] Second check failing');      # Test::More::fail()
+#~     $trap->did_return('[TT] did_return');   # Test::Trap
+#~     $trap->did_die('[TT] did_die');         # Test::Trap
     
 } $must_fail;
 
@@ -111,15 +117,21 @@ sub vault (&$) {
     #### $builder
     
     # Do the fake check to stand in for the real check we just hid.
-#~     if ($must_fail) {
+#~     if ($must_fail) {    TODO
 #~     };
     
     $stdout     = defined $vault->{stdout} ? $vault->{stdout} : q{};
     $report     = $stdout .= ( defined $bldout ? $bldout : q{} );
-    
     $diag       = "Actual report: $report";
     chomp $diag;
     pass($diag);
+    
+    # Print the actual diagnostic, if any.
+    $stderr     = defined $vault->{stderr} ? $vault->{stderr} : q{};
+    $report     = $stderr .= ( defined $blderr ? $blderr : q{} );
+    $diag       = "Actual error: $report";
+    note($diag);
+    
     
 #~     say STDOUT $stdout;
 #~     say STDERR $stderr;
