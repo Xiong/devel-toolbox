@@ -17,7 +17,7 @@ use List::MoreUtils             # The stuff missing in List::Util
 use parent 'Devel::Toolbox::Core::Base';
 
 # Alternate uses
-use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 ### DTT-VALET
 
 ## use
@@ -28,6 +28,10 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# FORWARD DECLARATIONS
+sub _ex;            # wrap around die() using Error::Base::crash()
+
+#----------------------------------------------------------------------------#
 # EXECUTION
 
 #=========# OBJECT METHOD
@@ -37,7 +41,7 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #   
 sub enforce {
     my $self        = shift;  
-    my $case        = $self->{case}         // die "! No cases declared.";
+    my $case        = $self->{case}         // _ex "No cases declared.";
 #~     my $caller_script   = $self->{attr}{caller_script};
     my $caller_package  = $self->{attr}{caller_package};
     my $attr        = $self->{attr};
@@ -80,7 +84,7 @@ sub enforce {
                 my $scalar = trap { &{ $i_case->{sub} }( @args ) };
             }
             default         {
-                die "! Invalid context demanded: $context";
+                _ex "Invalid context demanded: $context";
             }
         };
         
@@ -269,6 +273,55 @@ sub _append {
 #~     ### @_
     return join q{ | }, @_;
 }; ## _append
+
+#=========# INTERNAL ROUTINE
+#~ 
+#
+#   @
+#   
+sub _fail_inverter {
+    my $args            = shift;
+    my $out             = $args->{out}          // # mandatory
+        _ex "Checker error: Failed to emit any TAP to (STD)OUT.";
+    my $err             = $args->{err}          // q{};
+    my $must_fail       = $args->{must_fail}    // 0;
+        
+    my $fixed           = {};       # inverted or not, they're correct now
+    
+    my $was_ok_str      ;           # what check actually emitted
+    my $diag            ;           # reconstructed test name or message
+    
+    # Did the check say that it passed ('ok') or failed ('not ok')?
+    $out =~ s/^(ok|not ok)//;
+    $was_ok_str         = $1
+        or _ex "Checker error: Failed to emit either 'ok' or 'not ok'";
+    
+    
+    $diag         = $out;
+    $diag =~ s/    \s+\d*\s+-\s//; # drop (ok|not ok), number, dash
+    $diag =~ s/#.*$//;                  # drop all after first octothorpe
+    chomp $diag;
+    
+    
+    $fixed->{out}       = $out;
+    $fixed->{err}       = $err;
+    return $fixed;
+}; ## _fail_inverter
+
+#=========# INTERNAL ERROR WRAPPER ROUTINE
+#~ 
+#
+#   Wraps die().
+#   
+sub _ex {
+    require Error::Base;        # Simple structured errors with full backtrace
+    Error::Base->crash(
+        @_,
+        -base       => 'DTT-Valet:',
+        -prepend    => '! ',
+        -nest       => 1,
+    );
+}; ## _ex
 
 ## END MODULE
 1;

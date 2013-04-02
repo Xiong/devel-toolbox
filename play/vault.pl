@@ -15,6 +15,7 @@ use Clone                       # Recursively copy Perl datatypes
     qw| clone |;
 use Capture::Tiny               # Capture STDOUT and STDERR
     qw| :all |;
+use Devel::Toolbox::Test::Valet; #High productivity testing: correct, complete
 
 #~ use Devel::Comments '###';
 use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -25,7 +26,8 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #~ use Test::More tests => 2;
 use Test::More;
 sub vault (&$);      # forward
-my $must_fail       = 1;
+#~ my $must_fail       = 1;
+my $must_fail       = 0;
 
 my $dummy = trap{ 
     1;
@@ -39,9 +41,9 @@ pass('First check always passes.');
 my $rv  = vault {
 #~     say 'ok 2 [say] Second check';          # talking to STDOUT directly
 #~     pass('[TM] Second check passing');      # Test::More::pass()
-    fail('[TM] Second check failing');      # Test::More::fail()
+#~     fail('[TM] Second check failing');      # Test::More::fail()
 #~     $trap->did_return('[TT] did_return');   # Test::Trap
-#~     $trap->did_die('[TT] did_die');         # Test::Trap
+    $trap->did_die('[TT] did_die');         # Test::Trap
     
 } $must_fail;
 
@@ -71,12 +73,15 @@ sub vault (&$) {
     my $stdout      ;
     my @stdout      ;
     my $stderr      ;
+    my $out         ;
+    my $err         ;
     my $todo        ;
     my $plan        = '1..';    # fill in with count
     my $count       = 0;
     my $mario       ;           # clone of $builder
     my $report      ;
     my $diag        ;
+    my $diag_recon  ;
     
     
     # Clone/freeze Test::Builder.
@@ -116,20 +121,38 @@ sub vault (&$) {
     #### AFTER RESTORE
     #### $builder
     
+    # Consolidate outputs; these may come from four sources.
+    $out        = ( defined $bldout ? $bldout : q{} )
+                . ( defined $stdout ? $stdout : q{} )
+                ;
+    $err        = ( defined $blderr ? $blderr : q{} )
+                . ( defined $stderr ? $stderr : q{} )
+                ;
+    $report     = ( defined $out    ? $out    : q{} )
+                . ( defined $err    ? $err    : q{} )
+                ;
+    
+    # Invert sense of test if demanded to fail; anyway always... 
+    # extract original '$diag' or test name portion from intercepted outputs.
+    my $invert_hrf      = Devel::Toolbox::Test::Valet::_fail_inverter({
+        out     => $out,
+        err     => $err,
+        must_fail   => $must_fail,
+    });
+    $out        = $invert_hrf->{out};
+    $err        = $invert_hrf->{err};
+    $diag_recon = $invert_hrf->{diag};
+    
     # Do the fake check to stand in for the real check we just hid.
-#~     if ($must_fail) {    TODO
-#~     };
+    if ($must_fail) {
+        fail($diag_recon);
+    }
+    else {
+        pass($diag_recon);
+    };
     
-    $stdout     = defined $vault->{stdout} ? $vault->{stdout} : q{};
-    $report     = $stdout .= ( defined $bldout ? $bldout : q{} );
-    $diag       = "Actual report: $report";
-    chomp $diag;
-    pass($diag);
-    
-    # Print the actual diagnostic, if any.
-    $stderr     = defined $vault->{stderr} ? $vault->{stderr} : q{};
-    $report     = $stderr .= ( defined $blderr ? $blderr : q{} );
-    $diag       = "Actual error: $report";
+    # Print the actual results of the check.
+    $diag       = "Actual check report: $report";
     note($diag);
     
     
@@ -138,9 +161,15 @@ sub vault (&$) {
 #~     say STDOUT $plan;
     
     # Store for later amusement. 
-    $vault->{bldout}    = $bldout;
-    $vault->{blderr}    = $blderr;
-    $vault->{todo}      = $todo;
+    $vault->{report}        = $report;
+    $vault->{diag_recon}    = $diag_recon;
+    $vault->{bldout}        = $bldout;
+    $vault->{blderr}        = $blderr;
+    $vault->{stdout}        = $stdout;
+    $vault->{stderr}        = $stderr;
+    $vault->{out}           = $out;
+    $vault->{err}           = $err;
+    $vault->{todo}          = $todo;
     
     return $vault;
 };

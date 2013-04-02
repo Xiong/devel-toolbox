@@ -21,17 +21,21 @@ use parent 'Devel::Toolbox::Core::Base';
 ## pseudo-globals
 #----------------------------------------------------------------------------#
 # $_[0]: Checker class, usually 'main' (caller).
-#               $_[1]                $_[2]  $_[3]
-#   {check()}   $trap (have)         {want} {diag}
+#                         $_[1]                        $_[2]  $_[3]
+#   {check()}             $trap (have)                 {want} {diag}
 
-sub return_is { $_[1]->return_is( 0, $_[2], $_[3]) };
-sub stdout_is { $_[1]->stdout_is(    $_[2], $_[3]) };
-sub stderr_is { $_[1]->stderr_is(    $_[2], $_[3]) };
+sub return_is           { $_[1]->return_is        ( 0, $_[2], $_[3]) };
+sub stdout_is           { $_[1]->stdout_is        (    $_[2], $_[3]) };
+sub stderr_is           { $_[1]->stderr_is        (    $_[2], $_[3]) };
 
-sub die_like  { $_[1]->die_like (    $_[2], $_[3]) };
+sub die_like            { $_[1]->die_like         (    $_[2], $_[3]) };
 
-sub quiet     { $_[1]->quiet    (           $_[3]) };
-sub died      { $_[1]->did_die  (           $_[3]) };
+# Note that the is_deeply test does not accept an index. 
+# Even for array accessors, it operates on the entire array.
+sub return_is_deeply    { $_[1]->return_is_deeply (    $_[2], $_[3]) };
+
+sub quiet               { $_[1]->quiet            (           $_[3]) };
+sub died                { $_[1]->did_die          (           $_[3]) };
 
 
 ## END MODULE
