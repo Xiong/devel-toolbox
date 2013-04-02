@@ -18,6 +18,7 @@ use Capture::Tiny               # Capture STDOUT and STDERR
 
 #~ use Devel::Comments '###';
 use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '####', ({ -file => 'debug.log' });                  #~
 
 ## use
 #============================================================================#
@@ -32,27 +33,24 @@ pass('First check always passes.');
 # Rationally, one check at a time, please.
 # In this play script, should always be [not] ok 2.
 my $rv  = vault {
-#~     pass('Second check passing');       # Test::More::pass()
-#~     fail('Second check failing');       # Test::More::fail()
-#~     say 'ok 2 Second check';            # talking to STDOUT directly
+#~     say 'ok 2 [say] Second check';          # talking to STDOUT directly
+#~     pass('[TM] Second check passing');      # Test::More::pass()
+    fail('[TM] Second check failing');      # Test::More::fail()
     
 } $must_fail;
 
 ### $rv
 
 my $builder = Test::More->builder;
-### BEFORE THIRD CHECK
-### $builder
+#### BEFORE THIRD CHECK
+#### $builder
 
 
 pass('Third check always passes.');
-### AFTER THIRD CHECK
-### $builder
+#### AFTER THIRD CHECK
+#### $builder
 
 done_testing;
-#~ say STDOUT '===';
-### AFTER DONE_TESTING
-### $builder
 
 #~ exit(0);
 #----------------------------------------------------------------------------#
@@ -71,6 +69,8 @@ sub vault (&$) {
     my $plan        = '1..';    # fill in with count
     my $count       = 0;
     my $mario       ;           # clone of $builder
+    my $report      ;
+    my $diag        ;
     
     
     # Clone/freeze Test::Builder.
@@ -78,15 +78,15 @@ sub vault (&$) {
     $mario          = clone($builder);
     
     # Misdirect Test::Builder output.
-    ### BEFORE MISDIRECT
-    ### $builder
-    ### $mario
-#~     $builder->        output(\$bldout);
-#~     $builder->failure_output(\$blderr);
-#~     $builder->   todo_output(\$todo  );
-    ### AFTER MISDIRECT
-    ### $builder
-    ### $mario
+    #### BEFORE MISDIRECT
+    #### $builder
+    #### $mario
+    $builder->        output(\$bldout);
+    $builder->failure_output(\$blderr);
+    $builder->   todo_output(\$todo  );
+    #### AFTER MISDIRECT
+    #### $builder
+    #### $mario
     
     
     # Actual execution of the checker...
@@ -98,44 +98,37 @@ sub vault (&$) {
     ) 
         = capture { &$coderef };
     
-    ### AFTER CHECK
-    ### $builder
-    ### $mario
+    #### AFTER CHECK
+    #### $builder
+    #### $mario
     
-    
-#~     if ($must_fail) {
-#~         for (@stdout) {
-#~             s/^not ok/Xok/;
-#~             s/^ok/not ok/;
-#~             s/^Xok/ok/;
-#~         };
-#~         ### AFTER MUST FAIL
-#~         ### @stdout
-#~         $stdout     = join qq{\n}, @stdout;
-#~         $stderr     = '#   Check was declared to fail.';
-#~     }
-#~     else {
-#~         $stdout     = join qq{\n}, @stdout;
-#~     };
     
     
     # Restore Test::Builder.
-#~     $Test::Builder::Test    = $mario;   # fuck with actual package variable
+    $Test::Builder::Test    = $mario;   # fuck with actual package variable
 #~     $builder->reset_outputs;
-    ### AFTER RESTORE
-    ### $builder
+    #### AFTER RESTORE
+    #### $builder
     
     # Do the fake check to stand in for the real check we just hid.
-#~     pass('Fake second check.');
+#~     if ($must_fail) {
+#~     };
+    
+    $stdout     = defined $vault->{stdout} ? $vault->{stdout} : q{};
+    $report     = $stdout .= ( defined $bldout ? $bldout : q{} );
+    
+    $diag       = "Actual report: $report";
+    chomp $diag;
+    pass($diag);
     
 #~     say STDOUT $stdout;
 #~     say STDERR $stderr;
 #~     say STDOUT $plan;
     
-#~     # Store for later amusement. 
-#~     $vault->{stdout}    = $stdout;
-#~     $vault->{stderr}    = $stderr;
-#~     $vault->{todo}      = $todo;
+    # Store for later amusement. 
+    $vault->{bldout}    = $bldout;
+    $vault->{blderr}    = $blderr;
+    $vault->{todo}      = $todo;
     
     return $vault;
 };
