@@ -275,9 +275,21 @@ sub _append {
 }; ## _append
 
 #=========# INTERNAL ROUTINE
-#~ 
+#~     my $hashref = _fail_inverter({
+#~         out         => $string,     # captured (STD)OUT
+#~         must_fail   => $bool,       # do you demand failure?
+#~     });
+#~     $bool   = $hashref->{is_ok};    # did the check do what was demanded?
+#~     $string = $hashref->{diag};     # original test name
 #
-#   @
+#   Execution flows through this routine on every check; 
+#        it normally does little: a pass is a pass, and a fail is a fail. 
+#   But when {must_fail} is TRUE, a pass is a fail, and a fail is a pass. 
+#   
+#   Captured TAP 'ok|not ok' output must be passed in.
+#   As a convenience, the original check name is returned for re-emission.
+#   
+#   See also: Devel::Toolbox::Man::Test POD#PHILOSOPHY
 #   
 sub _fail_inverter {
     my $args            = shift;

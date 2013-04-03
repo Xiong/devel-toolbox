@@ -18,8 +18,8 @@ use Capture::Tiny               # Capture STDOUT and STDERR
 use Devel::Toolbox::Test::Valet; #High productivity testing: correct, complete
 
 #~ use Devel::Comments '###';
-use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
-#~ use Devel::Comments '####', ({ -file => 'debug.log' });                  #~
+#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+use Devel::Comments '####', ({ -file => 'debug.log' });                  #~
 
 ## use
 #============================================================================#
@@ -39,11 +39,13 @@ pass('First check always passes.');
 # Rationally, one check at a time, please.
 # In this play script, should always be [not] ok 2.
 my $rv  = vault {
-#~     say 'ok 2 [say] Second check';          # talking to STDOUT directly
-#~     pass('[TM] Second check passing');      # Test::More::pass()
-    fail('[TM] Second check failing');      # Test::More::fail()
-#~     $trap->did_return('[TT] did_return');   # Test::Trap
-#~     $trap->did_die('[TT] did_die');         # Test::Trap
+#~     say 'ok 2 [say] Second check passing';      # talking to STDOUT directly
+#~     say 'not ok 2 [say] Second check failing';  # talking to STDOUT directly
+#~     say STDERR '%# My funky diagnostic?';
+#~     pass('[TM] Second check passing');          # Test::More::pass()
+#~     fail('[TM] Second check failing');          # Test::More::fail()
+#~     $trap->did_return('[TT] did_return');       # Test::Trap
+    $trap->did_die('[TT] did_die');             # Test::Trap
     
 } $must_fail;
 
@@ -73,6 +75,7 @@ sub vault (&$) {
     my $stdout      ;
     my @stdout      ;
     my $stderr      ;
+    my $return      ;
     my $out         ;
     my $err         ;
     my $todo        ;
@@ -110,9 +113,9 @@ sub vault (&$) {
     # Actual execution of the checker...
     #   inside Capture::Tiny::capture{}
     (                           # returns positional results; don't alter
-        $vault->{stdout},
-        $vault->{stderr},
-        $vault->{return},
+        $stdout,
+        $stderr,
+        $return,
     ) 
         = capture { &$coderef };
     
@@ -128,10 +131,13 @@ sub vault (&$) {
     #### AFTER RESTORE
     #### $builder
     
+    ### $bldout
+    ### $stdout
+    
     # Consolidate outputs; these may come from four sources.
     $out        = defined $bldout   ? $bldout 
                 : defined $stdout   ? $stdout 
-                :                     die "Failed to capture (STD)OUT."
+                :                     die "! Failed to capture (STD)OUT."
                 ;
     chomp $out;
     $err        = defined $blderr   ? $blderr 
@@ -175,20 +181,19 @@ sub vault (&$) {
     # Invert sense of test if demanded to fail; also always extract... 
     # ... original $diag or test name portion from intercepted outputs.
     my $invert_hrf      = Devel::Toolbox::Test::Valet::_fail_inverter({
-        out     => $out,
-        err     => $err,
+        out         => $out,
         must_fail   => $must_fail,
     });
     $is_ok      = $invert_hrf->{is_ok}; # pass or fail if it should have done
     $diag_recon = $invert_hrf->{diag};  # original test name
     
-    # Do the fake check to stand in for the real check we just hid.
-    if ($is_ok) {
-        pass($diag_recon);
+    {
+        # Attempt to force the report from the correct (topmost) caller frame. 
+        local $Test::Builder::Level = $Test::Builder::Level + 9;
+        
+        # Do the fake check to stand in for the real check we just hid.
+        ok( $is_ok, $diag_recon);
     }
-    else {
-        fail($diag_recon);
-    };
     
     # Print diagnostics, such as they may be.
     if ( defined $report ) {
@@ -206,6 +211,7 @@ sub vault (&$) {
     $vault->{blderr}        = $blderr;
     $vault->{stdout}        = $stdout;
     $vault->{stderr}        = $stderr;
+    $vault->{return}        = $return;
     $vault->{out}           = $out;
     $vault->{err}           = $err;
     $vault->{todo}          = $todo;
