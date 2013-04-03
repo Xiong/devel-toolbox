@@ -1,9 +1,11 @@
 package Acme::Teddy;
 {
-    sub roar        { return        'Roar!' };
-    sub roar_out    { print         'Roar!' };
-    sub roar_err    { print STDERR  'Roar!' };
-    sub roar_die    { die           'Roar!' };
+    sub roar        { return        'Roar!'             };
+    sub roar_out    { print         'Roar!'             };
+    sub roar_err    { print STDERR  'Roar!'             };
+    sub roar_die    { die           'Roar!'             };
+    
+    sub tree        { return { a => [ 7, 'bar', 2 ] }   };
 }
 
 package main;
@@ -49,7 +51,15 @@ $self->sort(qw|
     roar_err
     roar_die
 |);
-
+$self->disable(qw|
+    disable_me
+    empty_hashref
+    null
+    roar
+    roar_out
+    roar_err
+    roar_die
+|);
 
 ### $self
 
@@ -63,7 +73,7 @@ $self->{case}{ null             }   = {
         return_is       => undef,
         quiet           => 1,
     },
-};  ## case
+};  ##
 
 $self->{case}{ roar             }   = {
     sub     => sub {
@@ -109,7 +119,28 @@ $self->{case}{ roar_die         }   = {
     },
 };  ##
 
-#            {                  }   = #
+$self->{case}{ tree             }   = {
+    sub     => sub {
+        Acme::Teddy::tree();
+    },
+    args    => undef,
+    want    => {
+        return_is_deeply    => [        # always want the whole array
+            { a => [ 7, 'bar', 2 ] }
+        ],
+        quiet               => 1,
+    },
+};  ##
+
+$self->{case}{ disable_me       }   = {
+    sub     => sub { 1 },
+    args    => undef,
+    want    => {
+        return_is       => undef,   # would fail
+    },
+};  ##
+
+#            {                  }   = # formatting guide
 
 
 ### $self

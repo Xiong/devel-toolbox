@@ -32,7 +32,7 @@ I<< Quis custodiet ipsos custodes?  >>
 
 =head1 PHILOSOPHY
 
-=head2 Tests cannot be tested.
+=head2 Tests cannot be tested
 
 This is the first principle of honest testing. Testing a test script with some other piece of code merely displaces the issue; now the tester tester must be tested. Therefore at some point an ultimate tester must be simple enough that its correctness can be validated by eye. 
 
@@ -58,13 +58,13 @@ In practice a YAML'ish, non-Perl format is excessively rigid; we want to preserv
         },
     };  ## case
 
-This is a single statement, nothing more than an assertion that given this target code with this set of arguments, these results are wanted. It is almost certain that any mistake in this statement stems from a misconception in the author's head about what C<< some_function() >> is actually intended to do. We will hope that the perl interpreter itself will catch any syntactical errors. 
+This is a single statement, nothing more than an assertion that: Given this target code with this set of arguments, these results are wanted. It is almost certain that any mistake in this statement stems from a misconception in the author's head about what C<< some_function() >> is actually intended to do. We will hope that the perl interpreter itself will catch any syntactical errors. 
 
-We can, of course, do little to ensure the author understands the function of the target production code. We have merely avoided issues stemming from poorly constructed test script logic. So the author is free to concentrate on that production function. 
+We can, of course, do little to ensure the test script author understands the function of the target production code. We have merely avoided issues stemming from poorly constructed test script logic. So the author is free to concentrate on that production function. 
 
 =head2 The gentleman's gentleman
 
-The test script consisting of declarations of test cases must somehow be processed. The given target must be executed with the given arguments; the results we then have captured; and these checked against the results we want. This is the responsibility of C<< ::Test::Valet::* >>. 
+The test script consisting of declarations of test cases must somehow be processed. The given target must be executed with the given arguments. We then have captured results; and we check these against the results we want. This processing is the responsibility of C<< ::Test::Valet >>. 
 
 To be the perfect developer's valet, ::TV must present several faces, often somewhat contradictory. A formal OO approach will be too formal; but we employ many related techniques. 
 
@@ -72,11 +72,21 @@ To be the perfect developer's valet, ::TV must present several faces, often some
 
 =head2 Testers cannot test themselves
 
-A container cannot contain itself; a mirror cannot reflect itself; and our testing module cannot be used to test itself. The snake may be able to swallow its own tail but it cannot swallow its mouth. Please excuse the lack of formal proof. I say that regardless of how matters are arranged, some untested element must remain outside the closed circle. So how can ::TV itself be tested? 
+A container cannot contain itself; a mirror cannot reflect itself; and our testing module cannot be used to test itself fully. The snake may be able to swallow its own tail but it cannot swallow its mouth. Please excuse the lack of formal proof. I say that regardless of how matters are arranged, some untested element must remain outside the closed circle. So how can ::TV itself be tested? 
 
-::TV's test battery exercises the testing module against a dummy target, L<< Acme::Teddy|Acme::Teddy >>. Each script defines the dummy differently; and each test case is processed by ::TV just as it would any target. So the test scripts are slightly more complex, but the testing module is exercised in exactly the same context as in normal use. Although ::TV reports the dummy functions properly, what it is really doing is confirming to us that it is, itself, correct. 
+::TV's test battery exercises the testing module against a dummy target, L<< Acme::Teddy|Acme::Teddy >>. Each script defines the dummy differently; and each test case is processed by ::TV just as it would for any target. So the test scripts are slightly more complex, but the testing module is exercised in exactly the same context as in normal use. Although ::TV reports the dummy functions properly, what it is really doing is confirming to us that it is, itself, correct. 
 
+If our self-test is to be reasonably complete then our dummy must sometimes fail and ::TV report it I<< as >> failing. But then this is a I<< passing >> test of ::TV itself! So we provide means to set a C<< must_fail >> attribute on the case or check expected to fail. When ::TV sees this flag, it executes inside a vault and inverts the sense of the check: 'ok' becomes 'not ok', and bad is good. 
 
+=head2 The strongest link in the chain
+
+Checkers are unreliable until proven otherwise. Their logic may be simple or complex. There are not only many checkers defined in popular test modules; the production code author may find it necessary to write an I<< ad hoc >> checker to manage some difficult type of case. The only way to hope a checker is correct is to test it... and since the primary function of a checker is to report failure when its check fails, this function must itself be checked I<< in the failing state. >> This would normally produce a failing test case, a failing test script, and a failing test suite: not what we need. 
+
+A negative checker could be written for each primary checker; but then we would be hoping they were exact complements, begging the question. Again, it is a fool's errand to write a checker checker, a straight drop down the infinite recursion rabbit hole. 
+
+Therefore the failure inverter routine allows us to execute a checker under conditions that I<< should >> cause it to fail; and if it I<< does >>, properly, we see a I<< passing >> check. Conversely, if our checker is flawed or we have set up its givens wrongly during this checker-testing exercise, then it will pass when it should not and we will see it as I<< failing >>. 
+
+The failure inverter routine is not itself a checker, outputs no TAP or diagnostics; and therefore all possible control flow paths can be exercised thoroughly under multiple conditions. These inverter tests are simple, normal cases in a normal test script; this does not even need to employ any other part of the ::TV fixture. 
 
 
 =head1 SEE ALSO

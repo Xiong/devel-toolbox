@@ -17,7 +17,7 @@ use List::MoreUtils             # The stuff missing in List::Util
 use parent 'Devel::Toolbox::Core::Base';
 
 # Alternate uses
-use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 ### DTT-VALET
 
 ## use
@@ -28,6 +28,10 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## pseudo-globals
 #----------------------------------------------------------------------------#
+# FORWARD DECLARATIONS
+sub _ex;            # wrap around die() using Error::Base::crash()
+
+#----------------------------------------------------------------------------#
 # EXECUTION
 
 #=========# OBJECT METHOD
@@ -37,34 +41,18 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #   
 sub enforce {
     my $self        = shift;  
-    my $case        = $self->{case}         // die "! No cases declared.";
+    my $case        = $self->{case}         // _ex "No cases declared.";
 #~     my $caller_script   = $self->{attr}{caller_script};
     my $caller_package  = $self->{attr}{caller_package};
     my $attr        = $self->{attr};
     my @case_keys   = keys $case;
     
+    # Ignore disabled cases.
+    @case_keys      = grep { $self->_is_enabled($_) } @case_keys;
+    
     # A case hash is declared but let us enforce cases in predictable order.
     # You can alter this order by calling $self->sort(@keys)
     @case_keys      = $self->_do_sort( @case_keys );
-    
-    # Delete disabled cases.
-    if ( exists $self->{enable} ) {     # if not then feature unused; skip
-        if ( $self->{enable}{':all'} ) {    # disable only if case == false
-            @case_keys 
-                = grep { 
-                    (
-                        defined $self->{enable}{$_} 
-                         && not $self->{enable}{$_}
-                    )
-                     ? 0 : 1 
-                } @case_keys;
-        }
-        else {                              # enable only if case == true
-            @case_keys 
-                = grep { $self->{enable}{$_} } 
-                    @case_keys;
-        };
-    }; ## if exists enable
     
     # Unpack case, execute, check.
     CASE_KEY:
@@ -96,7 +84,7 @@ sub enforce {
                 my $scalar = trap { &{ $i_case->{sub} }( @args ) };
             }
             default         {
-                die "! Invalid context demanded: $context";
+                _ex "Invalid context demanded: $context";
             }
         };
         
@@ -226,6 +214,39 @@ sub _do_sort {
 }; ## _do_sort
 
 #=========# OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub disable {
+    my $self                        = shift;
+    my @args                        = @_;
+    $self->{attr}{disable}          = {};
+    
+    for my $i_arg (@args) {
+        $self->{attr}{disable}{$i_arg} = 'DISABLE';     # TRUE if disabled
+    };
+    
+    return $self;
+}; ## disable
+
+#=========# INTERNAL OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub _is_enabled {
+    my $self        = shift;
+    my $key         = shift;
+    my %disable     = %{ $self->{attr}{disable} // return 1 }; # enable all
+    my $is_enabled  ;
+    
+    $is_enabled     = $disable{$key} ? 0 : 1;
+    
+    return $is_enabled;
+}; ## _is_enabled
+
+#=========# OBJECT METHOD
 #=========# INTERNAL ROUTINE
 #=========# EXTERNAL FUNCTION
 #~ 
@@ -252,6 +273,81 @@ sub _append {
 #~     ### @_
     return join q{ | }, @_;
 }; ## _append
+
+#=========# INTERNAL ROUTINE
+#~     my $hashref = _fail_inverter({
+#~         out         => $string,     # captured (STD)OUT
+#~         must_fail   => $bool,       # do you demand failure?
+#~     });
+#~     $bool   = $hashref->{is_ok};    # did the check do what was demanded?
+#~     $string = $hashref->{diag};     # original test name
+#
+#   Execution flows through this routine on every check; 
+#        it normally does little: a pass is a pass, and a fail is a fail. 
+#   But when {must_fail} is TRUE, a pass is a fail, and a fail is a pass. 
+#   
+#   Captured TAP 'ok|not ok' output must be passed in.
+#   As a convenience, the original check name is returned for re-emission.
+#   
+#   See also: Devel::Toolbox::Man::Test POD#PHILOSOPHY
+#   
+sub _fail_inverter {
+    my $args            = shift;
+    my $out             = $args->{out}          // # mandatory
+        _ex "Checker error: Failed to emit any TAP to (STD)OUT.";
+    my $must_fail       = $args->{must_fail}    // 0;
+        
+    my $rh              = {};       # return hashref 
+    
+    my $was_ok_str      ;           # what check actually emitted
+    my $was_ok_flag     ;           # bool
+    my $is_ok_flag      ;           # bool      our judgement
+    my $check_number    ;           # e.g., the '3' in 'ok 3'
+    my $diag            ;           # reconstructed test name or message
+    
+    # Did the check say that it passed ('ok') or failed ('not ok')?
+    $out =~ s/^(ok|not ok)//;
+    $was_ok_str         = $1
+        or _ex "Checker error: Failed to emit either 'ok' or 'not ok'";
+    $was_ok_flag        = $was_ok_str eq 'ok' ? 1 : 0;
+    
+    # Extract check number and strip some rubbish.
+    $out =~ s/^\s*(\d*)\s*-?\s*//;  # strip e.g., ' 3 - '
+    $check_number       = $1;
+    
+    # Extract directive. Whatever is left is the original $diag.
+    $out =~ s/#.*$//;               # drop all after first octothorpe
+    $diag   = $out;
+    chomp $diag;
+    
+    # Append helpful explanation.
+    if ($must_fail) {
+        $diag   .= ' | MUST FAIL';
+    };
+    
+    # Decide if this test REALLY passed or failed.
+    # TRUE if $must_fail is TRUE or $was_ok_flag is TRUE but not both!
+    $is_ok_flag         = ( $must_fail xor $was_ok_flag );
+        
+    $rh->{is_ok}        = $is_ok_flag;
+    $rh->{diag}         = $diag;
+    return $rh;
+}; ## _fail_inverter
+
+#=========# INTERNAL ERROR WRAPPER ROUTINE
+#~ 
+#
+#   Wraps die().
+#   
+sub _ex {
+    require Error::Base;        # Simple structured errors with full backtrace
+    Error::Base->crash(
+        @_,
+        -base       => 'DTT-Valet:',
+        -prepend    => '! ',
+        -nest       => 1,
+    );
+}; ## _ex
 
 ## END MODULE
 1;
