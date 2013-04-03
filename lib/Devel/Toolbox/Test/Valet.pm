@@ -283,29 +283,43 @@ sub _fail_inverter {
     my $args            = shift;
     my $out             = $args->{out}          // # mandatory
         _ex "Checker error: Failed to emit any TAP to (STD)OUT.";
-    my $err             = $args->{err}          // q{};
     my $must_fail       = $args->{must_fail}    // 0;
         
-    my $fixed           = {};       # inverted or not, they're correct now
+    my $rh              = {};       # return hashref 
     
     my $was_ok_str      ;           # what check actually emitted
+    my $was_ok_flag     ;           # bool
+    my $is_ok_flag      ;           # bool      our judgement
+    my $check_number    ;           # e.g., the '3' in 'ok 3'
     my $diag            ;           # reconstructed test name or message
     
     # Did the check say that it passed ('ok') or failed ('not ok')?
     $out =~ s/^(ok|not ok)//;
     $was_ok_str         = $1
         or _ex "Checker error: Failed to emit either 'ok' or 'not ok'";
+    $was_ok_flag        = $was_ok_str eq 'ok' ? 1 : 0;
     
+    # Extract check number and strip some rubbish.
+    $out =~ s/^\s*(\d*)\s*-?\s*//;  # strip e.g., ' 3 - '
+    $check_number       = $1;
     
-    $diag         = $out;
-    $diag =~ s/    \s+\d*\s+-\s//; # drop (ok|not ok), number, dash
-    $diag =~ s/#.*$//;                  # drop all after first octothorpe
+    # Extract directive. Whatever is left is the original $diag.
+    $out =~ s/#.*$//;               # drop all after first octothorpe
+    $diag   = $out;
     chomp $diag;
     
+    # Append helpful explanation.
+    if ($must_fail) {
+        $diag   .= ' | MUST FAIL';
+    };
     
-    $fixed->{out}       = $out;
-    $fixed->{err}       = $err;
-    return $fixed;
+    # Decide if this test REALLY passed or failed.
+    # TRUE if $must_fail is TRUE or $was_ok_flag is TRUE but not both!
+    $is_ok_flag         = ( $must_fail xor $was_ok_flag );
+        
+    $rh->{is_ok}        = $is_ok_flag;
+    $rh->{diag}         = $diag;
+    return $rh;
 }; ## _fail_inverter
 
 #=========# INTERNAL ERROR WRAPPER ROUTINE

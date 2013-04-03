@@ -26,12 +26,12 @@ my $self            = Devel::Toolbox::Test::Valet->new();
 $self->sort(qw|
     null
     no_args
+    missing_ok
     simple
     
 |);
 $self->disable(qw|
     disable_me
-    simple
 |);
 
 ### $self
@@ -58,7 +58,6 @@ $self->{case}{ missing_ok       }   = {
     sub     => \&Devel::Toolbox::Test::Valet::_fail_inverter,
     args                    => [{
             out     => 'fok',
-            err     => '',
         
         }],
     want    => {
@@ -70,14 +69,13 @@ $self->{case}{ missing_ok       }   = {
 $self->{case}{ simple          }   = {
     sub     => \&Devel::Toolbox::Test::Valet::_fail_inverter,
     args                    => [{
-            out     => 'ok',
-            err     => '',
-        
-        }],
+        out         => 'ok',
+        must_fail   => 0,
+    }],
     want    => {
         return_is_deeply    => [{
-            out     => 'ok',
-            err     => '',
+            is_ok   => 1,
+            diag    => '',
             
         }],
         quiet               => 1,

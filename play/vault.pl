@@ -26,12 +26,12 @@ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #~ use Test::More tests => 2;
 use Test::More;
 sub vault (&$);      # forward
+my $dummy = trap{ 
+    1;                  # target execution for Test::Trap
+};
+
 #~ my $must_fail       = 1;
 my $must_fail       = 0;
-
-my $dummy = trap{ 
-    1;
-};
 
 pass('First check always passes.');
 
@@ -41,9 +41,9 @@ pass('First check always passes.');
 my $rv  = vault {
 #~     say 'ok 2 [say] Second check';          # talking to STDOUT directly
 #~     pass('[TM] Second check passing');      # Test::More::pass()
-#~     fail('[TM] Second check failing');      # Test::More::fail()
+    fail('[TM] Second check failing');      # Test::More::fail()
 #~     $trap->did_return('[TT] did_return');   # Test::Trap
-    $trap->did_die('[TT] did_die');         # Test::Trap
+#~     $trap->did_die('[TT] did_die');         # Test::Trap
     
 } $must_fail;
 
@@ -80,8 +80,15 @@ sub vault (&$) {
     my $count       = 0;
     my $mario       ;           # clone of $builder
     my $report      ;
+    my @report      ;
     my $diag        ;
     my $diag_recon  ;
+    my $is_ok       ;
+    my $original_report ;
+    my $report_prepend  = qq{| ACTUAL:\n};
+    my $report_indent   =  q{|};
+    my $report_bad      = qq{| This check must fail but did not (BAD).\n};
+    my $report_good     = qq{| This check must fail and did (GOOD).\n};
     
     
     # Clone/freeze Test::Builder.
@@ -122,39 +129,71 @@ sub vault (&$) {
     #### $builder
     
     # Consolidate outputs; these may come from four sources.
-    $out        = ( defined $bldout ? $bldout : q{} )
-                . ( defined $stdout ? $stdout : q{} )
+    $out        = defined $bldout   ? $bldout 
+                : defined $stdout   ? $stdout 
+                :                     die "Failed to capture (STD)OUT."
                 ;
-    $err        = ( defined $blderr ? $blderr : q{} )
-                . ( defined $stderr ? $stderr : q{} )
-                ;
-    $report     = ( defined $out    ? $out    : q{} )
-                . ( defined $err    ? $err    : q{} )
+    chomp $out;
+    $err        = defined $blderr   ? $blderr 
+                : defined $stderr   ? $stderr 
+                :                     undef
                 ;
     
-    # Invert sense of test if demanded to fail; anyway always... 
-    # extract original '$diag' or test name portion from intercepted outputs.
+    ### $must_fail
+    ### $err
+    
+    # Compose any diagnostic message. 
+    #   If not $must_fail, it should be just as it was ($err only).
+    #   If $must_fail, it should include both $out and $err and be marked.
+    #   If $err is empty, then no diagnostic was emitted; 
+    #       say so only if $must_fail.
+    my $M   = $must_fail    ? 'M1' : 'M0';
+    my $E   = $err          ? 'E1' : 'E0';
+    {
+        no warnings 'uninitialized';
+        chomp $err;
+        $err =~ s/^# //gm;              # Test::More will replace octothorpes
+        $original_report 
+            = join qq{\n}, map { $report_indent . $_ }
+                split qq{\n}, join  qq{\n}, ( $out, $err );
+        chomp $original_report;
+    }
+    my %report_for  = (
+        M0_E0   => undef,               # normal passing check; be silent
+        M0_E1   => $err,                # normal failing check; echo
+        M1_E0   => $report_bad          # must fail and did NOT fail
+                .  $report_prepend
+                .  $original_report
+                ,
+        M1_E1   => $report_good         # must fail and did fail...
+                .  $report_prepend
+                .  $original_report
+                ,
+    ); ## report_for
+    $report     = $report_for{ join q{_}, $M, $E };
+    
+    # Invert sense of test if demanded to fail; also always extract... 
+    # ... original $diag or test name portion from intercepted outputs.
     my $invert_hrf      = Devel::Toolbox::Test::Valet::_fail_inverter({
         out     => $out,
         err     => $err,
         must_fail   => $must_fail,
     });
-    $out        = $invert_hrf->{out};
-    $err        = $invert_hrf->{err};
-    $diag_recon = $invert_hrf->{diag};
+    $is_ok      = $invert_hrf->{is_ok}; # pass or fail if it should have done
+    $diag_recon = $invert_hrf->{diag};  # original test name
     
     # Do the fake check to stand in for the real check we just hid.
-    if ($must_fail) {
-        fail($diag_recon);
+    if ($is_ok) {
+        pass($diag_recon);
     }
     else {
-        pass($diag_recon);
+        fail($diag_recon);
     };
     
-    # Print the actual results of the check.
-    $diag       = "Actual check report: $report";
-    note($diag);
-    
+    # Print diagnostics, such as they may be.
+    if ( defined $report ) {
+        note($report);
+    };
     
 #~     say STDOUT $stdout;
 #~     say STDERR $stderr;
