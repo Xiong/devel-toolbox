@@ -54,10 +54,6 @@ $self->sort(qw|
 |);
 $self->disable(qw|
     disable_me
-    empty_hashref
-    roar_err
-    roar_die
-    tree
 |);
 
 ### $self
