@@ -22,6 +22,8 @@ use parent 'Devel::Toolbox::Core::Base';
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '###', '####', ({ -file => 'debug.log' });           #~
+use Devel::Comments '#####', ({ -file => 'debug.log' });                 #~
 ### DTT-VALET
 
 ## use
@@ -52,6 +54,12 @@ sub enforce {
     my $attr        = $self->{attr};
     my @case_keys   = keys $case;
     
+# DEBUG ONLY
+my $builder;
+$builder = Test::More->builder;
+##### enforce ENTRY
+##### $builder
+    
     # Ignore disabled cases.
     @case_keys      = grep { $self->_is_enabled($_) } @case_keys;
     
@@ -70,6 +78,7 @@ sub enforce {
         my $context     = uc( $i_case->{context}  // 'SCALAR' );   # VOID, ARRAY
         my @args        = @{ $i_case->{args}      // []       };
         my $sub         = $i_case->{sub}          // 0        ;
+        my $must_fail   = $i_case->{must_fail}    // 0        ;
         
         # Skip case if no code defined, eh.
         if ( not $sub ) {
@@ -98,6 +107,11 @@ sub enforce {
         
         # Do all checks for this case (as a subtest).
         subtest $case_key => sub {  # $case_key follows checks in TAP output
+# DEBUG ONLY
+$builder = Test::More->builder;
+##### subtest ENTRY
+##### $case_key
+##### $builder
             pass('execute');
             my $want        = $i_case->{want}     // {};
             if ( not $want ) {
@@ -108,8 +122,9 @@ sub enforce {
             my $sub_check_count;
             CHECK_KEY:
             for my $check_key ( keys $want ) {
-#~                 ### $case_key
-#~                 ### $check_key
+                ### enforce CHECK_KEY
+                ### $case_key
+                ### $check_key
 #~                 ### $want
                 $sub_check_count++;
                 _vault {
@@ -132,10 +147,9 @@ sub enforce {
 #
 #   @
 #   
-sub vault (&$) {
+sub _vault (&$) {
     my $coderef     = shift;
     my $must_fail   = shift;
-    my $vault       = {};
     my $bldout      ;
     my @bldout      ;
     my $blderr      ;
@@ -168,13 +182,11 @@ sub vault (&$) {
     # Misdirect Test::Builder output.
     #### BEFORE MISDIRECT
     #### $builder
-    #### $mario
     $builder->        output(\$bldout);
     $builder->failure_output(\$blderr);
     $builder->   todo_output(\$todo  );
     #### AFTER MISDIRECT
     #### $builder
-    #### $mario
     
     
     # Actual execution of the checker...
@@ -188,18 +200,15 @@ sub vault (&$) {
     
     #### AFTER CHECK
     #### $builder
-    #### $mario
-    
-    
     
     # Restore Test::Builder.
     $Test::Builder::Test    = $mario;   # fuck with actual package variable
-#~     $builder->reset_outputs;
+    $builder->reset_outputs;
     #### AFTER RESTORE
     #### $builder
     
-    ### $bldout
-    ### $stdout
+#~     ### $bldout
+#~     ### $stdout
     
     # Consolidate outputs; these may come from four sources.
     $out        = defined $bldout   ? $bldout 
@@ -212,8 +221,9 @@ sub vault (&$) {
                 :                     undef
                 ;
     
-    ### $must_fail
-    ### $err
+#~     ### $must_fail
+#~     ### $out
+#~     ### $err
     
     # Compose any diagnostic message. 
     #   If not $must_fail, it should be just as it was ($err only).
@@ -231,6 +241,7 @@ sub vault (&$) {
                 split qq{\n}, join  qq{\n}, ( $out, $err );
         chomp $original_report;
     }
+    ### $original_report
     my %report_for  = (
         M0_E0   => undef,               # normal passing check; be silent
         M0_E1   => $err,                # normal failing check; echo
@@ -267,11 +278,8 @@ sub vault (&$) {
         note($report);
     };
     
-#~     say STDOUT $stdout;
-#~     say STDERR $stderr;
-#~     say STDOUT $plan;
-    
-    # Store for later amusement. 
+    # Store for later amusement.                # DEBUG
+    my $vault               = {};
     $vault->{report}        = $report;
     $vault->{diag_recon}    = $diag_recon;
     $vault->{bldout}        = $bldout;
@@ -283,7 +291,6 @@ sub vault (&$) {
     $vault->{err}           = $err;
     $vault->{todo}          = $todo;
     
-    return $vault;
 }; ## _vault
 
 #=========# OBJECT METHOD
@@ -293,8 +300,8 @@ sub vault (&$) {
 #   
 sub finish {
     my $self        = shift;
-    ### finish()
-    ### $self
+#~     ### finish()
+#~     ### $self
      
     done_testing( $self->{check_count} );
     
@@ -464,7 +471,7 @@ sub _fail_inverter {
     my $diag            ;           # reconstructed test name or message
     
     # Did the check say that it passed ('ok') or failed ('not ok')?
-    $out =~ s/^(ok|not ok)//;
+    $out =~ s/^\s*(ok|not ok)//;
     $was_ok_str         = $1
         or _ex "Checker error: Failed to emit either 'ok' or 'not ok'";
     $was_ok_flag        = $was_ok_str eq 'ok' ? 1 : 0;

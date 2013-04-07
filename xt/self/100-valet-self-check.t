@@ -50,15 +50,14 @@ $self->sort(qw|
     roar_out
     roar_err
     roar_die
+    tree
 |);
 $self->disable(qw|
     disable_me
     empty_hashref
-    null
-    roar
-    roar_out
     roar_err
     roar_die
+    tree
 |);
 
 ### $self
@@ -67,7 +66,7 @@ $self->disable(qw|
 $self->{case}{ empty_hashref    }   = {};
 
 $self->{case}{ null             }   = {
-    sub     => sub {  },
+    sub     => undef,
     args    => undef,
     want    => {
         return_is       => undef,

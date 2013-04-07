@@ -38,7 +38,7 @@ $self->disable(qw|
 
 # Declare cases themselves.
 $self->{case}{ null             }   = {
-    sub     => sub {  },
+    sub     => undef,
     args    => undef,
     want    => {
         return_is       => undef,
