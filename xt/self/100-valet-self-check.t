@@ -55,6 +55,9 @@ $self->sort(qw|
 $self->disable(qw|
     disable_me
 |);
+$self->todo(qw|
+    meow
+|);
 
 ### $self
 
@@ -77,6 +80,17 @@ $self->{case}{ roar             }   = {
     args    => undef,
     want    => {
         return_is       => 'Roar!',
+        quiet           => 1,
+    },
+};  ##
+
+$self->{case}{ meow             }   = {
+    sub     => sub {
+        Acme::Teddy::roar();
+    },
+    args    => undef,
+    want    => {
+        return_is       => 'Meow...',       # MUST FAIL
         quiet           => 1,
     },
 };  ##
