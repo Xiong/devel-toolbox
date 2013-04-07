@@ -1,0 +1,579 @@
+CORRECTNESS IN TESTING
+
+Xiong Changnian     <xiong@cpan.org>
+
+It's been said that if automobiles had progressed as quickly as computers, 
+they would cost $100 each and get 1000 miles to the gallon. It's also been 
+said that each time you bought a new one, it would take you a month to 
+learn to drive all over again and the car would crash twice a day. When 
+that story was new, the car came with an owner's manual a foot thick; then 
+it came on 20 CDs. Now you have to google if you want to know how your new 
+toy works and still, every day, it makes a funny noise. 
+
+Were we better than we are, we would all write programs that did exactly 
+what we desire. There is no theoretical objection. The operation of a 
+digital computer program is deterministic and, in theory, fully known. We 
+write buggy programs because we fail to grasp, accurately and precisely, 
+their actual function. 
+
+Because we are less than perfect, we compensate for our shortcomings by 
+*testing* our production code... with more code. If the testing code is 
+good and it reports the production code as good; then we may hope the 
+latter will work as intended. I would like to explore the demands of this 
+approach. 
+
+I fear to disappoint my gentle readers if they seek new ideas here; there 
+are none. I only want to identify and collect ideas that merit regard. 
+
+    <H2>Jargon</H2>
+
+Many objects, actions, and conditions specific to the testing process are 
+often called "test", "tests", "to test", "tested", etc. to the point at 
+which the unqualified root word has only a general meaning. In this essay 
+I should like to say (with some apologies): 
+
+author
+    The human person who writes test scripts. Our user; target developer. 
+
+target
+    The production code that does useful work; the thing tested. 
+    Commonly \&amp;unit.
+
+framework
+    The testing code that acts upon the target and proves it. This 
+    consists (at least) of: harness, fixture, trap, script, case, check. 
+
+harness
+    The invariant portion of the framework. Responsible for overall 
+    execution of a suite and aggregating its reports. While it may display 
+    diagnostics, the harness' most important duty is to report the status 
+    of a target as good or bad. 
+    
+    In Perl this is TAP::Harness, invoked with $ prove or perhaps ./Build 
+    test. 
+
+fixture
+    Module library directly responsible for testing the target and 
+    evaluating results, which are passed to the harness. General in 
+    application but not universally so; targets will require various 
+    fixtures. 
+
+trap
+    Element of a fixture responsible for supplying to the target its 
+    givens and collecting its outcomes. Isolates the target from all 
+    environment and intercepts its every attempt to affect anything 
+    outside of the framework. 
+
+suite
+    A collection of scripts to be executed in harness through a fixture. 
+    Ideally, the suite exercises every possible aspect of the target. 
+
+script
+    File containing specific references to target code, conditions given, 
+    and results demanded. A script may contain several cases. 
+
+case
+    Set of a particular target function or feature, its givens, its 
+    demands. For instance a prime number validator might be given '7' and 
+    demanded to return 'YES'.
+
+given
+    Condition under which a case's target is to be executed. These include 
+    arguments to the target, environment, and setup. Commonly @args.
+
+demand
+    Some requirement that the target must perform or fulfill. It may be 
+    demanded to return a value, to print to a file, or even to throw a 
+    fatal error. Commonly $expected or $want. 
+
+outcome
+    The actual performance of the target under the givens. Commonly $got 
+    or $have. 
+
+check
+    Comparison of an outcome and a demand; this produces a boolean report. 
+    In TAP this is (minimally) either 'ok' or 'not ok'. The check may also 
+    produce diagnostics in the event of failure. A checker is a unit that 
+    performs a check. 
+
+pass/fail
+    Correct/incorrect outcome; TAP 'ok'/'not ok'. 
+
+good/bad
+    Correct/incorrect mechanism (function). Not bijunctive with pass/fail.
+
+report
+    Statement of correctness ( pass/fail, good/bad ) from any element of 
+    the framework.
+
+diagnostic
+    Message intended to assist in finding causes of a fail or to indicate 
+    progress of a proof. Not a report.
+
+battery, cluster, sheaf
+    Generic grouping words; avoid "set". Battery of scripts, cluster of 
+    cases, sheaf of checks. 
+
+execute, run
+    Generic action words; avoid "to test". Execute target, run script.
+
+prove, proof, proven
+    A script, battery, suite may be executed from within the framework. 
+    When the run is complete that thing has been proven, good or bad. 
+
+deductive/inductive
+    These logical forms of proof will be discussed later, employed more or 
+    less as commonly understood. 
+
+---
+
+    <H2>State of the Art</H2>
+
+Since perl 5.6.2, for ten years, Test::More has given faithful service to the 
+Perl community, shipping with the perl interpreter as a core module. Thus it 
+represents the standard against which other test modules are compared. I 
+have often spoken of it as the one essential module. (I gloss over the fact 
+that Test::More is part of the Test-Simple distribution, including 
+Test::Builder and its components.) Let my gentle readers not underestimate 
+my sincerity; when helping novices I insist on guiding them into the 
+edit-test cycle and away from the edit-run madness. If good enough were good 
+enough, Test::More would be more than enough. 
+
+That said, this test fixture is showing considerable signs of age; and is 
+not yet in version 1.0. A massive, detailed, funded project is now 
+underway; not merely to upgrade Test::More and its backend; but to create 
+an entirely new Test::Builder2 backend on much more rigorous grounds. I 
+cannot say when or if this project will meet the standards I outline here. 
+The developers are entitled to honor and respect for their efforts; and 
+these cannot be minimized. 
+
+I think it is fair to say that no single module or distribution, not even 
+the upcoming Test-Simple 1.5, constitutes the entire fixture required to 
+test a target project of any scope. I don't believe this is the developers' 
+intent. There are far too many Test::* modules available on CPAN for me to 
+comment on even a small fraction. I do say that the range is such that a 
+developer would do very well to think twice, examine the offerings 
+carefully, and think again before committing to a new test module. 
+
+I will limit myself to two mentions: 
+
+Test::Trap does a workman-like job of confining target execution outputs 
+and also provides a fearsome collection of accessors and checkers. I have 
+used it often and with great success. 
+
+Fennec (one word) deserves mention in that it seems to have anticipated 
+much of what I have to say here. I have not yet tried it but I do so plan. 
+
+    <H2>Testers are required</H2>
+
+A target may be exercised by hand, behavior studied, and a purely human 
+judgement made if it is good or bad. A target's code may be studied by eye 
+and a similar judgement made. However human beings have been shown as poor 
+validators; we shine in other areas. We must apply the machine to the task 
+of proving target code. 
+
+    <H2>Testers must be tested</H2>
+
+If we desire to use the machine to prove the target then we must erect a 
+framework consisting of code. That code must also be proven good or bad. 
+For if the framework is not known to be good then its proof of the target 
+is unreliable. 
+
+My gentle readers will excuse my explicit statement of the obvious: I wish 
+to establish these points beyond all doubt. Although all agree, I have 
+seen in practice that the difficult task leads to what might be most 
+discreetly described as retreat. 
+
+I will go further to say that testers must be built and tested to the 
+highest possible standard. In the world of the mechanical engineer, the 
+greatest care is taken to produce, say, a vernier caliper; it is accurate 
+and precise, it makes repeatable, unambiguous measurements. What I have 
+seen of analogous devices in both the worlds of microelectronic hardware 
+and the software that runs on it... motivates me to write this essay in an 
+attempt at redress. 
+
+    <H2>Testers cannot be tested with a tester-tester</H2>
+
+Consider a factory that accepts rivets and assembles them into widgets 
+{fig-01}. We'd like to know if the factory is working so we bolt a tester 
+onto it {fig-02}. The tester examines the rivets as they enter, the 
+widgets as they leave, and monitors the factory's internals. If the tester 
+thinks the factory is working properly, it lights the GO light; if it 
+thinks the factory is not, NO GO. 
+
+We have already said that the tester must be tested. So we bolt a 
+tester-tester to the tester {fig-03}. This examines all the inputs from 
+the factory to the tester and sees which indicjator the tester outputs; 
+and examines the tester internals. If the tester is working, the 
+tester-tester says GO; otherwise NO GO. 
+
+It should be clear, when this is reduced to simple terms, that the 
+tester-tester strategy leads to infinite progression unless at some step we 
+retreat from the principle that testers must be tested. Therefore the tester 
+must test itself. 
+
+It will be argued that although infinite progression is absurd; it may be 
+advantageous to build a tester and a tester-tester, which latter tool does 
+test itself. Some may propose this or that depth of stacked testers, the 
+final one of which is also a self-tester. I will reply to this strategy when 
+I discuss deductive vs inductive proofs. 
+
+    <H2>Testers can never fully test themselves</H2>
+
+So-called "self-test" functions are very nice features; but they only 
+indicate a good device; they cannot prove correctness in every respect. 
+This is less obvious in the software world, where recursion is a common 
+technique. We can take an instance of the tester shown previously in 
+{fig-02} and bolt it onto another instance, perhpas bolt three of them 
+together in a circle; if one is proven, all are proven equally correct, for 
+they are exact copies. 
+
+A related strategy is to build a model, dummy factory, far simpler in 
+construction than the real one; and bolt an instance of the tester onto 
+the dummy. The dummy is so simple and uncomplicated, we can verify it is 
+completely correct by eye at a glance. If the tester lights the green 
+bulb, saying GO, we feel the tester itself is proven. If it lights up NO 
+GO, then we take this not as a failure of the dummy; we say the tester 
+itself is faulty. 
+
+Both strategies are practical to a point and each may have some value. 
+However there is at least one element that will not checked when the full 
+self-test suite is run successfully: the red NO GO light itself! For if it 
+ever lights, that would indicate a failure; if it never lights, we can 
+never know certainly that it *would* if there *were* a failure, either in 
+the tester or in its target factory. 
+
+The exact limits of the unprovable portion extend from the fault 
+indicator, the report of failure; back to the checker which must generate 
+it. The indication itself is included but the check is not. That's to say 
+the checker can be rigorously proven so long as its output is not coupled 
+to the fault indicator itself. It's fair to say that the coupling itself 
+between the check and the indicator may be overlooked by a thorough proof; 
+this risk may be mitigated if it is possible to uncouple the coupler 
+itself and check it alone. 
+
+The indicator itself, by definition, indicates failure; and can never be 
+asserted without indicating failure; therefore it is unprovable as a 
+matter of theoretical limit. The best we can do is resort to a 
+tester-tester that lights up GO, saying, "Yep, the tester said NO GO as 
+demanded."
+
+    <H2>Testers must be engineered</H2>
+
+We have now worked our way into a logical paradox; we have demonstrated 
+the theoretical impossibility of proving the correct performance of any 
+tester and so, of proving the correct performance of our target, the 
+production code. So we are led to request a change of venue from theory to 
+engineering. 
+
+In engineering we quantify error. We strive for theoretical perfection in 
+the certain knowledege it must elude us; and we bridge the gap by stating 
+clearly its magnitude. We also seek to close this gap to the practical 
+minimum. Another feature of engineering is the elaboration of best practices 
+meant to ensure that minimal gap; and to maximize return on our investment 
+-- if only of effort. 
+
+From here on we will shift to this more practical realm. 
+
+    <H2>Minimize logic in test scripts</H2>
+
+The ideal test script contains no logic at all, merely a series of 
+declarations of the form: 
+
+    given:
+        target
+        condition A
+        condition B
+        condition C
+    demand:
+        result X
+        result Y
+        result Z 
+
+In practice a YAML'ish, non-Perl format is excessively rigid; we want to 
+preserve the traditional Perlish test script format. Thus the declaration 
+of a case becomes, e.g.: 
+
+    $script_obj->{case}{ my_case_name   }   = {
+        sub     => \&amp;Target::Module::some_function,
+        args    => [qw| foo bar 42 |],
+        want    => {
+            return_is       => 'Roar!',
+            quiet           => 1,
+        },
+    };  ##
+
+This is a single statement, nothing more than an assertion that: Given 
+this target code with this permutation of arguments, these results are 
+demanded. It is almost certain that any mistake in this statement stems 
+from a misconception in the author's head about what <TT>some_function()
+</TT> is actually intended to do. We will hope that the perl interpreter 
+itself will catch any syntactical errors. 
+
+We can, of course, do little to ensure the test script author understands 
+the function of the target production code. We have merely avoided issues 
+stemming from poorly constructed test script logic. So the author is free 
+to concentrate on that production function. 
+
+Therefore the fixture must contain most logic required to perform a proof. 
+
+    <H2>Fixtures must be fully subclassable</H2>
+
+Apart from any other consideration, Perl test fixtures must adhere 
+faithfully to an object-oriented style. For every component of the 
+fixture, it must be possible to create a decoupled instance for 
+self-testing. 
+
+Another incentive to break the fixture into reusable components is that 
+there cannot be only one. Fixtures must be adaptable to the specific needs 
+of various targets as expressed in their test suites. The more widely 
+fixture code is reused, the more reliable and trustworthy it becomes. 
+
+So, I am sorry to say, the venerable Test::Builder can no longer be 
+employed as is; for it relies on a singleton object. From its POD: 
+
+    <blockquote>
+    This is done so that multiple modules share such global 
+    information as the test counter and where test output is going.
+    </blockquote>
+
+Unfortunately this is unacceptable. We do not want modules to know how many 
+checks the harness has seen; we absolutely do not want them to have any 
+control over where reports and diagsostics will go. Indeed, the fixture 
+should not store *any* global information whatever; although of course every 
+object stores. 
+
+The Script object -- the in-memory object representing the script, the 
+instance of the Script class -- maintains a count of how many cases it has 
+declared and how many executed; the Case object counts how many checks it 
+has declared and how many executed, which passed, which failed, and so on. 
+No part of the fixture is responsible for maintaining any sort of running 
+count or developing a summary. That is the sole responsibility of the 
+harness and any attempt to infringe on that leads to confusion and 
+rigidity. 
+
+    <H2>Checkers may not communicate directly with the harness</H2>
+
+One might think this assertion follows immediately from ordinary good 
+style. Checkers are numerous and may well be created ad hoc to suit a 
+single target unit and check. A checker's main role is to compare a case's 
+givens and outcomes and issue a boolean report, pass or fail; it should 
+also, in the case of failure, compose a diagnostic. 
+
+For instance, an is_deeply() checker may compare a given hashref with an 
+outcome hashref and on failure, issue the report 'FAIL' and the diagnostic 
+'Structures begin differing at...' with some summary of the items compared. 
+
+The checker's roles do not extend beyond these two tasks; and any attempt 
+to write them to do more virtually demands duplication of code. Nor is 
+there any value in delegating any portion of those roles since the precise 
+function required from each checker must be somewhat different. In short, 
+if the operation is common to all (or even many), it is not a proper 
+checker operation; if it is a proper checker operation, it is not common. 
+
+There is an additional consideration. A checker's logic is simple and 
+specific; and therefore it can know nothing about the larger framework. In 
+particular it cannot know whether the target, case, and check in question 
+*should* have passed or failed. 
+
+Again, and not to cause embarrassment, Test::More has taken an incorect 
+approach. Its checker functions, such as ok(), is(), etc. call common code 
+in Test::Builder::ok(), which takes on additional tasks beyond those cited 
+here; notably, this latter function actually prints TAP. 
+
+    <blockquote>
+    It's ok for your test to change where STDOUT and STDERR point to,
+    Test::Builder's default output settings will not be affected.
+    </blockquote>
+
+In fact it's deucedly difficult to affect its output with certainty. After 
+adjusting to the singleton I discovered that subtest() actually does create 
+a new instance of the Test::Builder object... copies the original 
+singleton where it can't be touched... and substitutes the new instance, 
+treating it as the singleton. 
+
+    <H2>Traps may not leak</H2>
+
+By definition the target is unproven during the testing process. Therefore 
+it is unacceptable that it should emit anything except to the testing 
+framework. Every conceivable output and side effect must be trapped: 
+captured for examination and not allowed to take effect anywhere in the 
+system outside of the framework. This includes but is not limited to 
+STDOUT/STDERR, attempts to fatal out, attempts to exit to shell, file system 
+manipulations, socket connections, and any display to the user. If system 
+resources must be provided to the target during testing then their state 
+must be exactly restored at the conclusion of the run. 
+
+The prohibition against leakage is bidirectional but not with equal force. 
+Some test cases may permit the target to receive inputs from outside the 
+framework. But if this is allowed then these inputs must also be captured so 
+that a later run of the case can be repeated under the same conditions. 
+Therefore all traffic in to and out of the target must be intercepted; none 
+may pass out but cases may be constructed in which some pass in. 
+
+Sometimes a target will require given resources (external to both target 
+and framework) and we can most easily supply the need with a mock 
+resource. Other times we supply an actual resource but adhere strictly to 
+the requirement that the target never alter anything outside of the 
+framework. It will usually be easier to supply a mock or a copy. 
+
+Often, target will want to write (say) a disk file and later read it; and 
+we do not always want to intercept the write and simulate the read, merely 
+to demonstrate we can. We may prefer to obscure the contents of that file 
+from the test suite; and this is acceptable. This implies we are not 
+concerned in this case with some internal detail of the target. 
+
+Our framework must then have features that provide sandboxed access to some 
+resources. So long as we limit the target to the sandbox we need not trap 
+its exchanges with resources in that sandbox. We may well do so in aid of 
+diagnostics; and if so, transparently. 
+
+There are no trapping features in released Test::More. I believe a trap 
+(capture) is planned for the upcoming version 1.5. Meanwhile Test::Trap is 
+effective only in the output direction -- which is, admittedly, the 
+greater concern. 
+
+    <H2>Cases must be crossjoined to checks</H2>
+
+"Cross join" is a database term; the equivalent mathematical term is 
+"Cartesian product". The concept is simple if not easy to describe: Given 
+two (or more) sets, form the set of all possible pairs (or n-tuples), one 
+member from each set. This can be visualized using a matrix: 
+
+    @A  = ( 'a', 'b', 'c' );
+    @B  = ( 0, 1, 2, 3 ),
+    
+    #          0   1   2   3
+    #
+    #   a     a0  a1  a2  a3
+    #   b     b0  b1  b2  b3
+    #   c     c0  c1  c2  c3
+
+    @C  = cross_join( @A, @B );
+    
+    ### @C = (
+    ###         [ 'a', 0 ], [ 'a', 1 ], [ 'a', 2 ], [ 'a', 3 ], [ 'b', 0 ], 
+    ###         [ 'b', 1 ], [ 'b', 2 ], [ 'b', 3 ], [ 'c', 0 ], [ 'c', 1 ], 
+    ###         [ 'c', 2 ], [ 'c', 3 ] 
+    ### );
+
+Note that the joined set is not itself a matrix; it is a one-dimensional 
+array of elements, each of which is an ordered n-tuple. 
+
+All too often, test script authors check only those outcomes which 
+interest them or which they intend the target to produce. So the return 
+values from a prime number generator are checked to see that each value is 
+indeed prime. The author has no expectation or intent that the generator 
+will emit anything at all to STDERR; so never bothers to check this 
+demand. The generator returns 2, the outcome is 'PRIME' and so is the 
+demand, the report is 'PASS'; and weeks later, the end user scratches his 
+head while the generator soberly issues an internal warning about some 
+uninitialized variable in concatenation or string. 
+
+Manually duplicating, for each of a number of cases, all possible checks is 
+obsessive at best. It is not even realistic for the machine to check every 
+value in large crossjoins. Simple multiplication tells us that if some 
+target unit is run under $N cases and each case checked $M times, the total 
+number of checks will be $N * $M. That doesn't grow so quickly that 
+thorough testing of most targets is impossible; but it does quickly become 
+reasonable to sample the crossjoin rather than slog through all. The 
+density of such sampling can range from 0 to 1 and should be adjustable. 
+
+Our fixture should relieve the author of the opportunity to stray from 
+correctness by attempting to check every case execution in as many ways as 
+we are able. For each check we provide default demands. This may result in 
+large numbers of failures since no defaults will be universally 
+applicable; and this may suggest to the author that other demands be 
+supplied in the suite. 
+
+Therefore a complete, proven suite is also a final and comprehensive 
+documentation of the target's API on which other developers may rely. 
+
+    <H2>Test authors require assistance</H2>
+
+We can labor to perfect fixture but we cannot write scripts for author's 
+targets; the script is defined by its specific application to its target. 
+Only the author knows what the target is intended to do. 
+
+We can and should provide script templates; and our script declaration 
+syntax must be kept a simple as possible while still granting the author 
+maximum flexibility. Since the author is responsible for stating 
+unambiguously the demanded performance of the target under given conditions 
+-- and this task is difficult -- we must relieve him, as much as possible, 
+from all other responsibilities. 
+
+We must provide adequate diagnostics in the event of bad proofs. Notice that 
+I say 'bad proofs', not 'failing checks'. It's quite possible for a check to 
+pass when it's expected to fail; and diagnostics are required in this event. 
+
+I propose a script helper, as well. This might help the author to write and 
+edit scripts by making suggestions, by writing suggested cases and demands. 
+It is always valid for an author to execute a case, examine the outcomes, 
+and say, "This is good." Our helper should process that simple approval into 
+a set of cases and checks to guard against regression. 
+
+    <H2>Employ both forms of reasoning</H2>
+
+In math and formal logic, only deductive proofs are acceptable. Deduction 
+takes the form of two or more unquestionable assertions and produces a 
+theorem; by this process, the theorem is proven: 
+
+    $Socrates->isa($Man);       # premiss
+    $Man->has('mortal');        # premiss
+    $Socrates->has('mortal');   # conclusion
+
+Given perfect reasoning, deduction is sufficient for proof. However to an 
+engineer, it is fragile: a chain is only as strong as its weakest link. 
+
+Induction sacrifices certainty in favor of resiliency: 
+
+    $Bob->has('mortal');        # observation
+    $Bob->isa($Man);            # observation
+    
+    $Ted->has('mortal');        #      "
+    $Ted->isa($Man);            #      "
+    
+    $Joe->has('mortal');
+    $Joe->isa($Man);
+    
+    $Man->has('mortal');        # conclusion
+
+Deduction is a rope or cable; each strand is weak but if one fails, others 
+take up the strain. When individual elements are likely to fail, engineers 
+are attracted to cables. 
+
+Proving a target is usually deductive. We supply givens and demands, we 
+execute the target, we check outcomes, and make reports. We report 
+the entire target as good if and only if all check reports pass. 
+
+Deductive proof of the testing framework is not only difficult; we have seen 
+previously that it is impossible. Some portion of the framework must, 
+inevitably, remain unchecked. Therefore I suggest an inductive approach to 
+supplement the deductive. 
+
+If we employ the same fixture on a number of targets -- targets both good 
+and bad -- and it reports them correctly; then we gain confidence in the 
+fixture's correctness. The key word here is "same". If a fixture approves a 
+target; we cannot be certain whether both are good or both are bad (in 
+complimentary ways). If the fixture reports the target bad; we cannot be 
+certain whether target is bad and fixture good, or the reverse. However if 
+the same fixture reports a number of targets good and bad, <i>as we 
+expect</i>, then we feel justified in calling the fixture itself good. 
+
+This is, indeed, the only way to cover the unavoidable gap in deductive 
+testing of a fixture. 
+
+Therefore we must put a high priority on test framework code reuse. We keep 
+the harness invariant so that all users employ it against all targets; we 
+keep the fixture modular so although it make be reconfigured for this target 
+or that, each module gets a heavy workout. We are forced to allow multiple 
+checkers but we work to make a set of standard checkers which are fully 
+tested and employed against a wide variety of targets and cases. This is 
+another motivation for crossjoining: no checker is run against only one 
+case. 
+
+This leaves only the script itself as an untestable item; it can be proven 
+good neither deductively nor inductively. Therefore I underline the 
+prohibition against logic in test scripts. 
+
+===

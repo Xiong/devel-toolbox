@@ -12,12 +12,18 @@ use Test::More;
 use Test::Trap;                 # Trap exit codes, exceptions, output, etc.
 use List::MoreUtils             # The stuff missing in List::Util
     qw| any |;
+use Clone                       # Recursively copy Perl datatypes
+    qw| clone |;
+use Capture::Tiny               # Capture STDOUT and STDERR
+    qw| :all |;
 
 # Project modules
 use parent 'Devel::Toolbox::Core::Base';
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '###', '####', ({ -file => 'debug.log' });           #~
+use Devel::Comments '#####', ({ -file => 'debug.log' });                 #~
 ### DTT-VALET
 
 ## use
@@ -30,6 +36,7 @@ use parent 'Devel::Toolbox::Core::Base';
 #----------------------------------------------------------------------------#
 # FORWARD DECLARATIONS
 sub _ex;            # wrap around die() using Error::Base::crash()
+sub _vault (&$);    # execute checks and *don't* emit TAP
 
 #----------------------------------------------------------------------------#
 # EXECUTION
@@ -46,6 +53,12 @@ sub enforce {
     my $caller_package  = $self->{attr}{caller_package};
     my $attr        = $self->{attr};
     my @case_keys   = keys $case;
+    
+#~ # DEBUG ONLY
+#~ my $builder;
+#~ $builder = Test::More->builder;
+#~ ##### enforce ENTRY
+#~ ##### $builder
     
     # Ignore disabled cases.
     @case_keys      = grep { $self->_is_enabled($_) } @case_keys;
@@ -65,6 +78,7 @@ sub enforce {
         my $context     = uc( $i_case->{context}  // 'SCALAR' );   # VOID, ARRAY
         my @args        = @{ $i_case->{args}      // []       };
         my $sub         = $i_case->{sub}          // 0        ;
+        my $must_fail   = $i_case->{must_fail}    // 0        ;
         
         # Skip case if no code defined, eh.
         if ( not $sub ) {
@@ -103,30 +117,173 @@ sub enforce {
             my $sub_check_count;
             CHECK_KEY:
             for my $check_key ( keys $want ) {
-#~                 ### $case_key
-#~                 ### $check_key
+                ### enforce CHECK_KEY
+                ### $case_key
+                ### $check_key
 #~                 ### $want
                 $sub_check_count++;
-                eval {
-                    $caller_package->$check_key(    # $_[0]     class, discard
-                        $trap,                      # $_[1]     have
-                        $want->{$check_key},        # $_[2]     want
-                        $check_key,                 # $_[3]     diag
-                    ) 
-                };
-                my $eval_err    = $@;
-                if ($eval_err) {
-                    diag("! Checker failure: $check_key");
-                    fail( $eval_err );
-                    next CHECK_KEY;
-                };
+                $caller_package->$check_key(    # $_[0]     class, discard
+                    $trap,                      # $_[1]     have
+                    $want->{$check_key},        # $_[2]     want
+                    $check_key,                 # $_[3]     diag
+                ); ## some checker 
             }; ## for check
         }; ## subtest
-        
     }; ## for i_case
     
     return $self;
 }; ## enforce
+
+#    #=========# INTERNAL ROUTINE
+#    #~ 
+#    #
+#    #   @
+#    #   
+#    sub _vault (&$) {
+#        my $coderef     = shift;
+#        my $must_fail   = shift;
+#        my $bldout      ;
+#        my @bldout      ;
+#        my $blderr      ;
+#        my $stdout      ;
+#        my @stdout      ;
+#        my $stderr      ;
+#        my $return      ;
+#        my $out         ;
+#        my $err         ;
+#        my $todo        ;
+#        my $plan        = '1..';    # fill in with count
+#        my $count       = 0;
+#        my $mario       ;           # clone of $builder
+#        my $report      ;
+#        my @report      ;
+#        my $diag        ;
+#        my $diag_recon  ;
+#        my $is_ok       ;
+#        my $original_report ;
+#        my $report_prepend  = qq{| ACTUAL:\n};
+#        my $report_indent   =  q{|};
+#        my $report_bad      = qq{| This check must fail but did not (BAD).\n};
+#        my $report_good     = qq{| This check must fail and did (GOOD).\n};
+        
+        
+#        # Clone/freeze Test::Builder.
+#        my $builder = Test::More->builder;
+#        $mario          = clone($builder);
+        
+#        # Misdirect Test::Builder output.
+#        #### BEFORE MISDIRECT
+#        #### $builder
+#        $builder->        output(\$bldout);
+#        $builder->failure_output(\$blderr);
+#        $builder->   todo_output(\$todo  );
+#        #### AFTER MISDIRECT
+#        #### $builder
+        
+        
+#        # Actual execution of the checker...
+#        #   inside Capture::Tiny::capture{}
+#        (                           # returns positional results; don't alter
+#            $stdout,
+#            $stderr,
+#            $return,
+#        ) 
+#            = capture { &$coderef };
+        
+#        #### AFTER CHECK
+#        #### $builder
+        
+#        # Restore Test::Builder.
+#        $Test::Builder::Test    = $mario;   # fuck with actual package variable
+#        $builder->reset_outputs;
+#        #### AFTER RESTORE
+#        #### $builder
+        
+#    #~     ### $bldout
+#    #~     ### $stdout
+        
+#        # Consolidate outputs; these may come from four sources.
+#        $out        = defined $bldout   ? $bldout 
+#                    : defined $stdout   ? $stdout 
+#                    :                     die "! Failed to capture (STD)OUT."
+#                    ;
+#        chomp $out;
+#        $err        = defined $blderr   ? $blderr 
+#                    : defined $stderr   ? $stderr 
+#                    :                     undef
+#                    ;
+        
+#    #~     ### $must_fail
+#    #~     ### $out
+#    #~     ### $err
+        
+#        # Compose any diagnostic message. 
+#        #   If not $must_fail, it should be just as it was ($err only).
+#        #   If $must_fail, it should include both $out and $err and be marked.
+#        #   If $err is empty, then no diagnostic was emitted; 
+#        #       say so only if $must_fail.
+#        my $M   = $must_fail    ? 'M1' : 'M0';
+#        my $E   = $err          ? 'E1' : 'E0';
+#        {
+#            no warnings 'uninitialized';
+#            chomp $err;
+#            $err =~ s/^# //gm;              # Test::More will replace octothorpes
+#            $original_report 
+#                = join qq{\n}, map { $report_indent . $_ }
+#                    split qq{\n}, join  qq{\n}, ( $out, $err );
+#            chomp $original_report;
+#        }
+#        ### $original_report
+#        my %report_for  = (
+#            M0_E0   => undef,               # normal passing check; be silent
+#            M0_E1   => $err,                # normal failing check; echo
+#            M1_E0   => $report_bad          # must fail and did NOT fail
+#                    .  $report_prepend
+#                    .  $original_report
+#                    ,
+#            M1_E1   => $report_good         # must fail and did fail...
+#                    .  $report_prepend
+#                    .  $original_report
+#                    ,
+#        ); ## report_for
+#        $report     = $report_for{ join q{_}, $M, $E };
+        
+#        # Invert sense of test if demanded to fail; also always extract... 
+#        # ... original $diag or test name portion from intercepted outputs.
+#        my $invert_hrf      = Devel::Toolbox::Test::Valet::_fail_inverter({
+#            out         => $out,
+#            must_fail   => $must_fail,
+#        });
+#        $is_ok      = $invert_hrf->{is_ok}; # pass or fail if it should have done
+#        $diag_recon = $invert_hrf->{diag};  # original test name
+        
+#        {
+#            # Attempt to force the report from the correct (topmost) caller frame. 
+#            local $Test::Builder::Level = $Test::Builder::Level + 9;
+            
+#            # Do the fake check to stand in for the real check we just hid.
+#            ok( $is_ok, $diag_recon);
+#        }
+        
+#        # Print diagnostics, such as they may be.
+#        if ( defined $report ) {
+#            note($report);
+#        };
+        
+#        # Store for later amusement.                # DEBUG
+#        my $vault               = {};
+#        $vault->{report}        = $report;
+#        $vault->{diag_recon}    = $diag_recon;
+#        $vault->{bldout}        = $bldout;
+#        $vault->{blderr}        = $blderr;
+#        $vault->{stdout}        = $stdout;
+#        $vault->{stderr}        = $stderr;
+#        $vault->{return}        = $return;
+#        $vault->{out}           = $out;
+#        $vault->{err}           = $err;
+#        $vault->{todo}          = $todo;
+        
+#    }; ## _vault
 
 #=========# OBJECT METHOD
 #~ 
@@ -135,8 +292,8 @@ sub enforce {
 #   
 sub finish {
     my $self        = shift;
-    ### finish()
-    ### $self
+#~     ### finish()
+#~     ### $self
      
     done_testing( $self->{check_count} );
     
@@ -274,65 +431,65 @@ sub _append {
     return join q{ | }, @_;
 }; ## _append
 
-#=========# INTERNAL ROUTINE
-#~     my $hashref = _fail_inverter({
-#~         out         => $string,     # captured (STD)OUT
-#~         must_fail   => $bool,       # do you demand failure?
-#~     });
-#~     $bool   = $hashref->{is_ok};    # did the check do what was demanded?
-#~     $string = $hashref->{diag};     # original test name
-#
-#   Execution flows through this routine on every check; 
-#        it normally does little: a pass is a pass, and a fail is a fail. 
-#   But when {must_fail} is TRUE, a pass is a fail, and a fail is a pass. 
-#   
-#   Captured TAP 'ok|not ok' output must be passed in.
-#   As a convenience, the original check name is returned for re-emission.
-#   
-#   See also: Devel::Toolbox::Man::Test POD#PHILOSOPHY
-#   
-sub _fail_inverter {
-    my $args            = shift;
-    my $out             = $args->{out}          // # mandatory
-        _ex "Checker error: Failed to emit any TAP to (STD)OUT.";
-    my $must_fail       = $args->{must_fail}    // 0;
+#    #=========# INTERNAL ROUTINE
+#    #~     my $hashref = _fail_inverter({
+#    #~         out         => $string,     # captured (STD)OUT
+#    #~         must_fail   => $bool,       # do you demand failure?
+#    #~     });
+#    #~     $bool   = $hashref->{is_ok};    # did the check do what was demanded?
+#    #~     $string = $hashref->{diag};     # original test name
+#    #
+#    #   Execution flows through this routine on every check; 
+#    #        it normally does little: a pass is a pass, and a fail is a fail. 
+#    #   But when {must_fail} is TRUE, a pass is a fail, and a fail is a pass. 
+#    #   
+#    #   Captured TAP 'ok|not ok' output must be passed in.
+#    #   As a convenience, the original check name is returned for re-emission.
+#    #   
+#    #   See also: Devel::Toolbox::Man::Test POD#PHILOSOPHY
+#    #   
+#    sub _fail_inverter {
+#        my $args            = shift;
+#        my $out             = $args->{out}          // # mandatory
+#            _ex "Checker error: Failed to emit any TAP to (STD)OUT.";
+#        my $must_fail       = $args->{must_fail}    // 0;
+            
+#        my $rh              = {};       # return hashref 
         
-    my $rh              = {};       # return hashref 
-    
-    my $was_ok_str      ;           # what check actually emitted
-    my $was_ok_flag     ;           # bool
-    my $is_ok_flag      ;           # bool      our judgement
-    my $check_number    ;           # e.g., the '3' in 'ok 3'
-    my $diag            ;           # reconstructed test name or message
-    
-    # Did the check say that it passed ('ok') or failed ('not ok')?
-    $out =~ s/^(ok|not ok)//;
-    $was_ok_str         = $1
-        or _ex "Checker error: Failed to emit either 'ok' or 'not ok'";
-    $was_ok_flag        = $was_ok_str eq 'ok' ? 1 : 0;
-    
-    # Extract check number and strip some rubbish.
-    $out =~ s/^\s*(\d*)\s*-?\s*//;  # strip e.g., ' 3 - '
-    $check_number       = $1;
-    
-    # Extract directive. Whatever is left is the original $diag.
-    $out =~ s/#.*$//;               # drop all after first octothorpe
-    $diag   = $out;
-    chomp $diag;
-    
-    # Append helpful explanation.
-    if ($must_fail) {
-        $diag   .= ' | MUST FAIL';
-    };
-    
-    # Decide if this test REALLY passed or failed.
-    # TRUE if $must_fail is TRUE or $was_ok_flag is TRUE but not both!
-    $is_ok_flag         = ( $must_fail xor $was_ok_flag );
+#        my $was_ok_str      ;           # what check actually emitted
+#        my $was_ok_flag     ;           # bool
+#        my $is_ok_flag      ;           # bool      our judgement
+#        my $check_number    ;           # e.g., the '3' in 'ok 3'
+#        my $diag            ;           # reconstructed test name or message
         
-    $rh->{is_ok}        = $is_ok_flag;
-    $rh->{diag}         = $diag;
-    return $rh;
-}; ## _fail_inverter
+#        # Did the check say that it passed ('ok') or failed ('not ok')?
+#        $out =~ s/^\s*(ok|not ok)//;
+#        $was_ok_str         = $1
+#            or _ex "Checker error: Failed to emit either 'ok' or 'not ok'";
+#        $was_ok_flag        = $was_ok_str eq 'ok' ? 1 : 0;
+        
+#        # Extract check number and strip some rubbish.
+#        $out =~ s/^\s*(\d*)\s*-?\s*//;  # strip e.g., ' 3 - '
+#        $check_number       = $1;
+        
+#        # Extract directive. Whatever is left is the original $diag.
+#        $out =~ s/#.*$//;               # drop all after first octothorpe
+#        $diag   = $out;
+#        chomp $diag;
+        
+#        # Append helpful explanation.
+#        if ($must_fail) {
+#            $diag   .= ' | MUST FAIL';
+#        };
+        
+#        # Decide if this test REALLY passed or failed.
+#        # TRUE if $must_fail is TRUE or $was_ok_flag is TRUE but not both!
+#        $is_ok_flag         = ( $must_fail xor $was_ok_flag );
+            
+#        $rh->{is_ok}        = $is_ok_flag;
+#        $rh->{diag}         = $diag;
+#        return $rh;
+#    }; ## _fail_inverter
 
 #=========# INTERNAL ERROR WRAPPER ROUTINE
 #~ 
