@@ -54,10 +54,17 @@ $self->sort(qw|
 |);
 $self->disable(qw|
     disable_me
-|);
-$self->todo(qw|
+    empty_hashref
+    null
     meow
+    roar_out
+    roar_err
+    roar_die
+    tree
 |);
+#~ $self->todo(qw|
+#~     meow
+#~ |);
 
 ### $self
 
@@ -163,8 +170,5 @@ $self->enforce();
 #----------------------------------------------------------------------------#
 # Cleanup
 
-END {
-    $self->finish();     # exits
-}
 exit;
 #============================================================================#

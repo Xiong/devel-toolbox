@@ -23,7 +23,7 @@ use parent 'Devel::Toolbox::Core::Base';
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #~ use Devel::Comments '###', '####', ({ -file => 'debug.log' });           #~
-use Devel::Comments '#####', ({ -file => 'debug.log' });                 #~
+#~ use Devel::Comments '#####', ({ -file => 'debug.log' });                 #~
 ### DTT-VALET
 
 ## use
@@ -70,7 +70,6 @@ sub enforce {
     # Unpack case, execute, check.
     CASE_KEY:
     for my $case_key ( @case_keys ) {
-        $self->{check_count}++;
         my $extra       ;
         my $diag        ;
         note( "---- $case_key:" );
@@ -106,7 +105,7 @@ sub enforce {
         $self->{case}{$case_key}{trap}      = $trap;
         
         # Do all checks for this case (as a subtest).
-        subtest $case_key => sub {  # $case_key follows checks in TAP output
+        subtest $case_key => sub {
             pass('execute');
             my $want        = $i_case->{want}     // {};
             if ( not $want ) {
@@ -114,14 +113,12 @@ sub enforce {
                 done_testing(1);                # 1 subtest for 'execute'
                 return;
             };
-            my $sub_check_count;
             CHECK_KEY:
             for my $check_key ( keys $want ) {
                 ### enforce CHECK_KEY
                 ### $case_key
                 ### $check_key
 #~                 ### $want
-                $sub_check_count++;
                 $caller_package->$check_key(    # $_[0]     class, discard
                     $trap,                      # $_[1]     have
                     $want->{$check_key},        # $_[2]     want
@@ -285,20 +282,6 @@ sub enforce {
         
 #    }; ## _vault
 
-#=========# OBJECT METHOD
-#~ 
-#
-#   @
-#   
-sub finish {
-    my $self        = shift;
-#~     ### finish()
-#~     ### $self
-     
-    done_testing( $self->{check_count} );
-    
-    exit;       # NEVER RETURNS
-}; ## finish
 
 #----------------------------------------------------------------------------#
 # FLAGGING / ATTRIBUTES
@@ -505,6 +488,15 @@ sub _ex {
         -nest       => 1,
     );
 }; ## _ex
+
+#----------------------------------------------------------------------------#
+# CLEANUP
+
+END {
+    ### END BLOCK
+    ### $?
+    done_testing();
+}
 
 ## END MODULE
 1;
