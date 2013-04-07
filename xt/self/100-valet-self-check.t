@@ -47,6 +47,7 @@ $self->sort(qw|
     empty_hashref
     null
     roar
+    meow
     roar_out
     roar_err
     roar_die
@@ -56,15 +57,14 @@ $self->disable(qw|
     disable_me
     empty_hashref
     null
-    meow
-    roar_out
     roar_err
     roar_die
     tree
 |);
-#~ $self->todo(qw|
-#~     meow
-#~ |);
+$self->mustfail(qw|
+    roar
+    meow
+|);
 
 ### $self
 

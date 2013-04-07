@@ -77,7 +77,6 @@ sub enforce {
         my $context     = uc( $i_case->{context}  // 'SCALAR' );   # VOID, ARRAY
         my @args        = @{ $i_case->{args}      // []       };
         my $sub         = $i_case->{sub}          // 0        ;
-        my $must_fail   = $i_case->{must_fail}    // 0        ;
         
         # Skip case if no code defined, eh.
         if ( not $sub ) {
@@ -85,6 +84,10 @@ sub enforce {
             next CASE_KEY;
         };
         
+        # Invert operation; ok => not ok, not ok => ok
+        if ( $self->_is_mustfail($case_key) ) {
+            Test::More->builder->todo_start('MUSTFAIL');
+        };
         # Execute code under test.
         given ($context) {
             when ( /VOID/   ) {
@@ -126,6 +129,11 @@ sub enforce {
                 ); ## some checker 
             }; ## for check
         }; ## subtest
+        
+        # Restore normal operation if we inverted it.
+        if ( $self->_is_mustfail($case_key) ) {
+            Test::More->builder->todo_end;
+        };
     }; ## for i_case
     
     return $self;
@@ -385,6 +393,42 @@ sub _is_enabled {
     
     return $is_enabled;
 }; ## _is_enabled
+
+#=========# OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub mustfail {
+    my $self                        = shift;
+    my @args                        = @_;
+    $self->{attr}{mustfail}         = {};
+    
+    return if not @args;
+    note('This script declares MUSTFAIL.');
+    
+    for my $i_arg (@args) {
+        $self->{attr}{mustfail}{$i_arg} = 'MUSTFAIL';   # TRUE if mustfail
+    };
+    
+    return $self;
+}; ## mustfail
+
+#=========# INTERNAL OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub _is_mustfail {
+    my $self        = shift;
+    my $key         = shift;
+    my %mustfail    = %{ $self->{attr}{mustfail} // return 0 }; # do not fail
+    my $mustfail  ;
+    
+    $mustfail     = $mustfail{$key} ? 1 : 0;
+    
+    return $mustfail;
+}; ## _is_mustfail
 
 #=========# OBJECT METHOD
 #=========# INTERNAL ROUTINE
