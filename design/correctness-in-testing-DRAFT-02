@@ -386,11 +386,7 @@ here; notably, this latter function actually prints TAP.
     Test::Builder's default output settings will not be affected.
     </blockquote>
 
-In fact it's deucedly difficult to affect its output with certainty. After 
-adjusting to the singleton I discovered that subtest() actually does create 
-a new instance of the Test::Builder object... copies the original 
-singleton where it can't be touched... and substitutes the new instance, 
-treating it as the singleton. 
+In fact it's deucedly difficult to affect its output with certainty. 
 
     <H2>Traps may not leak</H2>
 
@@ -488,6 +484,8 @@ supplied in the suite.
 
 Therefore a complete, proven suite is also a final and comprehensive 
 documentation of the target's API on which other developers may rely. 
+
+Fennec seems to provide crossjoin; see http://search.cpan.org/~exodist/Fennec-1.012/lib/Fennec.pm#CASE_WORKFLOW
 
     <H2>Test authors require assistance</H2>
 
