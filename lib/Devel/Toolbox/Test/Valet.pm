@@ -23,7 +23,7 @@ use parent 'Devel::Toolbox::Core::Base';
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 #~ use Devel::Comments '###', '####', ({ -file => 'debug.log' });           #~
-use Devel::Comments '#####', ({ -file => 'debug.log' });                 #~
+#~ use Devel::Comments '#####', ({ -file => 'debug.log' });                 #~
 ### DTT-VALET
 
 ## use
@@ -70,7 +70,6 @@ sub enforce {
     # Unpack case, execute, check.
     CASE_KEY:
     for my $case_key ( @case_keys ) {
-        $self->{check_count}++;
         my $extra       ;
         my $diag        ;
         note( "---- $case_key:" );
@@ -78,7 +77,6 @@ sub enforce {
         my $context     = uc( $i_case->{context}  // 'SCALAR' );   # VOID, ARRAY
         my @args        = @{ $i_case->{args}      // []       };
         my $sub         = $i_case->{sub}          // 0        ;
-        my $must_fail   = $i_case->{must_fail}    // 0        ;
         
         # Skip case if no code defined, eh.
         if ( not $sub ) {
@@ -86,6 +84,10 @@ sub enforce {
             next CASE_KEY;
         };
         
+        # Invert operation; ok => not ok, not ok => ok
+        if ( $self->_is_mustfail($case_key) ) {
+            Test::More->builder->todo_start('MUSTFAIL');
+        };
         # Execute code under test.
         given ($context) {
             when ( /VOID/   ) {
@@ -106,7 +108,7 @@ sub enforce {
         $self->{case}{$case_key}{trap}      = $trap;
         
         # Do all checks for this case (as a subtest).
-        subtest $case_key => sub {  # $case_key follows checks in TAP output
+        subtest $case_key => sub {
             pass('execute');
             my $want        = $i_case->{want}     // {};
             if ( not $want ) {
@@ -114,14 +116,12 @@ sub enforce {
                 done_testing(1);                # 1 subtest for 'execute'
                 return;
             };
-            my $sub_check_count;
             CHECK_KEY:
             for my $check_key ( keys $want ) {
                 ### enforce CHECK_KEY
                 ### $case_key
                 ### $check_key
 #~                 ### $want
-                $sub_check_count++;
                 $caller_package->$check_key(    # $_[0]     class, discard
                     $trap,                      # $_[1]     have
                     $want->{$check_key},        # $_[2]     want
@@ -129,6 +129,11 @@ sub enforce {
                 ); ## some checker 
             }; ## for check
         }; ## subtest
+        
+        # Restore normal operation if we inverted it.
+        if ( $self->_is_mustfail($case_key) ) {
+            Test::More->builder->todo_end;
+        };
     }; ## for i_case
     
     return $self;
@@ -285,20 +290,6 @@ sub enforce {
         
 #    }; ## _vault
 
-#=========# OBJECT METHOD
-#~ 
-#
-#   @
-#   
-sub finish {
-    my $self        = shift;
-#~     ### finish()
-#~     ### $self
-     
-    done_testing( $self->{check_count} );
-    
-    exit;       # NEVER RETURNS
-}; ## finish
 
 #----------------------------------------------------------------------------#
 # FLAGGING / ATTRIBUTES
@@ -404,6 +395,42 @@ sub _is_enabled {
 }; ## _is_enabled
 
 #=========# OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub mustfail {
+    my $self                        = shift;
+    my @args                        = @_;
+    $self->{attr}{mustfail}         = {};
+    
+    return if not @args;
+    note('This script declares MUSTFAIL.');
+    
+    for my $i_arg (@args) {
+        $self->{attr}{mustfail}{$i_arg} = 'MUSTFAIL';   # TRUE if mustfail
+    };
+    
+    return $self;
+}; ## mustfail
+
+#=========# INTERNAL OBJECT METHOD
+#~ 
+#
+#   @
+#   
+sub _is_mustfail {
+    my $self        = shift;
+    my $key         = shift;
+    my %mustfail    = %{ $self->{attr}{mustfail} // return 0 }; # do not fail
+    my $mustfail  ;
+    
+    $mustfail     = $mustfail{$key} ? 1 : 0;
+    
+    return $mustfail;
+}; ## _is_mustfail
+
+#=========# OBJECT METHOD
 #=========# INTERNAL ROUTINE
 #=========# EXTERNAL FUNCTION
 #~ 
@@ -505,6 +532,15 @@ sub _ex {
         -nest       => 1,
     );
 }; ## _ex
+
+#----------------------------------------------------------------------------#
+# CLEANUP
+
+END {
+    ### END BLOCK
+    ### $?
+    done_testing();
+}
 
 ## END MODULE
 1;

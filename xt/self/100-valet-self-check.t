@@ -47,6 +47,7 @@ $self->sort(qw|
     empty_hashref
     null
     roar
+    meow
     roar_out
     roar_err
     roar_die
@@ -54,6 +55,15 @@ $self->sort(qw|
 |);
 $self->disable(qw|
     disable_me
+    empty_hashref
+    null
+    roar_err
+    roar_die
+    tree
+|);
+$self->mustfail(qw|
+    roar
+    meow
 |);
 
 ### $self
@@ -77,6 +87,17 @@ $self->{case}{ roar             }   = {
     args    => undef,
     want    => {
         return_is       => 'Roar!',
+        quiet           => 1,
+    },
+};  ##
+
+$self->{case}{ meow             }   = {
+    sub     => sub {
+        Acme::Teddy::roar();
+    },
+    args    => undef,
+    want    => {
+        return_is       => 'Meow...',       # MUST FAIL
         quiet           => 1,
     },
 };  ##
@@ -149,8 +170,5 @@ $self->enforce();
 #----------------------------------------------------------------------------#
 # Cleanup
 
-END {
-    $self->finish();     # exits
-}
 exit;
 #============================================================================#
